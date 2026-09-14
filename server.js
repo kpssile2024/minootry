@@ -99,14 +99,34 @@ async function api(req,res,url) {
       if(!needTeacher(req,res)) return; const b=await body(req);
       const title=String(b.title||'').trim(), canva=String(b.canva_url||'').trim();
       if(!title || !/^https?:\/\//i.test(canva)) return json(res,400,{error:'Oyun adı ve geçerli bağlantı gerekli'});
-      const gr=db.prepare('INSERT INTO games(title,canva_url) VALUES (?,?)').run(title,canva); const gid=Number(gr.lastInsertRowid);
       let ids=[];
       if (b.class_id) ids=db.prepare('SELECT id FROM students WHERE class_id=?').all(Number(b.class_id)).map(x=>x.id);
       else if (b.student_id) ids=[Number(b.student_id)];
       if(!ids.length) return json(res,400,{error:'Atanacak öğrenci bulunamadı'});
+
+      // Aynı başlık + bağlantı için mevcut oyunu yeniden kullan. Böylece yanlışlıkla
+      // butona birkaç kez basılması yeni kopyalar üretmez.
+      let game=db.prepare('SELECT id FROM games WHERE title=? AND canva_url=? ORDER BY id DESC LIMIT 1').get(title,canva);
+      let gid;
+      if(game) gid=Number(game.id);
+      else {
+        const gr=db.prepare('INSERT INTO games(title,canva_url) VALUES (?,?)').run(title,canva);
+        gid=Number(gr.lastInsertRowid);
+      }
       const ins=db.prepare('INSERT OR IGNORE INTO assignments(game_id,student_id) VALUES (?,?)');
-      for(const sid of ids) ins.run(gid,sid);
-      return json(res,201,{game_id:gid,assigned:ids.length});
+      let added=0;
+      for(const sid of ids) { const r=ins.run(gid,sid); added+=Number(r.changes||0); }
+      if(!added) return json(res,409,{error:'Bu oyun seçilen öğrenci veya sınıfa zaten atanmış'});
+      return json(res,201,{game_id:gid,assigned:added});
+    }
+    const delGame=url.pathname.match(/^\/api\/games\/(\d+)$/);
+    if(delGame && req.method==='DELETE') {
+      if(!needTeacher(req,res)) return;
+      const gid=Number(delGame[1]);
+      const exists=db.prepare('SELECT id FROM games WHERE id=?').get(gid);
+      if(!exists) return json(res,404,{error:'Oyun bulunamadı'});
+      db.prepare('DELETE FROM games WHERE id=?').run(gid);
+      return json(res,200,{ok:true});
     }
     const cm=url.pathname.match(/^\/api\/classes\/(\d+)\/assignments$/);
     if(cm && req.method==='GET') {

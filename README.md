@@ -25,3 +25,8 @@ HTTPS altında yayınlandığında Safari/Chrome üzerinden Ana Ekrana Ekle ile 
 - KVKK/Gizlilik metni
 - Öğrenci adlarının mümkün olduğunca minimal tutulması
 - Canva paylaşım izinlerinin doğru ayarlanması
+
+
+## v1.1
+- Aynı oyunun aynı hedefe tekrar atanması engellendi.
+- Öğretmen paneline “Atamayı sil” özelliği eklendi.
