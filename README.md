@@ -1,10 +1,8 @@
-# Minoo v1.2
+# Minoo v1.3
 
-Bu sürüm kalıcı PostgreSQL veritabanı desteği ekler.
+Bu sürüm PostgreSQL/Supabase kalıcı veritabanı desteğini korur ve öğretmen panelindeki tamamlanma takibi sayacını düzeltir.
 
-- `DATABASE_URL` varsa PostgreSQL kullanır.
-- `DATABASE_URL` yoksa yerel test için SQLite kullanır.
-- Sınıflar, öğrenciler, oyun atamaları ve tamamlanma bilgileri deploy sonrası kaybolmaz.
-
-Render + Supabase için Render Environment Variables bölümüne `DATABASE_URL` ekleyin.
-Öğretmen şifresi için ayrıca `TEACHER_PASSWORD` eklenmesi önerilir.
+- PostgreSQL `BIGINT` kimlikleri tarayıcıda sayıya dönüştürülür.
+- Sınıfa atanan oyunlarda artık `0/4`, `1/4` gibi doğru öğrenci sayıları görünür.
+- Service Worker önbelleği `minoo-v1.3` olarak yenilendi; eski JS'in tarayıcı önbelleğinde kalması engellenir.
+- Oyun silme ve yinelenen atamayı engelleme özellikleri korunur.
