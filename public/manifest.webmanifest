@@ -1,1 +1,9 @@
-{"name":"Minoo","short_name":"Minoo","start_url":"/","display":"standalone","background_color":"#fbf7f1","theme_color":"#f5eee5","description":"Çocuk oyunları ve öğretmen takip uygulaması","icons":[{"src":"/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
+{
+  "name": "Minoo",
+  "short_name": "Minoo",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbf8ef",
+  "theme_color": "#789b72",
+  "description": "Öğretmen kontrollü, reklamsız çocuk etkinlik alanı"
+}
