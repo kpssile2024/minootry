@@ -151,6 +151,22 @@ async function api(req,res,url) {
         const r=sqlite.prepare('INSERT INTO classes(name) VALUES (?)').run(name); return json(res,201,{id:Number(r.lastInsertRowid),name});
       } catch { return json(res,409,{error:'Bu sınıf zaten var'}); }
     }
+    const classItem=url.pathname.match(/^\/api\/classes\/(\d+)$/);
+    if(classItem && req.method==='PATCH'){
+      if(!needTeacher(req,res))return; const id=Number(classItem[1]), b=await body(req), name=String(b.name||'').trim();
+      if(!name)return json(res,400,{error:'Sınıf adı gerekli'});
+      try{
+        if(usePostgres){const r=await pool.query('UPDATE classes SET name=$1 WHERE id=$2 RETURNING id,name',[name,id]);if(!r.rowCount)return json(res,404,{error:'Sınıf bulunamadı'});return json(res,200,r.rows[0]);}
+        const r=sqlite.prepare('UPDATE classes SET name=? WHERE id=?').run(name,id);if(!r.changes)return json(res,404,{error:'Sınıf bulunamadı'});return json(res,200,{id,name});
+      }catch{return json(res,409,{error:'Bu sınıf adı zaten kullanılıyor'});}
+    }
+    if(classItem && req.method==='DELETE'){
+      if(!needTeacher(req,res))return; const id=Number(classItem[1]);
+      const x=usePostgres?await one('SELECT id FROM classes WHERE id=$1',[id]):await one('',[id],'SELECT id FROM classes WHERE id=?');
+      if(!x)return json(res,404,{error:'Sınıf bulunamadı'});
+      if(usePostgres)await run('DELETE FROM classes WHERE id=$1',[id]);else await run('',[id],'DELETE FROM classes WHERE id=?');
+      return json(res,200,{ok:true});
+    }
     const sm=url.pathname.match(/^\/api\/classes\/(\d+)\/students$/);
     if (sm && req.method==='GET') {
       if(!needTeacher(req,res)) return; const id=Number(sm[1]);
@@ -165,6 +181,29 @@ async function api(req,res,url) {
       do { code=makeCode(); } while(await one(usePostgres?'SELECT 1 FROM students WHERE code=$1':'',[code],`SELECT 1 FROM students WHERE code=?`));
       if(usePostgres){ const r=await pool.query('INSERT INTO students(class_id,name,code) VALUES($1,$2,$3) RETURNING id,name,code',[Number(sm[1]),name,code]); return json(res,201,r.rows[0]); }
       const r=sqlite.prepare('INSERT INTO students(class_id,name,code) VALUES (?,?,?)').run(Number(sm[1]),name,code); return json(res,201,{id:Number(r.lastInsertRowid),name,code});
+    }
+    const studentItem=url.pathname.match(/^\/api\/students\/(\d+)$/);
+    if(studentItem && req.method==='PATCH'){
+      if(!needTeacher(req,res))return; const id=Number(studentItem[1]),b=await body(req),name=String(b.name||'').trim();
+      if(!name)return json(res,400,{error:'Öğrenci adı gerekli'});
+      if(usePostgres){const r=await pool.query('UPDATE students SET name=$1 WHERE id=$2 RETURNING id,name,code',[name,id]);if(!r.rowCount)return json(res,404,{error:'Öğrenci bulunamadı'});return json(res,200,r.rows[0]);}
+      const r=sqlite.prepare('UPDATE students SET name=? WHERE id=?').run(name,id);if(!r.changes)return json(res,404,{error:'Öğrenci bulunamadı'});return json(res,200,sqlite.prepare('SELECT id,name,code FROM students WHERE id=?').get(id));
+    }
+    if(studentItem && req.method==='DELETE'){
+      if(!needTeacher(req,res))return; const id=Number(studentItem[1]);
+      const x=usePostgres?await one('SELECT id FROM students WHERE id=$1',[id]):await one('',[id],'SELECT id FROM students WHERE id=?');
+      if(!x)return json(res,404,{error:'Öğrenci bulunamadı'});
+      if(usePostgres)await run('DELETE FROM students WHERE id=$1',[id]);else await run('',[id],'DELETE FROM students WHERE id=?');
+      return json(res,200,{ok:true});
+    }
+    const studentCode=url.pathname.match(/^\/api\/students\/(\d+)\/regenerate-code$/);
+    if(studentCode && req.method==='POST'){
+      if(!needTeacher(req,res))return; const id=Number(studentCode[1]);
+      const x=usePostgres?await one('SELECT id FROM students WHERE id=$1',[id]):await one('',[id],'SELECT id FROM students WHERE id=?');
+      if(!x)return json(res,404,{error:'Öğrenci bulunamadı'});
+      let code; do{code=makeCode();}while(await one(usePostgres?'SELECT 1 FROM students WHERE code=$1':'',[code],'SELECT 1 FROM students WHERE code=?'));
+      if(usePostgres)await run('UPDATE students SET code=$1 WHERE id=$2',[code,id]);else await run('',[code,id],'UPDATE students SET code=? WHERE id=?');
+      return json(res,200,{id,code});
     }
     if (req.method==='POST' && url.pathname==='/api/games/assign') {
       if(!needTeacher(req,res)) return; const b=await body(req);
