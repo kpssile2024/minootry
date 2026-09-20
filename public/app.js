@@ -5,12 +5,12 @@
  .setup-card{max-width:900px;margin:auto;background:rgba(255,255,255,.8);border-radius:28px;padding:18px;box-shadow:0 14px 40px rgba(55,90,110,.12)}
  .setup-guide{display:flex;align-items:center;gap:14px;margin-bottom:12px}.setup-guide h1{margin:0;color:#7048c7}.setup-guide p{margin:5px 0;font-weight:700;color:#31506b}
  .setup-mascot{font-size:42px;background:#d9f8df;width:66px;height:66px;border-radius:50%;display:grid;place-items:center}
- .setup-board{width:min(92vw,560px);aspect-ratio:1;margin:10px auto;display:grid;grid-template-columns:repeat(8,1fr);border:8px solid #c99b65;border-radius:14px;overflow:hidden;box-shadow:0 8px 22px rgba(70,50,30,.16)}
- .setup-square{position:relative;display:grid;place-items:center;min-width:0}.setup-square.light{background:#f7e6c8}.setup-square.dark{background:#b98f68}.setup-square.home:empty:after{content:'';width:62%;height:62%;border:2px dashed rgba(60,50,40,.35);border-radius:8px}
+ .setup-board{width:min(92vw,560px);aspect-ratio:1;margin:10px auto;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));border:8px solid #c99b65;border-radius:14px;overflow:hidden;box-shadow:0 8px 22px rgba(70,50,30,.16)}
+ .setup-square{position:relative;display:grid;place-items:center;min-width:0;min-height:0;width:100%;height:100%;overflow:hidden}.setup-square.light{background:#f7e6c8}.setup-square.dark{background:#b98f68}.setup-square.home:empty:after{content:'';width:62%;height:62%;border:2px dashed rgba(60,50,40,.35);border-radius:8px}
  .setup-square .rank,.setup-square .file{position:absolute;font-size:10px;font-weight:900;opacity:.65}.setup-square .rank{left:3px;top:2px}.setup-square .file{right:3px;bottom:1px}
- .setup-piece,.tray-piece{font-family:"Times New Roman",serif;line-height:1}.setup-piece{font-size:clamp(30px,7vw,55px);cursor:pointer;z-index:2;text-shadow:0 1px 0 white}.setup-piece.white,.tray-piece.white{color:#fff;-webkit-text-stroke:1.3px #313131}.setup-piece.black,.tray-piece.black{color:#1e1e1e}
+ .setup-piece,.tray-piece{font-family:"Times New Roman",serif;line-height:1}.setup-piece{font-size:clamp(26px,6vw,48px);cursor:pointer;z-index:2;text-shadow:none;max-width:90%;max-height:90%}.setup-piece.white,.tray-piece.white{color:#fff;-webkit-text-stroke:1.6px #222;text-shadow:0 1px 1px rgba(0,0,0,.18)}.setup-piece.black,.tray-piece.black{color:#050505;-webkit-text-stroke:.4px #050505;text-shadow:none}
  .setup-tray{max-width:760px;margin:16px auto;display:flex;flex-wrap:wrap;justify-content:center;gap:7px;padding:12px;border-radius:18px;background:#f7f0ff}
- .tray-piece{border:2px solid transparent;background:#fff;border-radius:12px;padding:7px 8px;font-size:34px;min-width:49px;box-shadow:0 3px 9px rgba(60,60,80,.09);cursor:pointer}.tray-piece small{display:block;font:700 9px system-ui;color:#53606c;margin-top:4px;-webkit-text-stroke:0}
+ .tray-piece{border:2px solid transparent;background:#fff;border-radius:12px;}.tray-piece.white{background:#66717d;border-color:#aeb7c0}.tray-piece.black{background:#f4eadc;border-color:#d8c5aa}.tray-piece{padding:7px 8px;font-size:34px;min-width:49px;box-shadow:0 3px 9px rgba(60,60,80,.09);cursor:pointer}.tray-piece small{display:block;font:700 9px system-ui;color:#53606c;margin-top:4px;-webkit-text-stroke:0}
  .tray-piece.selected{border-color:#7b61d1;transform:translateY(-3px);box-shadow:0 7px 15px rgba(90,70,180,.2)}
  .setup-actions{text-align:center}.setup-start{font-size:20px;padding:15px 34px;border-radius:999px;background:linear-gradient(180deg,#52d67c,#20ae58);color:#fff;font-weight:900;border:0;box-shadow:0 8px 18px rgba(30,160,80,.25)}
  .setup-tip{font-weight:800;color:#635083}.setup-square.wrong{animation:setupWrong .4s}.slide-in{animation:setupSlide .45s}.shuffle-pop{animation:setupShuffle .55s}
@@ -44,10 +44,10 @@ function notify(msg){let t=document.querySelector('#toast');if(!t){t=document.cr
 function modal(html){closeModal();const d=document.createElement('div');d.id='modal';d.className='modal';d.innerHTML=`<div class="modal-card">${html}</div>`;d.onclick=e=>{if(e.target===d)closeModal()};document.body.appendChild(d)}
 function closeModal(){document.querySelector('#modal')?.remove()}
 const avatar=(s,size='')=>s.photo_data?`<img class="avatar ${size}" src="${s.photo_data}" alt="">`:`<div class="avatar placeholder ${size}">🌱</div>`;
-function home(){teacherPass='';studentSession=null;currentClass=null;app.innerHTML=`<main class="center"><div class="logo">Minoo <span>v2.2.1</span></div><p class="tag">Oyna • Keşfet • Öğren</p><section class="card"><h2>Öğrenci girişi</h2><input id="scode" placeholder="MIN-XXXXXX" autocomplete="off"><button onclick="studentLogin()">Giriş yap</button></section><button class="link" onclick="teacherLogin()">Öğretmen girişi</button><p class="safe">Reklamsız • Sohbetsiz • Öğretmen kontrollü</p></main>`}
+function home(){teacherPass='';studentSession=null;currentClass=null;app.innerHTML=`<main class="center"><div class="logo">Minoo <span>v2.2.3</span></div><p class="tag">Oyna • Keşfet • Öğren</p><section class="card"><h2>Öğrenci girişi</h2><input id="scode" placeholder="MIN-XXXXXX" autocomplete="off"><button onclick="studentLogin()">Giriş yap</button></section><button class="link" onclick="teacherLogin()">Öğretmen girişi</button><p class="safe">Reklamsız • Sohbetsiz • Öğretmen kontrollü</p></main>`}
 function teacherLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="home()">← Geri</button><div class="logo">Minoo <span>Öğretmen</span></div><p class="tag">Öğretmen paneline güvenli giriş</p><section class="card login-card"><h2>Öğretmen Girişi</h2><label for="tp">Şifre</label><input id="tp" type="password" placeholder="Şifrenizi girin" autocomplete="current-password" autofocus onkeydown="if(event.key==='Enter')doTeacherLogin()"><button class="login-btn" onclick="doTeacherLogin()">Giriş yap</button></section></main>`}
 async function doTeacherLogin(){const p=document.querySelector('#tp').value;if(!p)return;try{teacherPass=p;await api('/api/teacher/login',{method:'POST',body:JSON.stringify({password:p})});closeModal();dashboard()}catch(e){teacherPass='';notify(e.message)}}
-async function dashboard(){const cs=await api('/api/classes');app.innerHTML=`<header><div><b>Minoo Öğretmen</b><small>v2.2.1</small></div><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="toolbar"><h1>Sınıflarım</h1><button onclick="addClass()">+ Sınıf</button></div><div class="grid">${cs.map(c=>`<article class="card"><h3>${esc(c.name)}</h3><p>${c.student_count} öğrenci</p><button onclick="openClass(${c.id})">Aç</button><div class="row"><button class="ghost" onclick="renameClass(${c.id},'${encodeURIComponent(c.name)}')">Adını değiştir</button><button class="danger ghost" onclick="deleteClass(${c.id},'${encodeURIComponent(c.name)}')">Sil</button></div></article>`).join('')}</div><hr><div class="toolbar"><h2>Oyun Kütüphanesi</h2><button onclick="gameForm()">+ Oyun ekle</button></div><div id="library"></div></main>`;loadLibrary()}
+async function dashboard(){const cs=await api('/api/classes');app.innerHTML=`<header><div><b>Minoo Öğretmen</b><small>v2.2.3</small></div><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="toolbar"><h1>Sınıflarım</h1><button onclick="addClass()">+ Sınıf</button></div><div class="grid">${cs.map(c=>`<article class="card"><h3>${esc(c.name)}</h3><p>${c.student_count} öğrenci</p><button onclick="openClass(${c.id})">Aç</button><div class="row"><button class="ghost" onclick="renameClass(${c.id},'${encodeURIComponent(c.name)}')">Adını değiştir</button><button class="danger ghost" onclick="deleteClass(${c.id},'${encodeURIComponent(c.name)}')">Sil</button></div></article>`).join('')}</div><hr><div class="toolbar"><h2>Oyun Kütüphanesi</h2><button onclick="gameForm()">+ Oyun ekle</button></div><div id="library"></div></main>`;loadLibrary()}
 async function loadLibrary(){const gs=await api('/api/games'),el=document.querySelector('#library');el.innerHTML=gs.length?`<div class="grid">${gs.map(g=>`<article class="card"><h3>${esc(g.title)}</h3><p>${g.game_type==='matching'?'🧩 Minoo Eşleştirme':g.game_type==='chess_intro'?'♟️ Satranç Taşlarını Tanı':g.game_type==='chess_setup'?'♟️ Satranç Taşlarını Dizelim':'🔗 Canva oyunu'}</p><p>${g.completed_count||0}/${g.assigned_count||0} tamamlandı</p><div class="row"><button class="ghost" onclick="teacherPreviewEncoded('${encodeURIComponent(JSON.stringify(g))}')">▶ Oyunu oyna</button><button onclick="gameForm(${g.id},'${encodeURIComponent(g.title)}','${encodeURIComponent(g.canva_url||'')}','${g.game_type||'external'}','${encodeURIComponent(g.game_data||'') }')">Düzenle</button><button class="danger ghost" onclick="deleteGame(${g.id},'${encodeURIComponent(g.title)}')">Sil</button></div></article>`).join('')}</div>`:'<p>Henüz oyun yok.</p>'}
 function addClass(){modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>Yeni sınıf</h2><label>Sınıf adı</label><input id="cn" autofocus><div class="modal-actions"><button class="ghost" onclick="closeModal()">Vazgeç</button><button onclick="saveClass()">Oluştur</button></div>`)}
 async function saveClass(){const name=document.querySelector('#cn').value.trim();if(!name)return;try{await api('/api/classes',{method:'POST',body:JSON.stringify({name})});closeModal();dashboard()}catch(e){notify(e.message)}}
@@ -131,7 +131,7 @@ function previewFinished(title){modal(`<h2>Önizleme tamamlandı 🎉</h2><p><b>
 async function matchingFinished(aid,title){try{await api(`/api/assignments/${aid}/complete`,{method:'POST'});modal(`<h2>Harika! 🎉</h2><p><b>${esc(title)}</b> oyununu tamamladın.</p><p class="big-star">⭐</p><div class="modal-actions"><button onclick="closeModal();studentDash()">Oyunlarıma dön</button></div>`)}catch(e){notify(e.message)}}
 
 
-/* ===== Minoo v2.2.1 • Satranç Taşlarını Dizelim ===== */
+/* ===== Minoo v2.2.3 • Satranç Taşlarını Dizelim ===== */
 const SETUP_BACK = ['♜','♞','♝','♛','♚','♝','♞','♜'];
 const SETUP_WHITE = ['♖','♘','♗','♕','♔','♗','♘','♖'];
 const SETUP_NAMES = {'♜':'Kale','♞':'At','♝':'Fil','♛':'Vezir','♚':'Şah','♟':'Piyon','♖':'Kale','♘':'At','♗':'Fil','♕':'Vezir','♔':'Şah','♙':'Piyon'};
@@ -168,7 +168,7 @@ function renderSetup(){
  if(!board)return;
  board.innerHTML=setupBoardHtml();
  const remaining=setupState.pieces.filter(x=>!setupState.placed.has(x.id));
- tray.innerHTML=`<div class="setup-tray ${setupState.phase}">${remaining.map(x=>`<button class="tray-piece ${x.side}" draggable="${setupState.phase==='play'}" ondragstart="setupDrag(event,'${x.id}')" onclick="setupPieceClick('${x.id}')" title="${SETUP_NAMES[x.p]}">${x.p}<small>${SETUP_NAMES[x.p]}</small></button>`).join('')}</div>`;
+ tray.innerHTML=`<div class="setup-tray ${setupState.phase}">${remaining.map(x=>`<button class="tray-piece ${x.side}" draggable="${setupState.phase==='play'}" ondragstart="setupDrag(event,'${x.id}')" onclick="setupPieceClick('${x.id}')" title="${SETUP_NAMES[x.p]}">${x.p}<small>${SETUP_NAMES[x.p]} • ${x.side==="white"?"BEYAZ":"SİYAH"}</small></button>`).join('')}</div>`;
  document.querySelector('#setupProgress').textContent=`${setupState.placed.size} / 32`;
  if(setupState.phase==='learn'){
    actions.innerHTML=setupState.placed.size===32?`<button class="setup-start" onclick="setupStartPlay()">▶ Oyuna Başla</button>`:`<p class="setup-tip">👆 Bir taşa dokun. Doğru yerine kayarak gitsin.</p>`;
@@ -211,15 +211,37 @@ document.addEventListener('click',e=>{
  if(e.target.closest('.setup-piece'))return;
  setupTryPlace(setupState.drag,sq.dataset.square);
 });
+
+function setupAllowedTargets(x){
+ const row=x.side==='white'?7:0, pawnRow=x.side==='white'?6:1;
+ if(SETUP_NAMES[x.p]==='Piyon')return Array.from({length:8},(_,c)=>`${c},${pawnRow}`);
+ if(SETUP_NAMES[x.p]==='Kale')return [`0,${row}`,`7,${row}`];
+ if(SETUP_NAMES[x.p]==='At')return [`1,${row}`,`6,${row}`];
+ if(SETUP_NAMES[x.p]==='Fil')return [`2,${row}`,`5,${row}`];
+ return [x.target];
+}
+function setupPlaceSound(){
+ try{
+  const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
+  const ctx=new C(),now=ctx.currentTime,o=ctx.createOscillator(),g=ctx.createGain();
+  o.type='square';o.frequency.setValueAtTime(165,now);o.frequency.exponentialRampToValueAtTime(95,now+.045);
+  g.gain.setValueAtTime(.08,now);g.gain.exponentialRampToValueAtTime(.001,now+.055);
+  o.connect(g).connect(ctx.destination);o.start(now);o.stop(now+.06);
+ }catch{}
+}
+
 function setupTryPlace(id,key){
  if(!id)return; const x=setupState.pieces.find(p=>p.id===id); if(!x)return;
- if(x.target===key){
-   setupState.placed.set(id,x); setupState.drag=null; renderSetup();
+ const occupied=[...setupState.placed.values()].some(p=>p.target===key);
+ const allowed=setupAllowedTargets(x);
+ if(allowed.includes(key)&&!occupied){
+   x.target=key;
+   setupState.placed.set(id,x); setupState.drag=null; setupPlaceSound(); renderSetup();
    document.querySelector('#setupMessage').textContent='Aferin! Doğru kare. Devam et. ⭐';
    if(setupState.placed.size===32)setTimeout(setupWin,250);
  }else{
    const sq=document.querySelector(`[data-square="${key}"]`); if(sq){sq.classList.add('wrong');setTimeout(()=>sq.classList.remove('wrong'),450)}
-   document.querySelector('#setupMessage').textContent='Bir daha düşün 😊 Bu taşın yeri başka bir kare.';
+   document.querySelector('#setupMessage').textContent=occupied?'Bu kare dolu 😊 Başka doğru kareyi seç.':'Bir daha düşün 😊 Bu taşın yeri başka bir kare.';
  }
 }
 async function setupWin(){
