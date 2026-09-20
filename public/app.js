@@ -1,14 +1,3 @@
-/* ===== Minoo v2.4.0 • Kalıcı satranç tasarım sistemi ===== */
-document.head.insertAdjacentHTML('beforeend',`<style id="minoo-chess-v240">
-.minoo-piece{display:block;width:88%;height:88%;margin:auto;overflow:visible;filter:drop-shadow(0 2px 1px rgba(0,0,0,.18))}
-.setup-piece,.tray-piece{font-size:0!important;-webkit-text-stroke:0!important;text-shadow:none!important}
-.setup-piece{width:100%;height:100%;display:grid;place-items:center}.setup-square .minoo-piece{width:92%;height:92%}
-.tray-piece .minoo-piece{width:46px;height:46px}.tray-piece.selected{outline:4px solid #7655d6;outline-offset:2px;transform:translateY(-3px)}
-.setup-trays{display:grid;gap:10px;margin-top:12px}.setup-side-title{font:900 13px system-ui;color:#53606c;text-align:center;margin:0 0 5px}
-.setup-tray{margin:0!important;max-width:none!important}.forgot-link{margin-top:5px}.reset-code{font-size:28px;font-weight:900;letter-spacing:2px;text-align:center;padding:14px;background:#f3efff;border-radius:15px;margin:12px 0}
-@media(min-width:850px){.setup-card{max-width:1180px!important}.setup-play-layout{display:grid;grid-template-columns:190px minmax(440px,590px) 190px;gap:14px;align-items:start}.setup-play-layout #setupBoard{grid-column:2;grid-row:1}.setup-play-layout .white-tray{grid-column:1;grid-row:1}.setup-play-layout .black-tray{grid-column:3;grid-row:1}.setup-play-layout .setup-tray{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;align-content:start;padding:9px!important}.setup-board{width:min(50vw,590px)!important;margin:0 auto!important}.setup-trays.learn{grid-template-columns:1fr 1fr}.setup-trays.learn .setup-tray{display:flex!important}}
-@media(max-width:849px){.setup-world{padding:4px!important}.setup-card{padding:7px!important;border-radius:17px!important}.setup-guide{gap:7px!important;margin-bottom:4px!important}.setup-guide h1{font-size:18px!important}.setup-guide p{font-size:11px!important;margin:1px 0!important}.setup-mascot{width:36px!important;height:36px!important;font-size:22px!important}.setup-board{width:min(92vw,390px)!important;border-width:4px!important;margin:3px auto 6px!important}.setup-trays{grid-template-columns:1fr 1fr;gap:5px;margin-top:5px}.setup-tray{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:3px!important;padding:5px!important}.tray-piece{min-width:0!important;padding:3px 1px!important;border-radius:8px!important}.tray-piece .minoo-piece{width:30px;height:30px}.tray-piece small{font-size:6px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.setup-side-title{font-size:10px}.setup-actions{margin-top:5px}.setup-tip{font-size:11px;margin:5px}.setup-start{font-size:17px!important;padding:11px 25px!important}}
-</style>`);
 document.head.insertAdjacentHTML('beforeend','\n<style>\n.setup-piece,.tray-piece{font-family:Georgia,"Times New Roman",serif!important}\n.setup-piece.white,.tray-piece.white{color:#fffdf2!important;-webkit-text-stroke:1.35px #343434!important;paint-order:stroke fill;filter:drop-shadow(0 1px 1px rgba(0,0,0,.28))}\n.setup-piece.black,.tray-piece.black{color:#111!important;-webkit-text-stroke:.65px #000!important;paint-order:stroke fill}\n.setup-square{aspect-ratio:1/1}.setup-board{overflow:hidden}\n.setup-learn-arrow{position:fixed;inset:0;width:100vw;height:100vh;z-index:9998;pointer-events:none}\n.setup-flying-piece{position:fixed;z-index:9999;pointer-events:none;display:grid;place-items:center;font:46px/1 Georgia,"Times New Roman",serif;transition:transform .62s cubic-bezier(.22,.8,.28,1)}\n.setup-flying-piece.white{color:#fffdf2;-webkit-text-stroke:1.35px #343434}.setup-flying-piece.black{color:#111;-webkit-text-stroke:.65px #000}\n.new-task-panel{margin:14px 0 22px;padding:16px;border-radius:20px;background:linear-gradient(135deg,#fff5d8,#f6e8ff);border:2px solid #ead7a2}\n.new-task-panel h2{margin:0 0 10px}.new-task-list{display:grid;gap:10px}\n.new-task-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;padding:14px 16px;border-radius:16px}\n.account-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.login-grid{display:grid;gap:10px}\n@media(max-width:700px){header{padding:10px 12px}.kid{padding:14px}.cols{grid-template-columns:1fr!important}.setup-card{padding:10px!important}.setup-world{padding:6px!important}.setup-board{width:min(96vw,520px)!important;border-width:5px!important}.setup-piece{font-size:clamp(25px,9vw,44px)!important}.setup-tray{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important}.tray-piece{min-width:0!important;padding:8px 3px!important;font-size:34px!important}.tray-piece small{font-size:9px!important}.setup-guide h1{font-size:20px}.setup-guide p{font-size:13px}.grid{grid-template-columns:1fr!important}}\n@media(min-width:701px){.kid,.setup-world{max-width:1180px;margin:auto}.setup-tray{max-width:900px;margin:14px auto}}\n</style>');
 
 (function(){
@@ -56,10 +45,10 @@ function notify(msg){let t=document.querySelector('#toast');if(!t){t=document.cr
 function modal(html){closeModal();const d=document.createElement('div');d.id='modal';d.className='modal';d.innerHTML=`<div class="modal-card">${html}</div>`;d.onclick=e=>{if(e.target===d)closeModal()};document.body.appendChild(d)}
 function closeModal(){document.querySelector('#modal')?.remove()}
 const avatar=(s,size='')=>s.photo_data?`<img class="avatar ${size}" src="${s.photo_data}" alt="">`:`<div class="avatar placeholder ${size}">🌱</div>`;
-function home(){teacherPass='';studentSession=null;currentClass=null;app.innerHTML=`<main class="center"><div class="logo">Minoo <span>v2.4.0</span></div><p class="tag">Oyna • Keşfet • Öğren</p><section class="card"><h2>Öğrenci girişi</h2><div class="login-grid"><input id="suser" placeholder="Kullanıcı adı" autocomplete="username"><input id="scode" type="password" placeholder="İlk giriş kodu / şifre" autocomplete="current-password" onkeydown="if(event.key==='Enter')studentLogin()"><button onclick="studentLogin()">Giriş yap</button><button class="link forgot-link" onclick="forgotStudentPassword()">Şifremi unuttum</button></div></section><button class="link" onclick="teacherLogin()">Öğretmen girişi</button><p class="safe">Reklamsız • Sohbetsiz • Öğretmen kontrollü</p></main>`}
+function home(){teacherPass='';studentSession=null;currentClass=null;app.innerHTML=`<main class="center"><div class="logo">Minoo <span>v2.4.1</span></div><p class="tag">Oyna • Keşfet • Öğren</p><section class="card"><h2>Öğrenci girişi</h2><div class="login-grid"><input id="suser" placeholder="Kullanıcı adı" autocomplete="username"><input id="scode" type="password" placeholder="İlk giriş kodu / şifre" autocomplete="current-password" onkeydown="if(event.key==='Enter')studentLogin()"><button onclick="studentLogin()">Giriş yap</button></div></section><button class="link" onclick="teacherLogin()">Öğretmen girişi</button><p class="safe">Reklamsız • Sohbetsiz • Öğretmen kontrollü</p></main>`}
 function teacherLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="home()">← Geri</button><div class="logo">Minoo <span>Öğretmen</span></div><p class="tag">Öğretmen paneline güvenli giriş</p><section class="card login-card"><h2>Öğretmen Girişi</h2><label for="tp">Şifre</label><input id="tp" type="password" placeholder="Şifrenizi girin" autocomplete="current-password" autofocus onkeydown="if(event.key==='Enter')doTeacherLogin()"><button class="login-btn" onclick="doTeacherLogin()">Giriş yap</button></section></main>`}
 async function doTeacherLogin(){const p=document.querySelector('#tp').value;if(!p)return;try{teacherPass=p;await api('/api/teacher/login',{method:'POST',body:JSON.stringify({password:p})});closeModal();dashboard()}catch(e){teacherPass='';notify(e.message)}}
-async function dashboard(){const cs=await api('/api/classes');app.innerHTML=`<header><div><b>Minoo Öğretmen</b><small>v2.4.0</small></div><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="toolbar"><h1>Sınıflarım</h1><button onclick="addClass()">+ Sınıf</button></div><div class="grid">${cs.map(c=>`<article class="card"><h3>${esc(c.name)}</h3><p>${c.student_count} öğrenci</p><button onclick="openClass(${c.id})">Aç</button><div class="row"><button class="ghost" onclick="renameClass(${c.id},'${encodeURIComponent(c.name)}')">Adını değiştir</button><button class="danger ghost" onclick="deleteClass(${c.id},'${encodeURIComponent(c.name)}')">Sil</button></div></article>`).join('')}</div><hr><div class="toolbar"><h2>Oyun Kütüphanesi</h2><button onclick="gameForm()">+ Oyun ekle</button></div><div id="library"></div></main>`;loadLibrary()}
+async function dashboard(){const cs=await api('/api/classes');app.innerHTML=`<header><div><b>Minoo Öğretmen</b><small>v2.4.1</small></div><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="toolbar"><h1>Sınıflarım</h1><button onclick="addClass()">+ Sınıf</button></div><div class="grid">${cs.map(c=>`<article class="card"><h3>${esc(c.name)}</h3><p>${c.student_count} öğrenci</p><button onclick="openClass(${c.id})">Aç</button><div class="row"><button class="ghost" onclick="renameClass(${c.id},'${encodeURIComponent(c.name)}')">Adını değiştir</button><button class="danger ghost" onclick="deleteClass(${c.id},'${encodeURIComponent(c.name)}')">Sil</button></div></article>`).join('')}</div><hr><div class="toolbar"><h2>Oyun Kütüphanesi</h2><button onclick="gameForm()">+ Oyun ekle</button></div><div id="library"></div></main>`;loadLibrary()}
 async function loadLibrary(){const gs=await api('/api/games'),el=document.querySelector('#library');el.innerHTML=gs.length?`<div class="grid">${gs.map(g=>`<article class="card"><h3>${esc(g.title)}</h3><p>${g.game_type==='matching'?'🧩 Minoo Eşleştirme':g.game_type==='chess_intro'?'♟️ Satranç Taşlarını Tanı':g.game_type==='chess_setup'?'♟️ Satranç Taşlarını Dizelim':'🔗 Canva oyunu'}</p><p>${g.completed_count||0}/${g.assigned_count||0} tamamlandı</p><div class="row"><button class="ghost" onclick="teacherPreviewEncoded('${encodeURIComponent(JSON.stringify(g))}')">▶ Oyunu oyna</button><button onclick="gameForm(${g.id},'${encodeURIComponent(g.title)}','${encodeURIComponent(g.canva_url||'')}','${g.game_type||'external'}','${encodeURIComponent(g.game_data||'') }')">Düzenle</button><button class="danger ghost" onclick="deleteGame(${g.id},'${encodeURIComponent(g.title)}')">Sil</button></div></article>`).join('')}</div>`:'<p>Henüz oyun yok.</p>'}
 function addClass(){modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>Yeni sınıf</h2><label>Sınıf adı</label><input id="cn" autofocus><div class="modal-actions"><button class="ghost" onclick="closeModal()">Vazgeç</button><button onclick="saveClass()">Oluştur</button></div>`)}
 async function saveClass(){const name=document.querySelector('#cn').value.trim();if(!name)return;try{await api('/api/classes',{method:'POST',body:JSON.stringify({name})});closeModal();dashboard()}catch(e){notify(e.message)}}
@@ -70,7 +59,7 @@ function gameForm(id=0,t='',u='',type='external',data=''){let pairs='';try{const
 function toggleGameFields(){const type=document.querySelector('#gtype')?.value;const matching=type==='matching';document.querySelector('#externalFields').style.display=type==='external'?'block':'none';document.querySelector('#matchingFields').style.display=matching?'block':'none'}
 async function saveGame(id){const title=document.querySelector('#gt').value.trim(),game_type=document.querySelector('#gtype').value,canva_url=document.querySelector('#gu').value.trim();const pairs=document.querySelector('#gpairs').value.split('\n').map(line=>{const i=line.indexOf('=');return i<0?[]:[line.slice(0,i).trim(),line.slice(i+1).trim()]}).filter(x=>x[0]&&x[1]);try{await api(id?'/api/games/'+id:'/api/games',{method:id?'PATCH':'POST',body:JSON.stringify({title,game_type,canva_url,pairs})});closeModal();currentClass?openClass(currentClass):dashboard()}catch(e){notify(e.message)}}
 async function deleteGame(id,name){if(confirm(`${decodeURIComponent(name)} oyununu silmek istediğine emin misin? Tüm atamaları da silinir.`))try{await api('/api/games/'+id,{method:'DELETE'});currentClass?openClass(currentClass):dashboard()}catch(e){notify(e.message)}}
-async function openClass(id){currentClass=id;const [cs,ss,as,gs]=await Promise.all([api('/api/classes'),api(`/api/classes/${id}/students`),api(`/api/classes/${id}/assignments`),api('/api/games')]);const c=cs.find(x=>Number(x.id)===Number(id));const grouped={};as.forEach(a=>(grouped[a.game_id]??={game_id:a.game_id,title:a.title,rows:[]}).rows.push(a));app.innerHTML=`<header><button class="ghost" onclick="dashboard()">← Sınıflar</button><b>${esc(c?.name||'Sınıf')}</b><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="cols"><section><div class="toolbar"><h2>Öğrenciler</h2><div class="row"><button onclick="studentForm()">+ Öğrenci</button><button class="ghost" onclick="bulkStudents()">Toplu ekle</button></div></div>${ss.length?`<div class="bulk-bar"><label><input id="selectAllStudents" type="checkbox" onchange="selectAllStudents(this.checked)"> Tümünü seç</label><span id="selectedCount">0 öğrenci seçildi</span><button id="bulkDeleteBtn" class="danger ghost" onclick="deleteSelectedStudents()" disabled>Seçilenleri sil</button></div>`:''}${ss.map(s=>`<article class="student"><input class="student-select" type="checkbox" data-student-id="${s.id}" aria-label="${esc(s.name)} seç" onchange="updateStudentSelection()"><div class="student-main" onclick="profile(${s.id})">${avatar(s)}<div><b>${esc(s.name)}</b><small>👤 ${esc(s.username||'—')}</small><code>${esc(s.code)}</code><small>${s.completed_count||0}/${s.assigned_count||0} tamamlandı</small>${s.guardian_name?`<small>Veli: ${esc(s.guardian_name)}</small>`:''}</div></div><div class="row"><button class="ghost" onclick="studentForm(${s.id})">Düzenle</button><button class="ghost" onclick="parentNoteQuick(${s.id},'${encodeURIComponent(s.name)}')">💌 Veliye not</button><button class="ghost" onclick="assignGamesToStudent(${s.id},'${encodeURIComponent(s.name)}')">🎮 Oyun ata</button><button class="ghost" onclick="copyCode('${esc(s.code)}')">Kopyala</button><button class="ghost" onclick="resetStudentPassword(${s.id},'${encodeURIComponent(s.name)}')">🔑 Şifre sıfırla</button><button class="ghost" onclick="regen(${s.id})">Kod yenile</button><button class="danger ghost" onclick="deleteStudent(${s.id},'${encodeURIComponent(s.name)}')">Sil</button></div></article>`).join('')||'<p>Öğrenci yok.</p>'}</section><section><h2>Oyun ata</h2><select id="gamePick"><option value="">Oyun seç</option>${gs.map(g=>`<option value="${g.id}">${esc(g.title)}</option>`).join('')}</select><button onclick="assignPicked()">Öğrencileri seç</button><p class="hint">Mevcut bir oyunu istediğin zaman bu sınıftaki öğrencilere ekleyip çıkarabilirsin.</p></section></div><section class="card wide"><h2>Tamamlanma takibi</h2>${Object.values(grouped).map(g=>{const done=g.rows.filter(x=>x.completed_at).length;return `<article class="assignment"><div class="toolbar"><div><h3>${esc(g.title)}</h3><b>${done}/${g.rows.length} öğrenci • %${g.rows.length?Math.round(done/g.rows.length*100):0}</b></div><button onclick="editAssignment(${g.game_id})">Atamayı düzenle</button></div><progress max="${g.rows.length}" value="${done}"></progress>${g.rows.map(x=>`<div class="status"><span>${esc(x.name)}</span><span>${x.completed_at?'✅ Tamamladı':'⏳ Yapmadı'}</span></div>`).join('')}</article>`}).join('')||'<p>Henüz atama yok.</p>'}</section></main>`}
+async function openClass(id){currentClass=id;const [cs,ss,as,gs]=await Promise.all([api('/api/classes'),api(`/api/classes/${id}/students`),api(`/api/classes/${id}/assignments`),api('/api/games')]);const c=cs.find(x=>Number(x.id)===Number(id));const grouped={};as.forEach(a=>(grouped[a.game_id]??={game_id:a.game_id,title:a.title,rows:[]}).rows.push(a));app.innerHTML=`<header><button class="ghost" onclick="dashboard()">← Sınıflar</button><b>${esc(c?.name||'Sınıf')}</b><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="cols"><section><div class="toolbar"><h2>Öğrenciler</h2><div class="row"><button onclick="studentForm()">+ Öğrenci</button><button class="ghost" onclick="bulkStudents()">Toplu ekle</button></div></div>${ss.length?`<div class="bulk-bar"><label><input id="selectAllStudents" type="checkbox" onchange="selectAllStudents(this.checked)"> Tümünü seç</label><span id="selectedCount">0 öğrenci seçildi</span><button id="bulkDeleteBtn" class="danger ghost" onclick="deleteSelectedStudents()" disabled>Seçilenleri sil</button></div>`:''}${ss.map(s=>`<article class="student"><input class="student-select" type="checkbox" data-student-id="${s.id}" aria-label="${esc(s.name)} seç" onchange="updateStudentSelection()"><div class="student-main" onclick="profile(${s.id})">${avatar(s)}<div><b>${esc(s.name)}</b><small>👤 ${esc(s.username||'—')}</small><code>${esc(s.code)}</code><small>${s.completed_count||0}/${s.assigned_count||0} tamamlandı</small>${s.guardian_name?`<small>Veli: ${esc(s.guardian_name)}</small>`:''}</div></div><div class="row"><button class="ghost" onclick="studentForm(${s.id})">Düzenle</button><button class="ghost" onclick="parentNoteQuick(${s.id},'${encodeURIComponent(s.name)}')">💌 Veliye not</button><button class="ghost" onclick="assignGamesToStudent(${s.id},'${encodeURIComponent(s.name)}')">🎮 Oyun ata</button><button class="ghost" onclick="copyCode('${esc(s.code)}')">Kopyala</button><button class="ghost" onclick="regen(${s.id})">Kod yenile</button><button class="danger ghost" onclick="deleteStudent(${s.id},'${encodeURIComponent(s.name)}')">Sil</button></div></article>`).join('')||'<p>Öğrenci yok.</p>'}</section><section><h2>Oyun ata</h2><select id="gamePick"><option value="">Oyun seç</option>${gs.map(g=>`<option value="${g.id}">${esc(g.title)}</option>`).join('')}</select><button onclick="assignPicked()">Öğrencileri seç</button><p class="hint">Mevcut bir oyunu istediğin zaman bu sınıftaki öğrencilere ekleyip çıkarabilirsin.</p></section></div><section class="card wide"><h2>Tamamlanma takibi</h2>${Object.values(grouped).map(g=>{const done=g.rows.filter(x=>x.completed_at).length;return `<article class="assignment"><div class="toolbar"><div><h3>${esc(g.title)}</h3><b>${done}/${g.rows.length} öğrenci • %${g.rows.length?Math.round(done/g.rows.length*100):0}</b></div><button onclick="editAssignment(${g.game_id})">Atamayı düzenle</button></div><progress max="${g.rows.length}" value="${done}"></progress>${g.rows.map(x=>`<div class="status"><span>${esc(x.name)}</span><span>${x.completed_at?'✅ Tamamladı':'⏳ Yapmadı'}</span></div>`).join('')}</article>`}).join('')||'<p>Henüz atama yok.</p>'}</section></main>`}
 function studentForm(id=0){if(id)return loadStudentForm(id);renderStudentForm({})}
 async function loadStudentForm(id){try{const p=await api(`/api/students/${id}/profile`);renderStudentForm(p.student)}catch(e){notify(e.message)}}
 function renderStudentForm(s){modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>${s.id?'Öğrenciyi düzenle':'Yeni öğrenci'}</h2><div class="photo-edit">${avatar(s,'large')}<div><label class="file-btn">Fotoğraf seç<input id="sp" type="file" accept="image/*" onchange="previewPhoto(this)"></label>${s.photo_data?'<button class="ghost" onclick="removePhoto()">Fotoğrafı kaldır</button>':''}</div></div><input type="hidden" id="photoData" value="${s.photo_data?'keep':''}"><label>Öğrenci adı soyadı</label><input id="sn" value="${esc(s.name||'')}"><label>Veli adı soyadı</label><input id="gn" value="${esc(s.guardian_name||'')}"><label>Veli telefon numarası</label><input id="gp" type="tel" value="${esc(s.guardian_phone||'')}" placeholder="05xx xxx xx xx"><label>Öğretmen notu</label><textarea id="tn" rows="3" maxlength="500" placeholder="Bu öğrenciyle ilgili kısa bir not...">${esc(s.teacher_note||'')}</textarea><p class="hint">Veli bilgileri ve öğretmen notu yalnızca öğretmen panelinde görünür.</p><div class="modal-actions"><button class="ghost" onclick="closeModal()">Vazgeç</button><button onclick="saveStudent(${Number(s.id)||0})">Kaydet</button></div>`)}
@@ -133,8 +122,6 @@ function teacherPreviewEncoded(v){
 }
 function previewBack(){teacherPreviewMode=false;dashboard()}
 
-function forgotStudentPassword(){modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>🔑 Şifremi unuttum</h2><p>Şifreni öğretmenin güvenli şekilde sıfırlayabilir.</p><p class="hint">Öğretmenine kullanıcı adını söyle; sana yeni bir geçici şifre verecek.</p><div class="modal-actions"><button onclick="closeModal()">Tamam</button></div>`)}
-async function resetStudentPassword(id,name){if(!confirm(`${decodeURIComponent(name)} için yeni geçici şifre oluşturulsun mu?`))return;try{const r=await api(`/api/students/${id}/reset-password`,{method:'POST'});modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>🔑 Yeni geçici şifre</h2><p><b>${esc(decodeURIComponent(name))}</b></p><div class="reset-code">${esc(r.temporary_password)}</div><p class="hint">Bu şifreyi öğrenciye ver. Giriş yaptıktan sonra “Şifrem” bölümünden değiştirebilir.</p><div class="modal-actions"><button onclick="closeModal()">Kapat</button></div>`) }catch(e){notify(e.message)}}
 async function studentLogin(){const username=document.querySelector('#suser').value.trim().toLowerCase(),password=document.querySelector('#scode').value.trim();if(!username||!password)return notify('Kullanıcı adı ve şifre gerekli');try{studentSession=await api('/api/student/login',{method:'POST',body:JSON.stringify({username,password})});studentDash()}catch(e){notify(e.message)}}
 function changeStudentPassword(){modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>🔐 Şifremi değiştir</h2><label>Mevcut şifre</label><input id="oldpw" type="password"><label>Yeni şifre</label><input id="newpw" type="password" minlength="4"><label>Yeni şifre tekrar</label><input id="newpw2" type="password" minlength="4"><div class="modal-actions"><button class="ghost" onclick="closeModal()">Vazgeç</button><button onclick="saveStudentPassword()">Şifreyi değiştir</button></div>`)}
 async function saveStudentPassword(){const old_password=document.querySelector('#oldpw').value,new_password=document.querySelector('#newpw').value,new2=document.querySelector('#newpw2').value;if(new_password!==new2)return notify('Yeni şifreler aynı değil');if(new_password.length<4)return notify('Yeni şifre en az 4 karakter olmalı');try{await api(`/api/student/${studentSession.id}/password`,{method:'POST',body:JSON.stringify({old_password,new_password})});closeModal();notify('Şifren değiştirildi ✓')}catch(e){notify(e.message)}}
@@ -147,141 +134,100 @@ function previewFinished(title){modal(`<h2>Önizleme tamamlandı 🎉</h2><p><b>
 async function matchingFinished(aid,title){try{await api(`/api/assignments/${aid}/complete`,{method:'POST'});modal(`<h2>Harika! 🎉</h2><p><b>${esc(title)}</b> oyununu tamamladın.</p><p class="big-star">⭐</p><div class="modal-actions"><button onclick="closeModal();studentDash()">Oyunlarıma dön</button></div>`)}catch(e){notify(e.message)}}
 
 
-/* ===== Minoo v2.4.0 • Satranç Taşlarını Dizelim ===== */
-const SETUP_BACK = ['♜','♞','♝','♛','♚','♝','♞','♜'];
-const SETUP_WHITE = ['♖','♘','♗','♕','♔','♗','♘','♖'];
-const SETUP_NAMES = {'♜':'Kale','♞':'At','♝':'Fil','♛':'Vezir','♚':'Şah','♟':'Piyon','♖':'Kale','♘':'At','♗':'Fil','♕':'Vezir','♔':'Şah','♙':'Piyon'};
+
+document.head.insertAdjacentHTML('beforeend',`<style>
+.minoo-piece-svg{width:58px;height:68px;display:block;margin:auto;filter:drop-shadow(0 4px 3px rgba(35,25,18,.22))}
+.setup-desktop-layout{display:grid;grid-template-columns:190px minmax(420px,560px) 190px;gap:16px;align-items:start;justify-content:center}
+.setup-side{border-radius:22px;padding:12px;min-height:560px}.setup-side.white{background:#eef7ff}.setup-side.black{background:#fff3eb}.setup-side h3{text-align:center;font-size:14px;margin:4px 0 12px}
+.side-pieces{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.tray-piece{position:relative;min-width:0!important;width:100%;padding:8px 4px!important}
+.setup-side.white .tray-piece{background:#9a704f!important;border-color:#79553c!important}.setup-side.black .tray-piece{background:#f2dfc2!important;border-color:#d3b68d!important}
+.setup-side.white .tray-piece small{color:#fff!important}.setup-side.black .tray-piece small{color:#352b24!important}.piece-count{position:absolute;right:5px;top:5px;background:#6f83bd;color:#fff;border-radius:8px;padding:2px 6px;font:800 11px system-ui}
+.tray-empty{grid-column:1/-1;text-align:center;padding:24px 5px;font-weight:900;color:#55a86a}
+.setup-square.home:empty:after{content:''!important;display:block!important;width:62%!important;height:62%!important;border:2px dashed rgba(56,43,31,.48)!important;border-radius:8px!important}
+.setup-piece{border:0;background:transparent;padding:0;width:88%;height:88%;display:grid;place-items:center}.setup-piece .minoo-piece-svg{width:88%;height:88%}
+.learn-pool{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;max-width:650px;margin:12px auto}.learn-chip{border:0;border-radius:12px;padding:4px}.learn-chip.white{background:#9a704f}.learn-chip.black{background:#f2dfc2}.learn-chip .minoo-piece-svg{width:40px;height:48px}
+@media(max-width:760px){.setup-desktop-layout{grid-template-columns:1fr 1fr;gap:8px}.setup-desktop-layout .setup-board{grid-column:1/-1;grid-row:1;width:min(94vw,500px)!important}.setup-side{min-height:0;padding:8px}.setup-side.white{grid-column:1;grid-row:2}.setup-side.black{grid-column:2;grid-row:2}.side-pieces{grid-template-columns:repeat(3,1fr);gap:5px}.tray-piece .minoo-piece-svg{width:38px;height:46px}.setup-side h3{font-size:11px}.learn-pool{grid-template-columns:repeat(8,1fr);gap:3px}.learn-chip .minoo-piece-svg{width:29px;height:36px}}
+</style>`);
+
+/* ===== Minoo v2.4.1 • Satranç Taşlarını Dizelim ===== */
 let setupState=null;
 
 function minooPieceSvg(type,side){
- const fill=side==='white'?'#fffdf7':'#111318',stroke=side==='white'?'#26313a':'#020304',hi=side==='white'?'#ffffff':'#4c525b';
- const C=`fill="${fill}" stroke="${stroke}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"`,H=`fill="none" stroke="${hi}" stroke-width="2.2" stroke-linecap="round" opacity=".78"`;
- let b='';
- if(type==='pawn')b=`<circle ${C} cx="50" cy="24" r="12"/><path ${C} d="M38 39c5 6 5 12 1 20L29 74h42L61 59c-4-8-4-14 1-20z"/><path ${H} d="M43 43c3 5 3 10 0 15"/>`;
- if(type==='rook')b=`<path ${C} d="M25 18h13v10h9V18h12v10h9V18h12v23H25z"/><path ${C} d="M31 41h38l-4 33H35z"/><path ${H} d="M38 46l-3 22"/>`;
- if(type==='knight')b=`<path ${C} d="M29 74c3-16 10-25 22-32-10-3-14-10-12-20 13 3 26 9 32 22 5 11 1 21-7 30z"/><path ${C} d="M39 23l8-10 5 15"/><circle cx="59" cy="39" r="3" fill="${side==='white'?'#26313a':'#fff'}"/><path ${H} d="M42 59c7-7 14-10 21-8"/>`;
- if(type==='bishop')b=`<circle ${C} cx="50" cy="17" r="7"/><path ${C} d="M50 25c-15 9-19 21-10 32l-9 17h38l-9-17c9-11 5-23-10-32z"/><path ${H} d="M47 33c-7 7-8 15-3 21"/>`;
- if(type==='queen')b=`<circle ${C} cx="25" cy="23" r="5"/><circle ${C} cx="42" cy="16" r="5"/><circle ${C} cx="58" cy="16" r="5"/><circle ${C} cx="75" cy="23" r="5"/><path ${C} d="M27 31l9 39h28l9-39-15 20-8-27-8 27z"/><path ${H} d="M39 61h22"/>`;
- if(type==='king')b=`<path ${C} d="M50 9v19M41 18h18"/><path ${C} d="M50 27c-15 0-25 10-25 23 0 9 5 16 13 21h24c8-5 13-12 13-21 0-13-10-23-25-23z"/><path ${H} d="M35 48c2-7 7-12 13-13"/>`;
- return `<svg class="minoo-piece" viewBox="0 0 100 100" aria-hidden="true">${b}<path ${C} d="M20 85h60l-5-11H25z"/><path ${H} d="M30 79h40"/></svg>`;
+ const fill=side==='white'?'#fffdf7':'#171a20', stroke=side==='white'?'#5b4938':'#07090c', hi=side==='white'?'#ffffff':'#454b57';
+ const common=`fill="${fill}" stroke="${stroke}" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"`;
+ const shine=`fill="none" stroke="${hi}" stroke-width="2.2" opacity=".72" stroke-linecap="round"`;
+ let body='';
+ if(type==='pawn') body=`<circle cx="50" cy="27" r="14" ${common}/><path d="M40 41 Q50 47 60 41 L66 76 Q50 84 34 76Z" ${common}/><path d="M29 78 Q50 70 71 78 L76 91 H24Z" ${common}/><path d="M35 91 H65 Q74 91 78 101 H22 Q26 91 35 91Z" ${common}/><path d="M43 22 Q49 17 56 21" ${shine}/>`;
+ else if(type==='rook') body=`<path d="M25 18 H38 V29 H47 V18 H57 V29 H66 V18 H78 V42 H22 V18Z" ${common}/><path d="M29 42 H71 L66 79 H34Z" ${common}/><path d="M27 79 H73 L78 91 H22Z" ${common}/><path d="M19 91 H81 L85 102 H15Z" ${common}/><path d="M31 48 L28 72" ${shine}/>`;
+ else if(type==='bishop') body=`<circle cx="50" cy="17" r="9" ${common}/><path d="M50 27 C30 38 29 58 40 70 L31 82 H69 L60 70 C71 58 70 38 50 27Z" ${common}/><path d="M47 34 L57 48" stroke="${stroke}" stroke-width="4" stroke-linecap="round"/><path d="M27 83 H73 L78 94 H22Z" ${common}/><path d="M18 94 H82 L86 104 H14Z" ${common}/><path d="M39 34 Q31 45 35 58" ${shine}/>`;
+ else if(type==='knight') body=`<path d="M28 87 Q30 70 39 59 Q47 49 42 39 L32 47 L35 31 Q49 15 68 23 Q78 28 79 42 Q68 37 61 39 Q72 52 67 66 Q63 76 55 87Z" ${common}/><path d="M30 87 H70 L78 99 H21Z" ${common}/><circle cx="62" cy="34" r="2.8" fill="${stroke}"/><path d="M42 28 Q53 22 64 27" ${shine}/>`;
+ else if(type==='queen') body=`<circle cx="24" cy="26" r="5" ${common}/><circle cx="42" cy="18" r="5" ${common}/><circle cx="58" cy="18" r="5" ${common}/><circle cx="76" cy="26" r="5" ${common}/><path d="M24 32 L34 70 H66 L76 32 L61 51 L50 27 L39 51Z" ${common}/><path d="M29 72 H71 L77 87 H23Z" ${common}/><path d="M18 89 H82 L86 102 H14Z" ${common}/><path d="M35 42 L39 63" ${shine}/>`;
+ else body=`<path d="M50 12 V31 M40 21 H60" stroke="${stroke}" stroke-width="5" stroke-linecap="round"/><path d="M50 30 C32 30 29 48 39 58 Q30 67 34 78 H66 Q70 67 61 58 C71 48 68 30 50 30Z" ${common}/><path d="M29 79 H71 L77 91 H23Z" ${common}/><path d="M18 92 H82 L86 103 H14Z" ${common}/><path d="M39 37 Q32 47 38 55" ${shine}/>`;
+ return `<svg class="minoo-piece-svg ${side}" viewBox="0 0 100 115" aria-hidden="true">${body}</svg>`;
 }
 function setupPieces(){
- const back=[['rook','♜'],['knight','♞'],['bishop','♝'],['queen','♛'],['king','♚'],['bishop','♝'],['knight','♞'],['rook','♜']],a=[];
- back.forEach(([type,p],c)=>a.push({id:`b8-${c}`,type,p,target:`${c},0`,side:'black'}));
- for(let c=0;c<8;c++)a.push({id:`b7-${c}`,type:'pawn',p:'♟',target:`${c},1`,side:'black'});
- for(let c=0;c<8;c++)a.push({id:`w2-${c}`,type:'pawn',p:'♟',target:`${c},6`,side:'white'});
- back.forEach(([type,p],c)=>a.push({id:`w1-${c}`,type,p,target:`${c},7`,side:'white'}));
+ const order=['rook','knight','bishop','queen','king','bishop','knight','rook'], a=[];
+ order.forEach((type,c)=>a.push({id:`b8-${c}`,type,target:`${c},0`,side:'black'}));
+ for(let c=0;c<8;c++)a.push({id:`b7-${c}`,type:'pawn',target:`${c},1`,side:'black'});
+ for(let c=0;c<8;c++)a.push({id:`w2-${c}`,type:'pawn',target:`${c},6`,side:'white'});
+ order.forEach((type,c)=>a.push({id:`w1-${c}`,type,target:`${c},7`,side:'white'}));
  return a;
 }
-function setupPieceName(x){return ({pawn:'Piyon',rook:'Kale',knight:'At',bishop:'Fil',queen:'Vezir',king:'Şah'})[x.type]||'Taş'}
+function setupPieceName(p){return ({rook:'Kale',knight:'At',bishop:'Fil',queen:'Vezir',king:'Şah',pawn:'Piyon'})[p.type]||''}
 function chessSetupGame(g){
- setupState={g,phase:'learn',placed:new Map(),pieces:setupPieces(),drag:null};
- const app=document.querySelector('#app');
+ setupState={g,phase:'learn',placed:new Map(),pieces:setupPieces(),selected:null};
  app.innerHTML=`<header class="chess-header"><button class="ghost" onclick="${teacherPreviewMode?'previewBack()':'studentDash()'}">← ${teacherPreviewMode?'Oyun Kütüphanesi':'Oyunlarım'}</button><b>♟️ ${esc(g.title||'Satranç Taşlarını Dizelim')}</b><span id="setupProgress">0 / 32</span></header>
- <main class="setup-world"><section class="setup-card">
- <div class="setup-guide"><div class="setup-mascot">🌱</div><div><h1>Satranç Taşlarını Dizelim</h1><p id="setupMessage">Önce taşları doğru yerlerine birlikte dizelim. Taşlara dokun; doğru karelerine kayarak yerleşsinler.</p></div></div>
- <div id="setupBoard"></div><div id="setupTray"></div><div id="setupActions"></div>
- </section></main>`;
+ <main class="setup-world"><section class="setup-card"><div class="setup-guide"><div class="setup-mascot">🌱</div><div><h1>Satranç Taşlarını Dizelim</h1><p id="setupMessage">Önce doğru dizilişi birlikte görelim.</p></div></div><div id="setupArea"></div><div class="setup-actions"><button id="setupStart" class="setup-start" hidden onclick="setupStartPlay()">▶ Oyuna Başla</button></div></section></main>`;
  renderSetup();
 }
 function setupBoardHtml(){
- let s='<div class="setup-board" aria-label="Satranç tahtası">';
- for(let r=0;r<8;r++)for(let c=0;c<8;c++){
-   const key=`${c},${r}`, placed=[...setupState.placed.values()].find(x=>(x.placedAt||x.target)===key);
-   s+=`<div class="setup-square ${(r+c)%2?'dark':'light'} ${r===0||r===1||r===6||r===7?'home':''}" data-square="${key}" ondragover="event.preventDefault()" ondrop="setupDrop(event,'${key}')">${placed?`<span class="setup-piece ${placed.side}" draggable="${setupState.phase==='play'}" ondragstart="setupDrag(event,'${placed.id}')" onclick="setupPieceClick('${placed.id}')">${minooPieceSvg(placed.type,placed.side)}</span>`:''}${c===0?`<small class="rank">${8-r}</small>`:''}${r===7?`<small class="file">${'abcdefgh'[c]}</small>`:''}</div>`;
- }
- return s+'</div>';
+ let h='<div class="setup-board">';
+ for(let r=0;r<8;r++)for(let c=0;c<8;c++){const key=`${c},${r}`,home=(r<=1||r>=6),p=setupState.placed.get(key);h+=`<div class="setup-square ${(r+c)%2?'dark':'light'} ${home?'home':''}" data-key="${key}" onclick="setupSquareClick('${key}')">${c===0?`<span class="rank">${8-r}</span>`:''}${r===7?`<span class="file">${'abcdefgh'[c]}</span>`:''}${p?`<button class="setup-piece ${p.side}" onclick="event.stopPropagation();setupBoardPieceClick('${p.id}')">${minooPieceSvg(p.type,p.side)}</button>`:''}</div>`}return h+'</div>';
+}
+function setupTrayHtml(side){
+ const remaining=setupState.pieces.filter(p=>p.side===side && ![...setupState.placed.values()].some(x=>x.id===p.id));
+ const groups=['rook','knight','bishop','queen','king','pawn'].map(type=>({type,items:remaining.filter(p=>p.type===type)})).filter(g=>g.items.length);
+ return `<aside class="setup-side ${side}"><h3>${side==='white'?'⚪ BEYAZ TAŞLAR':'⚫ SİYAH TAŞLAR'}</h3><div class="side-pieces">${groups.map(g=>{const p=g.items[0];return `<button class="tray-piece ${side} ${setupState.selected===p.id?'selected':''}" onclick="setupPieceClick('${p.id}')">${minooPieceSvg(p.type,p.side)}<small>${setupPieceName(p)}</small>${g.items.length>1?`<b class="piece-count">${g.items.length}</b>`:''}</button>`}).join('')||'<div class="tray-empty">✓ Tamam</div>'}</div></aside>`;
 }
 function renderSetup(){
- const board=document.querySelector('#setupBoard'),tray=document.querySelector('#setupTray'),actions=document.querySelector('#setupActions');if(!board)return;
- board.innerHTML=setupBoardHtml();const remaining=setupState.pieces.filter(x=>!setupState.placed.has(x.id));
- const trayHtml=side=>`<div class="${side}-tray"><p class="setup-side-title">${side==='white'?'⚪ BEYAZ TAŞLAR':'⚫ SİYAH TAŞLAR'}</p><div class="setup-tray ${setupState.phase}">${remaining.filter(x=>x.side===side).map(x=>`<button class="tray-piece ${x.side} ${setupState.drag===x.id?'selected':''}" draggable="${setupState.phase==='play'}" ondragstart="setupDrag(event,'${x.id}')" onclick="setupPieceClick('${x.id}')" title="${setupPieceName(x)}">${minooPieceSvg(x.type,x.side)}<small>${setupPieceName(x)}</small></button>`).join('')}</div></div>`;
- tray.innerHTML=`<div class="setup-trays ${setupState.phase}">${trayHtml('white')}${trayHtml('black')}</div>`;
- const card=document.querySelector('.setup-card');card?.classList.toggle('setup-play-layout',setupState.phase==='play');
- if(setupState.phase==='play'){const wt=tray.querySelector('.white-tray'),bt=tray.querySelector('.black-tray');if(wt&&bt&&board){card.append(wt);card.append(board);card.append(bt);tray.remove();}}
- document.querySelector('#setupProgress').textContent=`${setupState.placed.size} / 32`;
- if(setupState.phase==='learn')actions.innerHTML=setupState.placed.size===32?`<button class="setup-start" onclick="setupStartPlay()">▶ Oyuna Başla</button>`:`<p class="setup-tip">👆 Bir taşa dokun. Doğru yerine kayarak gitsin.</p>`;
- else actions.innerHTML=`<p class="setup-tip">👆 Taşa bir kez dokun, sonra doğru kareye dokun. İstersen sürükleyebilirsin.</p>`;
-}
-function setupPieceClick(id){
- const x=setupState.pieces.find(p=>p.id===id); if(!x)return;
+ const area=document.querySelector('#setupArea'); if(!area)return;
  if(setupState.phase==='learn'){
-   if(setupState.placed.has(id)||setupState.animating)return;
-   const key=setupAllowedTargets(x).find(k=>![...setupState.placed.values()].some(p=>p.target===k));if(!key)return;
-   setupState.animating=true;
-   const from=[...document.querySelectorAll('.tray-piece')].find(b=>b.getAttribute('onclick')?.includes(`'${id}'`)),to=document.querySelector(`[data-square="${key}"]`);
-   if(!from||!to){setupState.placed.set(id,{...x,placedAt:key});setupState.animating=false;renderSetup();return}
-   const a=from.getBoundingClientRect(),b=to.getBoundingClientRect(),x1=a.left+a.width/2,y1=a.top+a.height/2,x2=b.left+b.width/2,y2=b.top+b.height/2;
-   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('class','setup-learn-arrow');svg.innerHTML=`<defs><marker id="minooArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#f05a38"/></marker></defs><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#f05a38" stroke-width="7" stroke-linecap="round" stroke-dasharray="12 10" marker-end="url(#minooArrow)"/>`;document.body.appendChild(svg);
-   const fly=document.createElement('div');fly.className=`setup-flying-piece ${x.side}`;fly.innerHTML=minooPieceSvg(x.type,x.side);fly.style.left=(x1-24)+'px';fly.style.top=(y1-24)+'px';document.body.appendChild(fly);requestAnimationFrame(()=>fly.style.transform=`translate(${x2-x1}px,${y2-y1}px)`);
-   setTimeout(()=>{svg.remove();fly.remove();setupState.placed.set(id,{...x,placedAt:key});setupState.animating=false;setupPlaceSound();renderSetup();document.querySelector('#setupMessage').textContent=setupState.placed.size===32?'Harika! Taşların doğru dizilişini gördün. Hazırsan oyuna başlayalım!':`${setupPieceName(x)} okla gösterilen yerine yerleşti. Devam et!`;},650);
-   return;
- }
- if(setupState.placed.has(id)){
-   setupState.placed.delete(id); setupState.drag=id; renderSetup(); return;
- }
- setupState.drag=id; renderSetup();
- document.querySelectorAll('.tray-piece').forEach(b=>b.classList.remove('selected'));
- const btn=[...document.querySelectorAll('.tray-piece')].find(b=>b.getAttribute('onclick')?.includes(`'${id}'`));
- if(btn)btn.classList.add('selected');
- document.querySelector('#setupMessage').textContent=`${setupPieceName(x)} seçildi. Şimdi doğru kareye dokun.`;
+   area.innerHTML=`<div class="setup-learn-wrap">${setupBoardHtml()}<p class="setup-tip">Bir taşa dokun; doğru yerine gidişini görelim.</p><div class="learn-pool">${setupState.pieces.filter(p=>![...setupState.placed.values()].some(x=>x.id===p.id)).map(p=>`<button class="learn-chip ${p.side}" onclick="setupLearnPiece('${p.id}')">${minooPieceSvg(p.type,p.side)}</button>`).join('')}</div></div>`;
+ } else area.innerHTML=`<div class="setup-desktop-layout">${setupTrayHtml('white')}${setupBoardHtml()}${setupTrayHtml('black')}</div>`;
+ document.querySelector('#setupProgress').textContent=`${setupState.placed.size} / 32`;
 }
-function setupStartPlay(){
- setupState.phase='play'; setupState.placed.clear(); setupState.drag=null;
- setupState.pieces=setupShuffle(setupState.pieces);
- document.querySelector('#setupMessage').textContent='Taşlar karıştı! Şimdi hepsini doğru yerlerine sen diz.';
- renderSetup();
- document.querySelector('.setup-tray')?.classList.add('shuffle-pop');
+function setupLearnPiece(id){
+ const p=setupState.pieces.find(x=>x.id===id); if(!p)return;
+ const key=p.target; if(setupState.placed.has(key))return;
+ setupState.placed.set(key,p); setupPlaceSound(); renderSetup();
+ if(setupState.placed.size===32){document.querySelector('#setupMessage').textContent='Harika! Doğru dizilişi gördün. Şimdi sıra sende!';document.querySelector('#setupStart').hidden=false}
 }
-function setupShuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
-function setupDrag(ev,id){setupState.drag=id;try{ev.dataTransfer.setData('text/plain',id)}catch{}}
-function setupDrop(ev,key){ev.preventDefault();const id=setupState.drag||ev.dataTransfer?.getData('text/plain');setupTryPlace(id,key)}
-document.addEventListener('click',e=>{
- const sq=e.target.closest?.('.setup-square'); if(!sq||!setupState||setupState.phase!=='play'||!setupState.drag)return;
- if(e.target.closest('.setup-piece'))return;
- setupTryPlace(setupState.drag,sq.dataset.square);
-});
-
-function setupAllowedTargets(x){
- const row=x.side==='white'?7:0, pawnRow=x.side==='white'?6:1;
- if(x.type==='pawn')return Array.from({length:8},(_,c)=>`${c},${pawnRow}`);
- if(x.type==='rook')return [`0,${row}`,`7,${row}`];
- if(x.type==='knight')return [`1,${row}`,`6,${row}`];
- if(x.type==='bishop')return [`2,${row}`,`5,${row}`];
- return [x.target];
+function setupStartPlay(){setupState.phase='play';setupState.placed.clear();setupState.selected=null;document.querySelector('#setupStart').hidden=true;document.querySelector('#setupMessage').textContent='Bir taşa dokun, sonra tahtadaki doğru kareye dokun.';renderSetup()}
+function setupPieceClick(id){setupState.selected=setupState.selected===id?null:id;renderSetup()}
+function setupBoardPieceClick(id){
+ if(setupState.phase!=='play')return;
+ const entry=[...setupState.placed.entries()].find(([,p])=>p.id===id); if(!entry)return;
+ setupState.placed.delete(entry[0]); setupState.selected=id; renderSetup();
+}
+function setupSquareClick(key){if(setupState.phase==='play'&&setupState.selected)setupTryPlace(setupState.selected,key)}
+function setupAllowedTargets(p){
+ if(p.type==='pawn') return [...Array(8)].map((_,c)=>`${c},${p.side==='white'?6:1}`);
+ if(p.type==='rook') return p.side==='white'?['0,7','7,7']:['0,0','7,0'];
+ if(p.type==='knight') return p.side==='white'?['1,7','6,7']:['1,0','6,0'];
+ if(p.type==='bishop') return p.side==='white'?['2,7','5,7']:['2,0','5,0'];
+ return [p.target];
+}
+function setupTryPlace(id,key){
+ const p=setupState.pieces.find(x=>x.id===id); if(!p||setupState.placed.has(key))return;
+ if(!setupAllowedTargets(p).includes(key)){const sq=document.querySelector(`.setup-square[data-key="${key}"]`);sq?.classList.add('wrong');setTimeout(()=>sq?.classList.remove('wrong'),420);return}
+ setupState.placed.set(key,p); setupState.selected=null; setupPlaceSound(); renderSetup();
+ if(setupState.placed.size===32)setTimeout(setupWin,350);
 }
 function setupPlaceSound(){
- try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;const ctx=setupPlaceSound.ctx||(setupPlaceSound.ctx=new C()),now=ctx.currentTime,len=Math.floor(ctx.sampleRate*.05),buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);for(let i=0;i<len;i++){const t=i/ctx.sampleRate;d[i]=(Math.random()*2-1)*Math.exp(-t*65)}const src=ctx.createBufferSource(),f=ctx.createBiquadFilter(),g=ctx.createGain();f.type='bandpass';f.frequency.value=650;f.Q.value=.8;g.gain.setValueAtTime(.22,now);g.gain.exponentialRampToValueAtTime(.001,now+.055);src.buffer=buf;src.connect(f).connect(g).connect(ctx.destination);src.start(now)}catch{}
+ try{const C=window.AudioContext||window.webkitAudioContext,ctx=new C(),t=ctx.currentTime,b=ctx.createBuffer(1,ctx.sampleRate*.07,ctx.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/(ctx.sampleRate*.012));const src=ctx.createBufferSource(),f=ctx.createBiquadFilter(),g=ctx.createGain();src.buffer=b;f.type='lowpass';f.frequency.value=850;g.gain.setValueAtTime(.17,t);g.gain.exponentialRampToValueAtTime(.001,t+.07);src.connect(f).connect(g).connect(ctx.destination);src.start(t)}catch{}
 }
+function setupWin(){const g=setupState.g;modal(`<h2>Şahane! 🎉</h2><p>Satranç taşlarını doğru dizdin.</p><div class="big-star">⭐</div><div class="modal-actions"><button onclick="closeModal();${teacherPreviewMode?'previewFinished(g.title)':`completeGame(${g.assignment_id},'${encodeURIComponent(g.title)}')`}">Tamam</button></div>`)}
 
-function setupTryPlace(id,key){
- if(!id)return; const x=setupState.pieces.find(p=>p.id===id); if(!x)return;
- const occupied=[...setupState.placed.values()].some(p=>(p.placedAt||p.target)===key);
- const allowed=setupAllowedTargets(x);
- if(allowed.includes(key)&&!occupied){
-   x.target=key;
-   setupState.placed.set(id,x); setupState.drag=null; setupPlaceSound(); renderSetup();
-   document.querySelector('#setupMessage').textContent='Aferin! Doğru kare. Devam et. ⭐';
-   if(setupState.placed.size===32)setTimeout(setupWin,250);
- }else{
-   const sq=document.querySelector(`[data-square="${key}"]`); if(sq){sq.classList.add('wrong');setTimeout(()=>sq.classList.remove('wrong'),450)}
-   document.querySelector('#setupMessage').textContent=occupied?'Bu kare dolu 😊 Başka doğru kareyi seç.':'Bir daha düşün 😊 Bu taşın yeri başka bir kare.';
- }
-}
-async function setupWin(){
- playChessCelebration();
- if(!teacherPreviewMode && setupState.g.assignment_id){try{await api(`/api/assignments/${setupState.g.assignment_id}/complete`,{method:'POST'})}catch{}}
- modal(`<h2>🎉 Harika!</h2><p>Tüm satranç taşlarını doğru şekilde dizdin!</p><p><b>Artık satranç tahtasını hazırlayabiliyorsun. ♟️</b></p><div class="modal-actions"><button class="ghost" onclick="closeModal();chessSetupGame(setupState.g)">↻ Tekrar Oyna</button><button onclick="closeModal();${teacherPreviewMode?'previewBack()':'studentDash()'}">⌂ ${teacherPreviewMode?'Oyun Kütüphanesi':'Oyunlarım'}</button></div>`);
-}
-
-const CHESS_PIECES=[
-{name:'Kale',symbol:'♜',tone:'blue',short:'Düz yolların ustasıyım!',speech:'Merhaba! Ben Kale. Dikey ve yatay yönlerde istediğim kadar ilerleyebilirim. Taş alırken de düz yolları kullanırım.',dirs:['up','right','down','left'],note:'Dikey ve yatay gider.'},
-{name:'At',symbol:'♞',tone:'peach',short:'L şeklinde sıçrarım!',speech:'Merhaba! Ben At. İki kare bir yöne, sonra bir kare yana giderim. Hareketim L harfine benzer. Üstelik diğer taşların üzerinden atlayabilirim.',dirs:['knight'],note:'L şeklinde gider ve taşların üzerinden atlayabilir.'},
-{name:'Fil',symbol:'●',tone:'lilac',short:'Çapraz yollar benim!',speech:'Merhaba! Ben Fil. Her zaman çapraz yönlerde istediğim kadar ilerlerim. Taş alırken de çapraz giderim.',dirs:['ne','se','sw','nw'],note:'Her yöne çapraz gider.'},
-{name:'Vezir',symbol:'♛',tone:'pink',short:'Her yöne gidebilirim!',speech:'Merhaba! Ben Vezir. Yatay, dikey ve çapraz yönlerde istediğim kadar ilerleyebilirim. Taş alırken de bu yönleri kullanırım.',dirs:['up','ne','right','se','down','sw','left','nw'],note:'Yatay, dikey ve çapraz gider.'},
-{name:'Şah',symbol:'♚',tone:'mint',short:'Bir kare, her yöne!',speech:'Merhaba! Ben Şah. Her yöne gidebilirim ama yalnızca bir kare ilerlerim. Ben çok önemliyim. Rakibin beni kaçamayacağım şekilde tehdit etmesine şah mat denir.',dirs:['king'],note:'Her yöne yalnızca bir kare gider.'},
-{name:'Piyon',symbol:'♟',tone:'melon',short:'İleri gider, çapraz alırım!',speech:'Merhaba! Ben Piyon. Düz yönde ilerlerim. İlk hamlemde bir ya da iki kare, sonraki hamlelerde bir kare gidebilirim. Taş alırken bir kare çapraza giderim ve asla geri gitmem. Son sıraya ulaşırsam terfi edebilirim.',dirs:['pawn'],note:'İleri gider; taş alırken çapraz gider.'}
-];
 function chessPieceVisual(p){
  if(p.name==='Fil')return `<svg class="bishop-svg" viewBox="0 0 100 120" role="img" aria-label="Fil"><circle cx="50" cy="15" r="10" fill="currentColor"/><path d="M50 26 C31 38 28 57 39 70 L29 89 H71 L61 70 C72 57 69 38 50 26Z" fill="currentColor"/><rect x="24" y="90" width="52" height="11" rx="5" fill="currentColor"/><rect x="17" y="103" width="66" height="10" rx="5" fill="currentColor"/></svg>`;
  return `<span class="chess-glyph">${p.symbol}</span>`
@@ -333,7 +279,7 @@ function chessArrows(){return ''}
 function openChessPiece(i,aid,title){const p=CHESS_PIECES[i],home=document.querySelector('#chessHome'),lesson=document.querySelector('#chessLesson');home.hidden=true;lesson.hidden=false;lesson.innerHTML=`<div class="lesson-top"><button class="round-back" onclick="closeChessPiece()">←</button><button class="ghost" onclick="openChessPiece(${(i+5)%6},${aid},'${title}')">← Önceki</button><div class="lesson-title ${p.tone}">${p.name} <small>${i+1}/6</small></div><button class="sound-btn" onclick="speakChess(${i})" aria-label="Dinle">🔊</button><button class="ghost" onclick="openChessPiece(${(i+1)%6},${aid},'${title}')">Sonraki →</button></div><div class="lesson-body"><div class="lesson-character ${p.tone}"><span>${chessPieceVisual(p)}</span><b>Merhaba! Ben ${p.name}!</b><p>${p.short}</p></div><div class="board-zone">${chessBoard(p)}<p class="movement-note">${p.note}</p></div><div class="speech-card ${p.tone}"><p>${p.speech}</p><button onclick="replayChess(${i})">▶ Hareketi tekrar göster</button></div></div>`;setTimeout(()=>lesson.classList.add('play'),30);markChessSeen(i,aid,title)}
 function closeChessPiece(){const l=document.querySelector('#chessLesson');if(l){l.classList.remove('play');l.hidden=true}document.querySelector('#chessHome').hidden=false}
 function replayChess(i){const l=document.querySelector('#chessLesson');l.classList.remove('play');void l.offsetWidth;l.classList.add('play');speakChess(i)}
-function speakChess(i){if(!('speechSynthesis' in window))return notify('Bu cihazda sesli okuma desteklenmiyor.');speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(CHESS_PIECES[i].speech);u.lang='tr-TR';u.rate=.82;u.pitch=1.0;const voices=speechSynthesis.getVoices().filter(v=>/^tr/i.test(v.lang||''));u.voice=voices.find(v=>/premium|enhanced|natural/i.test(v.name))||voices[0]||null;speechSynthesis.speak(u)}
+function speakChess(i){if(!('speechSynthesis' in window))return notify('Bu cihazda sesli okuma desteklenmiyor.');speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(CHESS_PIECES[i].speech);u.lang='tr-TR';u.rate=.9;u.pitch=1.2;speechSynthesis.speak(u)}
 
 function playChessCelebration(){
  try{
