@@ -45,10 +45,10 @@ function notify(msg){let t=document.querySelector('#toast');if(!t){t=document.cr
 function modal(html){closeModal();const d=document.createElement('div');d.id='modal';d.className='modal';d.innerHTML=`<div class="modal-card">${html}</div>`;d.onclick=e=>{if(e.target===d)closeModal()};document.body.appendChild(d)}
 function closeModal(){document.querySelector('#modal')?.remove()}
 const avatar=(s,size='')=>s.photo_data?`<img class="avatar ${size}" src="${s.photo_data}" alt="">`:`<div class="avatar placeholder ${size}">🌱</div>`;
-function home(){teacherPass='';studentSession=null;currentClass=null;app.innerHTML=`<main class="center"><div class="logo">Minoo <span>v2.5.0</span></div><p class="tag">Oyna • Keşfet • Öğren</p><section class="card"><h2>Öğrenci girişi</h2><div class="login-grid"><input id="suser" placeholder="Kullanıcı adı" autocomplete="username"><input id="scode" type="password" placeholder="İlk giriş kodu / şifre" autocomplete="current-password" onkeydown="if(event.key==='Enter')studentLogin()"><button onclick="studentLogin()">Giriş yap</button></div></section><button class="link" onclick="teacherLogin()">Öğretmen girişi</button><p class="safe">Reklamsız • Sohbetsiz • Öğretmen kontrollü</p></main>`}
+function home(){teacherPass='';studentSession=null;currentClass=null;app.innerHTML=`<main class="center"><div class="logo">Minoo <span>v2.5.1</span></div><p class="tag">Oyna • Keşfet • Öğren</p><section class="card"><h2>Öğrenci girişi</h2><div class="login-grid"><input id="suser" placeholder="Kullanıcı adı" autocomplete="username"><input id="scode" type="password" placeholder="İlk giriş kodu / şifre" autocomplete="current-password" onkeydown="if(event.key==='Enter')studentLogin()"><button onclick="studentLogin()">Giriş yap</button></div></section><button class="link" onclick="teacherLogin()">Öğretmen girişi</button><p class="safe">Reklamsız • Sohbetsiz • Öğretmen kontrollü</p></main>`}
 function teacherLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="home()">← Geri</button><div class="logo">Minoo <span>Öğretmen</span></div><p class="tag">Öğretmen paneline güvenli giriş</p><section class="card login-card"><h2>Öğretmen Girişi</h2><label for="tp">Şifre</label><input id="tp" type="password" placeholder="Şifrenizi girin" autocomplete="current-password" autofocus onkeydown="if(event.key==='Enter')doTeacherLogin()"><button class="login-btn" onclick="doTeacherLogin()">Giriş yap</button></section></main>`}
 async function doTeacherLogin(){const p=document.querySelector('#tp').value;if(!p)return;try{teacherPass=p;await api('/api/teacher/login',{method:'POST',body:JSON.stringify({password:p})});closeModal();dashboard()}catch(e){teacherPass='';notify(e.message)}}
-async function dashboard(){const cs=await api('/api/classes');app.innerHTML=`<header><div><b>Minoo Öğretmen</b><small>v2.5.0</small></div><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="toolbar"><h1>Sınıflarım</h1><button onclick="addClass()">+ Sınıf</button></div><div class="grid">${cs.map(c=>`<article class="card"><h3>${esc(c.name)}</h3><p>${c.student_count} öğrenci</p><button onclick="openClass(${c.id})">Aç</button><div class="row"><button class="ghost" onclick="renameClass(${c.id},'${encodeURIComponent(c.name)}')">Adını değiştir</button><button class="danger ghost" onclick="deleteClass(${c.id},'${encodeURIComponent(c.name)}')">Sil</button></div></article>`).join('')}</div><hr><div class="toolbar"><h2>Oyun Kütüphanesi</h2><button onclick="gameForm()">+ Oyun ekle</button></div><div id="library"></div></main>`;loadLibrary()}
+async function dashboard(){const cs=await api('/api/classes');app.innerHTML=`<header><div><b>Minoo Öğretmen</b><small>v2.5.1</small></div><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="toolbar"><h1>Sınıflarım</h1><button onclick="addClass()">+ Sınıf</button></div><div class="grid">${cs.map(c=>`<article class="card"><h3>${esc(c.name)}</h3><p>${c.student_count} öğrenci</p><button onclick="openClass(${c.id})">Aç</button><div class="row"><button class="ghost" onclick="renameClass(${c.id},'${encodeURIComponent(c.name)}')">Adını değiştir</button><button class="danger ghost" onclick="deleteClass(${c.id},'${encodeURIComponent(c.name)}')">Sil</button></div></article>`).join('')}</div><hr><div class="toolbar"><h2>Oyun Kütüphanesi</h2><button onclick="gameForm()">+ Oyun ekle</button></div><div id="library"></div></main>`;loadLibrary()}
 async function loadLibrary(){const gs=await api('/api/games'),el=document.querySelector('#library');el.innerHTML=gs.length?`<div class="grid">${gs.map(g=>`<article class="card"><h3>${esc(g.title)}</h3><p>${g.game_type==='matching'?'🧩 Minoo Eşleştirme':g.game_type==='chess_intro'?'♟️ Satranç Taşlarını Tanı':g.game_type==='chess_names'?'🔊 Satranç Taşlarının İsimleri':g.game_type==='chess_setup'?'♟️ Satranç Taşlarını Dizelim':'🔗 Canva oyunu'}</p><p>${g.completed_count||0}/${g.assigned_count||0} tamamlandı</p><div class="row"><button class="ghost" onclick="teacherPreviewEncoded('${encodeURIComponent(JSON.stringify(g))}')">▶ Oyunu oyna</button><button onclick="gameForm(${g.id},'${encodeURIComponent(g.title)}','${encodeURIComponent(g.canva_url||'')}','${g.game_type||'external'}','${encodeURIComponent(g.game_data||'') }')">Düzenle</button><button class="danger ghost" onclick="deleteGame(${g.id},'${encodeURIComponent(g.title)}')">Sil</button></div></article>`).join('')}</div>`:'<p>Henüz oyun yok.</p>'}
 function addClass(){modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>Yeni sınıf</h2><label>Sınıf adı</label><input id="cn" autofocus><div class="modal-actions"><button class="ghost" onclick="closeModal()">Vazgeç</button><button onclick="saveClass()">Oluştur</button></div>`)}
 async function saveClass(){const name=document.querySelector('#cn').value.trim();if(!name)return;try{await api('/api/classes',{method:'POST',body:JSON.stringify({name})});closeModal();dashboard()}catch(e){notify(e.message)}}
@@ -149,7 +149,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 @media(max-width:760px){.setup-desktop-layout{grid-template-columns:1fr 1fr;gap:8px}.setup-desktop-layout .setup-board{grid-column:1/-1;grid-row:1;width:min(94vw,500px)!important}.setup-side{min-height:0;padding:8px}.setup-side.white{grid-column:1;grid-row:2}.setup-side.black{grid-column:2;grid-row:2}.side-pieces{grid-template-columns:repeat(3,1fr);gap:5px}.tray-piece .minoo-piece-svg{width:38px;height:46px}.setup-side h3{font-size:11px}.learn-pool{grid-template-columns:repeat(8,1fr);gap:3px}.learn-chip .minoo-piece-svg{width:29px;height:36px}}
 </style>`);
 
-/* ===== Minoo v2.5.0 • Satranç Taşlarını Dizelim ===== */
+/* ===== Minoo v2.5.1 • Satranç Taşlarını Dizelim ===== */
 let setupState=null;
 
 function minooPieceSvg(type,side){
@@ -300,7 +300,7 @@ function chessPieceVisual(p){
  return `<span class="chess-glyph">${p.symbol}</span>`
 }
 
-/* ===== Minoo v2.5.0 • Satranç Taşlarının İsimleri ===== */
+/* ===== Minoo v2.5.1 • Satranç Taşlarının İsimleri ===== */
 function chessNamesGame(g){
  window._chessNamesState={g,heard:new Set()};
  app.innerHTML=`<header class="chess-header"><button class="ghost" onclick="${teacherPreviewMode?'previewBack()':'studentDash()'}">← ${teacherPreviewMode?'Oyun Kütüphanesi':'Oyunlarım'}</button><b>🔊 ${esc(g.title||'Satranç Taşlarının İsimleri')}</b><span id="chessNamesProgress">0 / 6 dinlendi</span></header>
@@ -435,7 +435,7 @@ document.head.insertAdjacentHTML('beforeend', `<style id="minoo243-final">
 </style>`);
 document.head.insertAdjacentHTML('beforeend', `<style id="minoo248">@keyframes minooArrowFlow248{to{stroke-dashoffset:-36}}.setup-arrow-layer line{filter:drop-shadow(0 3px 4px rgba(94,75,190,.20));animation:minooArrowFlow248 .7s linear infinite}</style>`);
 
-/* v2.5.0 — Satranç Taşlarını Dizelim: seçili taş kutusu vurgusu */
+/* v2.5.1 — Satranç Taşlarını Dizelim: seçili taş kutusu vurgusu */
 document.head.insertAdjacentHTML('beforeend', `<style id="minoo249-selected-piece">
 .setup-piece.minoo-selected-piece,
 .setup-piece.selected,
@@ -477,15 +477,15 @@ document.addEventListener('click',function(e){
 
 document.head.insertAdjacentHTML('beforeend', `<style id="minoo250-selection">
 .tray-piece.selected{
- background:#dff6e5 !important;
- border:3px solid #55ad70 !important;
- box-shadow:0 0 0 4px rgba(85,173,112,.18),0 8px 20px rgba(55,120,72,.16) !important;
+ background:#b9d7ff !important;
+ border:4px solid #1557b0 !important;
+ box-shadow:0 0 0 5px rgba(21,87,176,.28),0 8px 22px rgba(14,54,120,.28) !important;
  transform:translateY(-2px) scale(1.025);
 }
 .tray-piece.selected::after{
  content:"✓";
  position:absolute;top:5px;right:6px;width:23px;height:23px;border-radius:50%;
- display:grid;place-items:center;background:#55ad70;color:#fff;font-weight:900;font-size:14px;
+ display:grid;place-items:center;background:#1557b0;color:#fff;font-weight:900;font-size:14px;
  box-shadow:0 2px 5px rgba(0,0,0,.15)
 }
 .tray-piece{position:relative}
