@@ -1,6 +1,29 @@
 
 (function(){
  const s=document.createElement('style');s.textContent=`
+ .setup-world{min-height:100vh;padding:18px;background:linear-gradient(180deg,#e9f8ff,#f2fff4)}
+ .setup-card{max-width:900px;margin:auto;background:rgba(255,255,255,.8);border-radius:28px;padding:18px;box-shadow:0 14px 40px rgba(55,90,110,.12)}
+ .setup-guide{display:flex;align-items:center;gap:14px;margin-bottom:12px}.setup-guide h1{margin:0;color:#7048c7}.setup-guide p{margin:5px 0;font-weight:700;color:#31506b}
+ .setup-mascot{font-size:42px;background:#d9f8df;width:66px;height:66px;border-radius:50%;display:grid;place-items:center}
+ .setup-board{width:min(92vw,560px);aspect-ratio:1;margin:10px auto;display:grid;grid-template-columns:repeat(8,1fr);border:8px solid #c99b65;border-radius:14px;overflow:hidden;box-shadow:0 8px 22px rgba(70,50,30,.16)}
+ .setup-square{position:relative;display:grid;place-items:center;min-width:0}.setup-square.light{background:#f7e6c8}.setup-square.dark{background:#b98f68}.setup-square.home:empty:after{content:'';width:62%;height:62%;border:2px dashed rgba(60,50,40,.35);border-radius:8px}
+ .setup-square .rank,.setup-square .file{position:absolute;font-size:10px;font-weight:900;opacity:.65}.setup-square .rank{left:3px;top:2px}.setup-square .file{right:3px;bottom:1px}
+ .setup-piece,.tray-piece{font-family:"Times New Roman",serif;line-height:1}.setup-piece{font-size:clamp(30px,7vw,55px);cursor:pointer;z-index:2;text-shadow:0 1px 0 white}.setup-piece.white,.tray-piece.white{color:#fff;-webkit-text-stroke:1.3px #313131}.setup-piece.black,.tray-piece.black{color:#1e1e1e}
+ .setup-tray{max-width:760px;margin:16px auto;display:flex;flex-wrap:wrap;justify-content:center;gap:7px;padding:12px;border-radius:18px;background:#f7f0ff}
+ .tray-piece{border:2px solid transparent;background:#fff;border-radius:12px;padding:7px 8px;font-size:34px;min-width:49px;box-shadow:0 3px 9px rgba(60,60,80,.09);cursor:pointer}.tray-piece small{display:block;font:700 9px system-ui;color:#53606c;margin-top:4px;-webkit-text-stroke:0}
+ .tray-piece.selected{border-color:#7b61d1;transform:translateY(-3px);box-shadow:0 7px 15px rgba(90,70,180,.2)}
+ .setup-actions{text-align:center}.setup-start{font-size:20px;padding:15px 34px;border-radius:999px;background:linear-gradient(180deg,#52d67c,#20ae58);color:#fff;font-weight:900;border:0;box-shadow:0 8px 18px rgba(30,160,80,.25)}
+ .setup-tip{font-weight:800;color:#635083}.setup-square.wrong{animation:setupWrong .4s}.slide-in{animation:setupSlide .45s}.shuffle-pop{animation:setupShuffle .55s}
+ @keyframes setupWrong{25%,75%{transform:translateX(-5px)}50%{transform:translateX(5px);background:#f4aaa5}}
+ @keyframes setupSlide{from{transform:translateY(35px) scale(.7);opacity:.2}to{transform:none;opacity:1}}
+ @keyframes setupShuffle{0%{transform:scale(.9);opacity:.2}60%{transform:scale(1.03)}100%{transform:none;opacity:1}}
+ @media(max-width:620px){.setup-card{padding:10px;border-radius:18px}.setup-guide h1{font-size:22px}.setup-guide p{font-size:13px}.setup-mascot{width:48px;height:48px;font-size:30px}.tray-piece{font-size:27px;min-width:41px;padding:6px}.setup-board{border-width:5px}}
+ `;document.head.appendChild(s)
+})();
+
+
+(function(){
+ const s=document.createElement('style');s.textContent=`
  .bishop-svg{width:72px;height:86px;color:currentColor;display:block;margin:auto}
  .piece-tile.lilac .bishop-svg,.lesson-character.lilac .bishop-svg{color:#a98bd5}
  .chess-piece-grid .piece-tile em{display:block!important;margin-top:8px;font-style:normal;font-weight:800;opacity:.78}
@@ -21,10 +44,10 @@ function notify(msg){let t=document.querySelector('#toast');if(!t){t=document.cr
 function modal(html){closeModal();const d=document.createElement('div');d.id='modal';d.className='modal';d.innerHTML=`<div class="modal-card">${html}</div>`;d.onclick=e=>{if(e.target===d)closeModal()};document.body.appendChild(d)}
 function closeModal(){document.querySelector('#modal')?.remove()}
 const avatar=(s,size='')=>s.photo_data?`<img class="avatar ${size}" src="${s.photo_data}" alt="">`:`<div class="avatar placeholder ${size}">🌱</div>`;
-function home(){teacherPass='';studentSession=null;currentClass=null;app.innerHTML=`<main class="center"><div class="logo">Minoo <span>v2.1.2</span></div><p class="tag">Oyna • Keşfet • Öğren</p><section class="card"><h2>Öğrenci girişi</h2><input id="scode" placeholder="MIN-XXXXXX" autocomplete="off"><button onclick="studentLogin()">Giriş yap</button></section><button class="link" onclick="teacherLogin()">Öğretmen girişi</button><p class="safe">Reklamsız • Sohbetsiz • Öğretmen kontrollü</p></main>`}
+function home(){teacherPass='';studentSession=null;currentClass=null;app.innerHTML=`<main class="center"><div class="logo">Minoo <span>v2.2</span></div><p class="tag">Oyna • Keşfet • Öğren</p><section class="card"><h2>Öğrenci girişi</h2><input id="scode" placeholder="MIN-XXXXXX" autocomplete="off"><button onclick="studentLogin()">Giriş yap</button></section><button class="link" onclick="teacherLogin()">Öğretmen girişi</button><p class="safe">Reklamsız • Sohbetsiz • Öğretmen kontrollü</p></main>`}
 function teacherLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="home()">← Geri</button><div class="logo">Minoo <span>Öğretmen</span></div><p class="tag">Öğretmen paneline güvenli giriş</p><section class="card login-card"><h2>Öğretmen Girişi</h2><label for="tp">Şifre</label><input id="tp" type="password" placeholder="Şifrenizi girin" autocomplete="current-password" autofocus onkeydown="if(event.key==='Enter')doTeacherLogin()"><button class="login-btn" onclick="doTeacherLogin()">Giriş yap</button></section></main>`}
 async function doTeacherLogin(){const p=document.querySelector('#tp').value;if(!p)return;try{teacherPass=p;await api('/api/teacher/login',{method:'POST',body:JSON.stringify({password:p})});closeModal();dashboard()}catch(e){teacherPass='';notify(e.message)}}
-async function dashboard(){const cs=await api('/api/classes');app.innerHTML=`<header><div><b>Minoo Öğretmen</b><small>v2.1.2</small></div><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="toolbar"><h1>Sınıflarım</h1><button onclick="addClass()">+ Sınıf</button></div><div class="grid">${cs.map(c=>`<article class="card"><h3>${esc(c.name)}</h3><p>${c.student_count} öğrenci</p><button onclick="openClass(${c.id})">Aç</button><div class="row"><button class="ghost" onclick="renameClass(${c.id},'${encodeURIComponent(c.name)}')">Adını değiştir</button><button class="danger ghost" onclick="deleteClass(${c.id},'${encodeURIComponent(c.name)}')">Sil</button></div></article>`).join('')}</div><hr><div class="toolbar"><h2>Oyun Kütüphanesi</h2><button onclick="gameForm()">+ Oyun ekle</button></div><div id="library"></div></main>`;loadLibrary()}
+async function dashboard(){const cs=await api('/api/classes');app.innerHTML=`<header><div><b>Minoo Öğretmen</b><small>v2.2</small></div><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="toolbar"><h1>Sınıflarım</h1><button onclick="addClass()">+ Sınıf</button></div><div class="grid">${cs.map(c=>`<article class="card"><h3>${esc(c.name)}</h3><p>${c.student_count} öğrenci</p><button onclick="openClass(${c.id})">Aç</button><div class="row"><button class="ghost" onclick="renameClass(${c.id},'${encodeURIComponent(c.name)}')">Adını değiştir</button><button class="danger ghost" onclick="deleteClass(${c.id},'${encodeURIComponent(c.name)}')">Sil</button></div></article>`).join('')}</div><hr><div class="toolbar"><h2>Oyun Kütüphanesi</h2><button onclick="gameForm()">+ Oyun ekle</button></div><div id="library"></div></main>`;loadLibrary()}
 async function loadLibrary(){const gs=await api('/api/games'),el=document.querySelector('#library');el.innerHTML=gs.length?`<div class="grid">${gs.map(g=>`<article class="card"><h3>${esc(g.title)}</h3><p>${g.game_type==='matching'?'🧩 Minoo Eşleştirme':g.game_type==='chess_intro'?'♟️ Satranç Taşlarını Tanı':'🔗 Canva oyunu'}</p><p>${g.completed_count||0}/${g.assigned_count||0} tamamlandı</p><div class="row"><button class="ghost" onclick="teacherPreviewEncoded('${encodeURIComponent(JSON.stringify(g))}')">▶ Oyunu oyna</button><button onclick="gameForm(${g.id},'${encodeURIComponent(g.title)}','${encodeURIComponent(g.canva_url||'')}','${g.game_type||'external'}','${encodeURIComponent(g.game_data||'') }')">Düzenle</button><button class="danger ghost" onclick="deleteGame(${g.id},'${encodeURIComponent(g.title)}')">Sil</button></div></article>`).join('')}</div>`:'<p>Henüz oyun yok.</p>'}
 function addClass(){modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>Yeni sınıf</h2><label>Sınıf adı</label><input id="cn" autofocus><div class="modal-actions"><button class="ghost" onclick="closeModal()">Vazgeç</button><button onclick="saveClass()">Oluştur</button></div>`)}
 async function saveClass(){const name=document.querySelector('#cn').value.trim();if(!name)return;try{await api('/api/classes',{method:'POST',body:JSON.stringify({name})});closeModal();dashboard()}catch(e){notify(e.message)}}
@@ -101,11 +124,109 @@ function previewBack(){teacherPreviewMode=false;dashboard()}
 async function studentLogin(){const code=document.querySelector('#scode').value.trim().toUpperCase();try{studentSession=await api('/api/student/login',{method:'POST',body:JSON.stringify({code})});studentDash()}catch(e){notify(e.message)}}
 async function studentDash(){const [gs,notes]=await Promise.all([api(`/api/student/${studentSession.id}/games`),api(`/api/student/${studentSession.id}/parent-notes`)]);app.innerHTML=`<header><div class="kid-head">${avatar(studentSession)}<div><b>Merhaba ${esc(studentSession.name)} 👋</b><small>${esc(studentSession.class_name)}</small></div></div><button class="ghost" onclick="home()">Çıkış</button></header><main class="kid">${notes.length?`<section class="parent-notes-kid"><h2>💌 Öğretmeninden Not</h2>${notes.map(n=>`<article><small>${formatDate(n.created_at)}</small><p>${esc(n.note)}</p></article>`).join('')}</section>`:''}<h1>Oyunlarım</h1><p>Bugün keşfedecek harika oyunların var!</p><div class="grid">${gs.map(g=>`<article class="game ${g.completed_at?'done':''}"><h2>${esc(g.title)}</h2><p>${g.game_type==='matching'?'🧩 Minoo Eşleştirme':g.game_type==='chess_intro'?'♟️ Satranç Taşlarını Tanı':'🎨 Canva oyunu'}</p><p>${g.completed_at?'✅ Tamamladın':'🌱 Seni bekliyor'}</p><button onclick="playEncoded('${encodeURIComponent(JSON.stringify(g))}')">${g.completed_at?'Tekrar oyna':'Oyunu aç'}</button></article>`).join('')||'<div class="card"><h2>Şimdilik oyun yok 🌼</h2><p>Öğretmenin yeni oyun eklediğinde burada görünecek.</p></div>'}</div></main>`}
 function playEncoded(v){playGame(JSON.parse(decodeURIComponent(v)))}
-function playGame(g){if(g.game_type==='matching')return matchingGame(g);if(g.game_type==='chess_intro')return chessIntroGame(g);play(g.assignment_id,encodeURIComponent(g.canva_url))}
+function playGame(g){if(g.game_type==='matching')return matchingGame(g);if(g.game_type==='chess_intro')return chessIntroGame(g);if(g.game_type==='chess_setup')return chessSetupGame(g);play(g.assignment_id,encodeURIComponent(g.canva_url))}
 async function play(aid,u){window.open(decodeURIComponent(u),'_blank','noopener,noreferrer');modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>Oyunu bitirdin mi? 🌟</h2><p>Oyunu tamamladıysan aşağıdaki düğmeye bas.</p><div class="modal-actions"><button class="ghost" onclick="closeModal()">Daha bitirmedim</button><button onclick="completeGame(${aid})">Tamamladım ✓</button></div>`)}
 function matchingGame(g){let data={pairs:[]};try{data=JSON.parse(g.game_data||'{}')}catch{}const pairs=data.pairs||[];const cards=[];pairs.forEach((p,i)=>{cards.push({pair:i,text:p[0]}),cards.push({pair:i,text:p[1]})});for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]]}app.innerHTML=`<header><button class="ghost" onclick="${teacherPreviewMode?'previewBack()':'studentDash()'}">← ${teacherPreviewMode?'Oyun Kütüphanesi':'Oyunlarım'}</button><b>${esc(g.title)}</b><span></span></header><main class="matching-wrap"><div class="matching-top"><div><h1>🧩 Eşlerini bul!</h1><p>Birbirine ait iki karta sırayla dokun.</p></div><b id="matchScore">0 / ${pairs.length}</b></div><div id="matchBoard" class="match-board">${cards.map((c,i)=>`<button class="match-card" data-i="${i}" data-pair="${c.pair}" type="button"><span>?</span><b>${esc(c.text)}</b></button>`).join('')}</div><p id="matchMessage" class="match-message" aria-live="polite"></p></main>`;let first=null,lock=false,done=0;const board=document.querySelector('#matchBoard');board.addEventListener('click',e=>{const btn=e.target.closest('.match-card');if(!btn||lock||btn.classList.contains('matched')||btn===first)return;btn.classList.add('open');if(!first){first=btn;return}if(first.dataset.pair===btn.dataset.pair){first.classList.add('matched');btn.classList.add('matched');first=null;done++;document.querySelector('#matchScore').textContent=`${done} / ${pairs.length}`;document.querySelector('#matchMessage').textContent='Harika! Bir eş buldun 🌟';if(done===pairs.length)setTimeout(()=>teacherPreviewMode?previewFinished(g.title):matchingFinished(g.assignment_id,g.title),500)}else{lock=true;document.querySelector('#matchMessage').textContent='Bir daha deneyelim 🌱';const old=first;first=null;setTimeout(()=>{old.classList.remove('open');btn.classList.remove('open');lock=false},700)}})}
 function previewFinished(title){modal(`<h2>Önizleme tamamlandı 🎉</h2><p><b>${esc(title)}</b> öğretmen önizlemesinde tamamlandı.</p><p class="hint">Bu deneme hiçbir öğrencinin ilerleme kaydını değiştirmedi.</p><div class="modal-actions"><button onclick="closeModal();previewBack()">Oyun Kütüphanesine dön</button></div>`)}
 async function matchingFinished(aid,title){try{await api(`/api/assignments/${aid}/complete`,{method:'POST'});modal(`<h2>Harika! 🎉</h2><p><b>${esc(title)}</b> oyununu tamamladın.</p><p class="big-star">⭐</p><div class="modal-actions"><button onclick="closeModal();studentDash()">Oyunlarıma dön</button></div>`)}catch(e){notify(e.message)}}
+
+
+/* ===== Minoo v2.2 • Satranç Taşlarını Dizelim ===== */
+const SETUP_BACK = ['♜','♞','♝','♛','♚','♝','♞','♜'];
+const SETUP_WHITE = ['♖','♘','♗','♕','♔','♗','♘','♖'];
+const SETUP_NAMES = {'♜':'Kale','♞':'At','♝':'Fil','♛':'Vezir','♚':'Şah','♟':'Piyon','♖':'Kale','♘':'At','♗':'Fil','♕':'Vezir','♔':'Şah','♙':'Piyon'};
+let setupState=null;
+
+function setupPieces(){
+ const a=[];
+ SETUP_BACK.forEach((p,c)=>a.push({id:`b8-${c}`,p,target:`${c},0`,side:'black'}));
+ for(let c=0;c<8;c++)a.push({id:`b7-${c}`,p:'♟',target:`${c},1`,side:'black'});
+ for(let c=0;c<8;c++)a.push({id:`w2-${c}`,p:'♙',target:`${c},6`,side:'white'});
+ SETUP_WHITE.forEach((p,c)=>a.push({id:`w1-${c}`,p,target:`${c},7`,side:'white'}));
+ return a;
+}
+function chessSetupGame(g){
+ setupState={g,phase:'learn',placed:new Map(),pieces:setupPieces(),drag:null};
+ const app=document.querySelector('#app');
+ app.innerHTML=`<header class="chess-header"><button class="ghost" onclick="${teacherPreviewMode?'previewBack()':'studentDash()'}">← ${teacherPreviewMode?'Oyun Kütüphanesi':'Oyunlarım'}</button><b>♟️ ${esc(g.title||'Satranç Taşlarını Dizelim')}</b><span id="setupProgress">0 / 32</span></header>
+ <main class="setup-world"><section class="setup-card">
+ <div class="setup-guide"><div class="setup-mascot">🌱</div><div><h1>Satranç Taşlarını Dizelim</h1><p id="setupMessage">Önce taşları doğru yerlerine birlikte dizelim. Taşlara dokun; doğru karelerine kayarak yerleşsinler.</p></div></div>
+ <div id="setupBoard"></div><div id="setupTray"></div><div id="setupActions"></div>
+ </section></main>`;
+ renderSetup();
+}
+function setupBoardHtml(){
+ let s='<div class="setup-board" aria-label="Satranç tahtası">';
+ for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+   const key=`${c},${r}`, placed=[...setupState.placed.values()].find(x=>x.target===key);
+   s+=`<div class="setup-square ${(r+c)%2?'dark':'light'} ${r===0||r===1||r===6||r===7?'home':''}" data-square="${key}" ondragover="event.preventDefault()" ondrop="setupDrop(event,'${key}')">${placed?`<span class="setup-piece ${placed.side}" draggable="${setupState.phase==='play'}" ondragstart="setupDrag(event,'${placed.id}')" onclick="setupPieceClick('${placed.id}')">${placed.p}</span>`:''}${c===0?`<small class="rank">${8-r}</small>`:''}${r===7?`<small class="file">${'abcdefgh'[c]}</small>`:''}</div>`;
+ }
+ return s+'</div>';
+}
+function renderSetup(){
+ const board=document.querySelector('#setupBoard'),tray=document.querySelector('#setupTray'),actions=document.querySelector('#setupActions');
+ if(!board)return;
+ board.innerHTML=setupBoardHtml();
+ const remaining=setupState.pieces.filter(x=>!setupState.placed.has(x.id));
+ tray.innerHTML=`<div class="setup-tray ${setupState.phase}">${remaining.map(x=>`<button class="tray-piece ${x.side}" draggable="${setupState.phase==='play'}" ondragstart="setupDrag(event,'${x.id}')" onclick="setupPieceClick('${x.id}')" title="${SETUP_NAMES[x.p]}">${x.p}<small>${SETUP_NAMES[x.p]}</small></button>`).join('')}</div>`;
+ document.querySelector('#setupProgress').textContent=`${setupState.placed.size} / 32`;
+ if(setupState.phase==='learn'){
+   actions.innerHTML=setupState.placed.size===32?`<button class="setup-start" onclick="setupStartPlay()">▶ Oyuna Başla</button>`:`<p class="setup-tip">👆 Bir taşa dokun. Doğru yerine kayarak gitsin.</p>`;
+ }else{
+   actions.innerHTML=`<p class="setup-tip">Taşları sürükleyerek ya da önce taşa, sonra kareye dokunarak yerleştir.</p>`;
+ }
+}
+function setupPieceClick(id){
+ const x=setupState.pieces.find(p=>p.id===id); if(!x)return;
+ if(setupState.phase==='learn'){
+   if(setupState.placed.has(id))return;
+   const el=document.querySelector(`[data-square="${x.target}"]`);
+   setupState.placed.set(id,x); renderSetup();
+   const landed=document.querySelector(`[data-square="${x.target}"] .setup-piece`);
+   if(landed){landed.classList.add('slide-in');}
+   document.querySelector('#setupMessage').textContent=setupState.placed.size===32?'Harika! Taşların doğru dizilişini gördün. Hazırsan oyuna başlayalım!':`${SETUP_NAMES[x.p]} doğru yerine yerleşti. Devam et!`;
+   return;
+ }
+ if(setupState.placed.has(id)){
+   setupState.placed.delete(id); setupState.drag=id; renderSetup(); return;
+ }
+ setupState.drag=id;
+ document.querySelectorAll('.tray-piece').forEach(b=>b.classList.remove('selected'));
+ const btn=[...document.querySelectorAll('.tray-piece')].find(b=>b.getAttribute('onclick')?.includes(`'${id}'`));
+ if(btn)btn.classList.add('selected');
+ document.querySelector('#setupMessage').textContent=`${SETUP_NAMES[x.p]} seçildi. Şimdi doğru kareye dokun.`;
+}
+function setupStartPlay(){
+ setupState.phase='play'; setupState.placed.clear(); setupState.drag=null;
+ setupState.pieces=setupShuffle(setupState.pieces);
+ document.querySelector('#setupMessage').textContent='Taşlar karıştı! Şimdi hepsini doğru yerlerine sen diz.';
+ renderSetup();
+ document.querySelector('.setup-tray')?.classList.add('shuffle-pop');
+}
+function setupShuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
+function setupDrag(ev,id){setupState.drag=id;try{ev.dataTransfer.setData('text/plain',id)}catch{}}
+function setupDrop(ev,key){ev.preventDefault();const id=setupState.drag||ev.dataTransfer?.getData('text/plain');setupTryPlace(id,key)}
+document.addEventListener('click',e=>{
+ const sq=e.target.closest?.('.setup-square'); if(!sq||!setupState||setupState.phase!=='play'||!setupState.drag)return;
+ if(e.target.closest('.setup-piece'))return;
+ setupTryPlace(setupState.drag,sq.dataset.square);
+});
+function setupTryPlace(id,key){
+ if(!id)return; const x=setupState.pieces.find(p=>p.id===id); if(!x)return;
+ if(x.target===key){
+   setupState.placed.set(id,x); setupState.drag=null; renderSetup();
+   document.querySelector('#setupMessage').textContent='Aferin! Doğru kare. Devam et. ⭐';
+   if(setupState.placed.size===32)setTimeout(setupWin,250);
+ }else{
+   const sq=document.querySelector(`[data-square="${key}"]`); if(sq){sq.classList.add('wrong');setTimeout(()=>sq.classList.remove('wrong'),450)}
+   document.querySelector('#setupMessage').textContent='Bir daha düşün 😊 Bu taşın yeri başka bir kare.';
+ }
+}
+async function setupWin(){
+ playChessCelebration();
+ if(!teacherPreviewMode && setupState.g.assignment_id){try{await api(`/api/assignments/${setupState.g.assignment_id}/complete`,{method:'POST'})}catch{}}
+ modal(`<h2>🎉 Harika!</h2><p>Tüm satranç taşlarını doğru şekilde dizdin!</p><p><b>Artık satranç tahtasını hazırlayabiliyorsun. ♟️</b></p><div class="modal-actions"><button class="ghost" onclick="closeModal();chessSetupGame(setupState.g)">↻ Tekrar Oyna</button><button onclick="closeModal();${teacherPreviewMode?'previewBack()':'studentDash()'}">⌂ ${teacherPreviewMode?'Oyun Kütüphanesi':'Oyunlarım'}</button></div>`);
+}
 
 const CHESS_PIECES=[
 {name:'Kale',symbol:'♜',tone:'blue',short:'Düz yolların ustasıyım!',speech:'Merhaba! Ben Kale. Dikey ve yatay yönlerde istediğim kadar ilerleyebilirim. Taş alırken de düz yolları kullanırım.',dirs:['up','right','down','left'],note:'Dikey ve yatay gider.'},
