@@ -55,10 +55,10 @@ function notify(msg){let t=document.querySelector('#toast');if(!t){t=document.cr
 function modal(html){closeModal();const d=document.createElement('div');d.id='modal';d.className='modal';d.innerHTML=`<div class="modal-card">${html}</div>`;d.onclick=e=>{if(e.target===d)closeModal()};document.body.appendChild(d)}
 function closeModal(){document.querySelector('#modal')?.remove()}
 const avatar=(s,size='')=>s.photo_data?`<img class="avatar ${size}" src="${s.photo_data}" alt="">`:`<div class="avatar placeholder ${size}">🌱</div>`;
-function home(){teacherPass='';studentSession=null;currentClass=null;app.innerHTML=`<main class="center"><div class="logo">Minoo <span>v2.6.3</span></div><p class="tag">Oyna • Keşfet • Öğren</p><section class="card"><h2>Öğrenci girişi</h2><div class="login-grid"><input id="suser" placeholder="Kullanıcı adı" autocomplete="username"><input id="scode" type="password" placeholder="İlk giriş kodu / şifre" autocomplete="current-password" onkeydown="if(event.key==='Enter')studentLogin()"><button onclick="studentLogin()">Giriş yap</button></div></section><button class="link" onclick="teacherLogin()">Öğretmen girişi</button><p class="safe">Reklamsız • Sohbetsiz • Öğretmen kontrollü</p></main>`}
+function home(){teacherPass='';studentSession=null;currentClass=null;app.innerHTML=`<main class="center"><div class="logo">Minoo <span>v2.6.4</span></div><p class="tag">Oyna • Keşfet • Öğren</p><section class="card"><h2>Öğrenci girişi</h2><div class="login-grid"><input id="suser" placeholder="Kullanıcı adı" autocomplete="username"><input id="scode" type="password" placeholder="İlk giriş kodu / şifre" autocomplete="current-password" onkeydown="if(event.key==='Enter')studentLogin()"><button onclick="studentLogin()">Giriş yap</button></div></section><button class="link" onclick="teacherLogin()">Öğretmen girişi</button><p class="safe">Reklamsız • Sohbetsiz • Öğretmen kontrollü</p></main>`}
 function teacherLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="home()">← Geri</button><div class="logo">Minoo <span>Öğretmen</span></div><p class="tag">Öğretmen paneline güvenli giriş</p><section class="card login-card"><h2>Öğretmen Girişi</h2><label for="tp">Şifre</label><input id="tp" type="password" placeholder="Şifrenizi girin" autocomplete="current-password" autofocus onkeydown="if(event.key==='Enter')doTeacherLogin()"><button class="login-btn" onclick="doTeacherLogin()">Giriş yap</button></section></main>`}
 async function doTeacherLogin(){const p=document.querySelector('#tp').value;if(!p)return;try{teacherPass=p;await api('/api/teacher/login',{method:'POST',body:JSON.stringify({password:p})});closeModal();dashboard()}catch(e){teacherPass='';notify(e.message)}}
-async function dashboard(){const cs=await api('/api/classes');app.innerHTML=`<header><div><b>Minoo Öğretmen</b><small>v2.6.3</small></div><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="toolbar"><h1>Sınıflarım</h1><button onclick="addClass()">+ Sınıf</button></div><div class="grid">${cs.map(c=>`<article class="card"><h3>${esc(c.name)}</h3><p>${c.student_count} öğrenci</p><button onclick="openClass(${c.id})">Aç</button><div class="row"><button class="ghost" onclick="renameClass(${c.id},'${encodeURIComponent(c.name)}')">Adını değiştir</button><button class="danger ghost" onclick="deleteClass(${c.id},'${encodeURIComponent(c.name)}')">Sil</button></div></article>`).join('')}</div><hr><div class="toolbar"><h2>Oyun Kütüphanesi</h2><button onclick="gameForm()">+ Oyun ekle</button></div><div id="library"></div></main>`;loadLibrary()}
+async function dashboard(){const cs=await api('/api/classes');app.innerHTML=`<header><div><b>Minoo Öğretmen</b><small>v2.6.4</small></div><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="toolbar"><h1>Sınıflarım</h1><button onclick="addClass()">+ Sınıf</button></div><div class="grid">${cs.map(c=>`<article class="card"><h3>${esc(c.name)}</h3><p>${c.student_count} öğrenci</p><button onclick="openClass(${c.id})">Aç</button><div class="row"><button class="ghost" onclick="renameClass(${c.id},'${encodeURIComponent(c.name)}')">Adını değiştir</button><button class="danger ghost" onclick="deleteClass(${c.id},'${encodeURIComponent(c.name)}')">Sil</button></div></article>`).join('')}</div><hr><div class="toolbar"><h2>Oyun Kütüphanesi</h2><button onclick="gameForm()">+ Oyun ekle</button></div><div id="library"></div></main>`;loadLibrary()}
 async function loadLibrary(){const gs=await api('/api/games'),el=document.querySelector('#library');el.innerHTML=gs.length?`<div class="grid">${gs.map(g=>`<article class="card"><h3>${esc(g.title)}</h3><p>${g.game_type==='matching'?'🧩 Minoo Eşleştirme':g.game_type==='chess_intro'?'♟️ Satranç Taşlarını Tanı':g.game_type==='chess_names'?'🔊 Satranç Taşlarının İsimleri':g.game_type==='chess_setup'?'♟️ Satranç Taşlarını Dizelim':'🔗 Canva oyunu'}</p><p>${g.completed_count||0}/${g.assigned_count||0} tamamlandı</p><div class="row"><button class="ghost" onclick="teacherPreviewEncoded('${encodeURIComponent(JSON.stringify(g))}')">▶ Oyunu oyna</button><button onclick="gameForm(${g.id},'${encodeURIComponent(g.title)}','${encodeURIComponent(g.canva_url||'')}','${g.game_type||'external'}','${encodeURIComponent(g.game_data||'') }')">Düzenle</button><button class="danger ghost" onclick="deleteGame(${g.id},'${encodeURIComponent(g.title)}')">Sil</button></div></article>`).join('')}</div>`:'<p>Henüz oyun yok.</p>'}
 function addClass(){modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>Yeni sınıf</h2><label>Sınıf adı</label><input id="cn" autofocus><div class="modal-actions"><button class="ghost" onclick="closeModal()">Vazgeç</button><button onclick="saveClass()">Oluştur</button></div>`)}
 async function saveClass(){const name=document.querySelector('#cn').value.trim();if(!name)return;try{await api('/api/classes',{method:'POST',body:JSON.stringify({name})});closeModal();dashboard()}catch(e){notify(e.message)}}
@@ -843,3 +843,143 @@ document.head.insertAdjacentHTML('beforeend',`<style id="minoo263">
 .m262-board{grid-template-columns:repeat(8,minmax(0,1fr))!important;grid-template-rows:repeat(8,minmax(0,1fr))!important;width:min(92vw,620px)!important;height:auto!important;aspect-ratio:1/1!important}.m262-sq{width:100%!important;height:100%!important;aspect-ratio:1/1!important;overflow:visible!important;line-height:1!important}.m262-sq .v261-piece{width:72%!important;height:72%!important;max-width:72%!important;max-height:72%!important;display:grid!important;place-items:center!important;transform:none!important;margin:0!important}.m262-sq .v261-piece svg{width:100%!important;height:100%!important;display:block!important}.m262-sq.circled:before{inset:9%!important;border-radius:50%!important;animation:m263Circle .28s ease-out both!important}.m263-arrow{stroke:#ef5350!important;stroke-width:1.15%!important}.m263-candle{height:250px;width:170px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;position:relative;z-index:3}.m263-candle .wax{width:95px;min-height:8px;background:linear-gradient(90deg,#ffd66b,#fff0a8,#ffc64f);border-radius:18px 18px 10px 10px;position:relative;transition:height .8s linear;box-shadow:inset -12px 0 16px #e8a72f55,0 12px 20px #0004}.m263-candle .wax:before{content:'';position:absolute;top:-8px;left:8px;width:78px;height:18px;background:#ffe38b;border-radius:50%}.m263-candle .wax i{position:absolute;right:10px;top:12px;width:12px;height:34px;border-radius:10px;background:#ffd35f}.m263-candle .flame{font-size:58px;animation:m262Vibe .4s infinite alternate;z-index:4;margin-bottom:-8px}.m263-candle .flame.out{animation:none;font-size:48px}.theme-candle{background:linear-gradient(#253044,#101725)!important}@keyframes m263Circle{from{transform:scale(.65) rotate(-8deg);opacity:.2}to{transform:scale(1);opacity:1}}
 </style>`);
 setTimeout(()=>document.querySelectorAll('.logo span,header small').forEach(x=>{if(/v2\.6\.[0-9]+/.test(x.textContent))x.textContent=x.textContent.replace(/v2\.6\.[0-9]+/,'v2.6.3')}),0);
+
+
+/* ===== Minoo v2.6.4 • Atölye alanları + Fen renk karışımı + Türkçe harf yazma ===== */
+const MINOO_VERSION='v2.6.4';
+
+function atelierHome(){
+  modal(`<button class="modal-x" onclick="closeModal()">×</button>
+  <h2>🎨 Minoo Oyun Atölyesi</h2>
+  <p class="hint">Bir öğrenme alanı seçin.</p>
+  <div class="m264-subjects">
+    <button onclick="m264MathHome()"><span>🔢</span><b>Matematik</b><small>Matematik ve Geometri-Uzaysal Algı</small></button>
+    <button onclick="m264TurkishHome()"><span>📖</span><b>Türkçe</b><small>Okuma Yazma</small></button>
+    <button onclick="m264ScienceHome()"><span>🔬</span><b>Fen</b><small>Keşfet ve deney yap</small></button>
+    <button onclick="m264EnglishHome()"><span>🇬🇧</span><b>İngilizce</b><small>İçerikler yakında</small></button>
+  </div>`);
+}
+function m264MathHome(){
+  modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>🔢 Matematik</h2>
+  <div class="m264-subjects two">
+    <button onclick="m264MathGames()"><span>🔢</span><b>Matematik</b><small>Eşleştirme, sınıflandırma, karşılaştırma, sıralama</small></button>
+    <button onclick="notify('Geometri ve Uzaysal Algı oyunlarını birlikte ekleyeceğiz.')"><span>📐</span><b>Geometri ve Uzaysal Algı</b><small>Yeni oyun alanı</small></button>
+  </div><div class="modal-actions"><button class="ghost" onclick="atelierHome()">← Geri</button></div>`);
+}
+function m264MathGames(){
+  modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>🔢 Matematik Oyunları</h2>
+  <div class="atelier-path">
+    <button onclick="atelierFormC('atelier_matching')"><b>1. Eşleştirme</b><small>İlişkiyi fark et</small></button>
+    <button onclick="atelierFormC('classification')"><b>2. Sınıflandırma</b><small>Ortak özelliğe göre grupla</small></button>
+    <button onclick="atelierFormC('comparison')"><b>3. Karşılaştırma</b><small>Özellikleri karşılaştır</small></button>
+    <button onclick="atelierFormC('ordering')"><b>4. Sıralama</b><small>Bir kurala göre sırala</small></button>
+  </div><div class="modal-actions"><button class="ghost" onclick="m264MathHome()">← Geri</button></div>`);
+}
+function m264EnglishHome(){
+  modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>🇬🇧 İngilizce</h2><p class="hint">İngilizce alanı hazır. Oyunları sonraki adımda birlikte ekleyeceğiz.</p><div class="modal-actions"><button class="ghost" onclick="atelierHome()">← Geri</button></div>`);
+}
+function m264ScienceHome(){
+  modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>🔬 Fen</h2>
+  <div class="m264-feature"><span>🎨</span><div><b>Renkleri Karıştırıyorum</b><small>Önce keşfet, sonra hangi rengin oluşacağını bul.</small></div></div>
+  <div class="modal-actions"><button class="ghost" onclick="atelierHome()">← Geri</button><button onclick="closeModal();m264ColorGame({game_type:'science_color_mix',title:'Renkleri Karıştırıyorum'})">▶ Önizle</button><button onclick="m264AddBuiltIn('science_color_mix','Renkleri Karıştırıyorum')">＋ Kütüphaneye Ekle</button></div>`);
+}
+function m264TurkishHome(){
+  modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>📖 Türkçe</h2>
+  <div class="m264-feature"><span>✍️</span><div><b>Okuma Yazma</b><small>29 harfin yazılışını izle, noktalı harfin üzerinden parmağınla çiz.</small></div></div>
+  <div class="modal-actions"><button class="ghost" onclick="atelierHome()">← Geri</button><button onclick="closeModal();m264LetterGame({game_type:'turkish_letters',title:'Harfleri Yazıyorum'})">▶ Önizle</button><button onclick="m264AddBuiltIn('turkish_letters','Harfleri Yazıyorum')">＋ Kütüphaneye Ekle</button></div>`);
+}
+async function m264AddBuiltIn(type,title){
+  try{await api('/api/games',{method:'POST',body:JSON.stringify({title,game_type:type,game_data:{age:'4-6 yaş',built_in:true}})});closeModal();dashboard();notify('Oyun kütüphaneye eklendi ✓')}
+  catch(e){notify(e.message)}
+}
+
+/* Fen • renk karıştırma */
+const M264_MIXES=[
+ ['#ffd928','#2387e8','#45ad55','Sarı','Mavi','Yeşil'],
+ ['#ef4a4a','#ffd928','#f28a25','Kırmızı','Sarı','Turuncu'],
+ ['#ef4a4a','#3978df','#8b5bc2','Kırmızı','Mavi','Mor'],
+ ['#ef4a4a','#ffffff','#f5a4b8','Kırmızı','Beyaz','Pembe'],
+ ['#f28a25','#ffffff','#f7bd82','Turuncu','Beyaz','Açık turuncu'],
+ ['#222831','#ffffff','#9aa0a6','Siyah','Beyaz','Gri']
+];
+function m264ColorGame(g){window._m264mix={g,phase:'learn',i:0,selected:null};m264MixRender()}
+function m264MixRender(){
+ const s=window._m264mix,m=M264_MIXES[s.i];
+ if(s.phase==='learn'){
+  app.innerHTML=`<header><button class="ghost" onclick="m262Home()">⌂ Ana Sayfa</button><b>🔬 Renkleri Karıştırıyorum</b><span>${s.i+1}/${M264_MIXES.length}</span></header>
+  <main class="m264-mix"><h1>Renkleri keşfedelim!</h1><p>İki renge dokun. Boyalar karışsın.</p>
+  <div class="mix-lab"><button class="paint ${s.a?'on':''}" style="--c:${m[0]}" onclick="m264MixTap(1)"><i></i><b>${m[3]}</b></button>
+  <div class="mix-center ${s.a&&s.b?'mixed':''}" style="--mix:${m[2]}"><span>+</span><i></i></div>
+  <button class="paint ${s.b?'on':''}" style="--c:${m[1]}" onclick="m264MixTap(2)"><i></i><b>${m[4]}</b></button></div>
+  <div class="mix-result">${s.a&&s.b?`<b style="--mix:${m[2]}"></b><strong>${m[5]}!</strong>`:'<span>İki rengi seç 👆</span>'}</div>
+  <div class="v261-actions"><button class="ghost" onclick="m264MixPrev()">← Geri</button><button onclick="m264MixNext()">İleri →</button></div></main>`;
+ }else m264MixQuiz();
+}
+function m264MixTap(n){const s=window._m264mix;s[n===1?'a':'b']=true;m264MixRender();if(s.a&&s.b)m263Speak(`${M264_MIXES[s.i][3]} ile ${M264_MIXES[s.i][4]} karışınca ${M264_MIXES[s.i][5]} olur.`)}
+function m264MixPrev(){const s=window._m264mix;if(s.i>0){s.i--;s.a=s.b=false;m264MixRender()}}
+function m264MixNext(){const s=window._m264mix;if(s.i<M264_MIXES.length-1){s.i++;s.a=s.b=false;m264MixRender()}else{s.phase='quiz';s.i=0;m264MixRender()}}
+function m264MixQuiz(){
+ const s=window._m264mix,m=M264_MIXES[s.i],alts=M264_MIXES.filter(x=>x!==m).map(x=>[x[2],x[5]]),opts=[[m[2],m[5]],alts[(s.i+1)%alts.length],alts[(s.i+3)%alts.length]].sort((a,b)=>((a[1].charCodeAt(0)+s.i)%3)-((b[1].charCodeAt(0)+s.i)%3));
+ app.innerHTML=`<header><button class="ghost" onclick="m262Home()">⌂ Ana Sayfa</button><b>🔬 Renkleri Karıştırıyorum</b><span>Soru ${s.i+1}/${M264_MIXES.length}</span></header>
+ <main class="m264-mix"><h1>${m[3]} + ${m[4]} = ?</h1><p>${m[3]} ile ${m[4]} karışınca hangi renk olur?</p>
+ <div class="mix-question"><i style="--c:${m[0]}"></i><span>＋</span><i style="--c:${m[1]}"></i></div>
+ <div class="mix-options">${opts.map(o=>`<button class="${s.selected===o[1]?'selected':''}" onclick="window._m264mix.selected='${o[1]}';m264MixQuiz()"><i style="--c:${o[0]}"></i><b>${o[1]}</b></button>`).join('')}</div>
+ <div class="v261-actions"><button onclick="m264MixCheck()">✓ Kontrol Et</button></div></main>`;
+}
+function m264MixCheck(){const s=window._m264mix,m=M264_MIXES[s.i];if(!s.selected)return notify('Önce bir renk seç 🌈');if(s.selected!==m[5]){document.querySelector('.mix-options .selected')?.classList.add('m262-wrong');return notify('Bir daha deneyelim 🌱')}m263Speak('Aferin! Doğru renk.');if(s.i<M264_MIXES.length-1){s.i++;s.selected=null;setTimeout(m264MixQuiz,450)}else modal(`<h2>Aferin! 🌈</h2><p>Renk karışımlarını tamamladın.</p><div class="modal-actions"><button onclick="closeModal();m262Home()">Ana Sayfa</button></div>`)}
+
+/* Türkçe • 29 harf, öğretici + parmakla izleme */
+const M264_LETTERS=[...'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ'];
+function m264LetterGame(g){window._m264letter={g,i:0,phase:'learn',drawing:false,points:[],coverage:0};m264LetterRender()}
+function m264LetterRender(){
+ const s=window._m264letter,L=M264_LETTERS[s.i];
+ app.innerHTML=`<header><button class="ghost" onclick="m262Home()">⌂ Ana Sayfa</button><b>📖 Okuma Yazma • Harfleri Yazıyorum</b><span>${s.i+1}/${M264_LETTERS.length}</span></header>
+ <main class="m264-letter"><h1>${L} harfini ${s.phase==='learn'?'öğrenelim':'sen yaz'}</h1>
+ <p>${s.phase==='learn'?'Kayan oku izle. Harfin üzerinden nasıl gidildiğine bakalım.':'Parmağını kaldırmadan noktalı harfin üzerinden çiz.'}</p>
+ <div class="trace-wrap"><canvas id="traceCanvas" width="700" height="520"></canvas>${s.phase==='learn'?'<div class="trace-arrow">➤</div>':''}</div>
+ <div class="v261-actions">${s.phase==='learn'?`<button onclick="m264ReplayLetter()">↻ Tekrar Göster</button><button onclick="window._m264letter.phase='trace';m264LetterRender()">Şimdi Ben Çizeyim →</button>`:`<button class="retry" onclick="m264ClearTrace()">↻ Temizle</button><button onclick="m264CheckTrace()">✓ Kontrol Et</button>`}</div></main>`;
+ setTimeout(()=>m264InitTrace(),30)
+}
+function m264CanvasLetter(ctx,L,solid=false){
+ ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='900 360px Arial, sans-serif';ctx.lineWidth=solid?18:8;ctx.setLineDash(solid?[]:[7,13]);ctx.strokeStyle=solid?'#74c6ff':'#9aa9ba';ctx.globalAlpha=solid?.32:.8;ctx.strokeText(L,350,265);ctx.restore()
+}
+function m264InitTrace(){
+ const s=window._m264letter,c=document.querySelector('#traceCanvas');if(!c)return;const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);m264CanvasLetter(ctx,M264_LETTERS[s.i],false);
+ if(s.phase==='learn'){m264CanvasLetter(ctx,M264_LETTERS[s.i],true);const a=document.querySelector('.trace-arrow');a?.classList.add('go')}
+ else{
+  c.style.touchAction='none';
+  const pos=e=>{const r=c.getBoundingClientRect(),p=e.touches?.[0]||e;return [(p.clientX-r.left)*c.width/r.width,(p.clientY-r.top)*c.height/r.height]};
+  const start=e=>{e.preventDefault();s.drawing=true;const p=pos(e);s.points.push(p);ctx.beginPath();ctx.moveTo(...p)};
+  const move=e=>{if(!s.drawing)return;e.preventDefault();const p=pos(e);s.points.push(p);ctx.lineTo(...p);ctx.strokeStyle='#425fda';ctx.lineWidth=22;ctx.lineCap='round';ctx.lineJoin='round';ctx.setLineDash([]);ctx.stroke()};
+  const end=e=>{e.preventDefault();s.drawing=false};
+  c.addEventListener('pointerdown',start);c.addEventListener('pointermove',move);c.addEventListener('pointerup',end);c.addEventListener('pointercancel',end);
+ }
+}
+function m264ReplayLetter(){m264LetterRender()}
+function m264ClearTrace(){window._m264letter.points=[];m264LetterRender()}
+function m264CheckTrace(){
+ const s=window._m264letter;if(s.points.length<18)return notify('Harfin üzerinden biraz daha çizelim ✍️');
+ const c=document.querySelector('#traceCanvas'),ctx=c.getContext('2d'),L=M264_LETTERS[s.i];
+ const off=document.createElement('canvas');off.width=c.width;off.height=c.height;const o=off.getContext('2d');o.textAlign='center';o.textBaseline='middle';o.font='900 360px Arial, sans-serif';o.lineWidth=42;o.strokeStyle='#000';o.strokeText(L,350,265);
+ const data=o.getImageData(0,0,off.width,off.height).data;let inside=0;
+ for(const [x,y] of s.points){const ix=Math.max(0,Math.min(699,Math.round(x))),iy=Math.max(0,Math.min(519,Math.round(y)));if(data[(iy*700+ix)*4+3]>0)inside++}
+ const ratio=inside/Math.max(1,s.points.length);
+ if(ratio<.72){document.querySelector('.trace-wrap')?.classList.add('m262-wrong');return notify('Çizgiyi noktalı harfin üzerinde tutalım. Yeniden deneyebilirsin 🌱')}
+ m263Speak('Aferin! Harfi çok güzel takip ettin.');
+ if(s.i<M264_LETTERS.length-1){s.i++;s.phase='learn';s.points=[];setTimeout(m264LetterRender,500)}
+ else modal(`<h2>Aferin! 🎉</h2><p>Alfabedeki bütün harfleri tamamladın.</p><div class="modal-actions"><button onclick="closeModal();m262Home()">Ana Sayfa</button></div>`)
+}
+
+const _playGame264=playGame;playGame=function(g){if(g.game_type==='science_color_mix')return m264ColorGame(g);if(g.game_type==='turkish_letters')return m264LetterGame(g);return _playGame264(g)};
+const _v261Label264=v261Label;v261Label=function(t){return t==='science_color_mix'?'🔬 Renkleri Karıştırıyorum':t==='turkish_letters'?'✍️ Harfleri Yazıyorum':_v261Label264(t)};
+
+/* sürüm etiketini tek yerden güncelle */
+setInterval(()=>document.querySelectorAll('.logo span,header small').forEach(x=>{if(/^v\d/.test(x.textContent.trim()))x.textContent=MINOO_VERSION}),700);
+
+document.head.insertAdjacentHTML('beforeend',`<style id="minoo264">
+.m264-subjects{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.m264-subjects button{min-height:145px;border-radius:24px!important;background:#fff!important;color:#2d4057!important;border:2px solid #e7e5df!important;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;text-align:left;gap:5px}.m264-subjects button span{font-size:34px}.m264-subjects button b{font-size:20px}.m264-subjects button small{opacity:.72}.m264-feature{display:flex;gap:18px;align-items:center;padding:22px;border:2px solid #ece7de;border-radius:24px;background:#fffdf9}.m264-feature>span{font-size:52px}.m264-feature div{display:flex;flex-direction:column;gap:6px}.m264-feature b{font-size:22px}
+.m264-mix,.m264-letter{max-width:900px;margin:auto;padding:22px;text-align:center}.mix-lab{display:grid;grid-template-columns:1fr 130px 1fr;align-items:center;gap:16px;margin:30px auto}.paint{background:#fff!important;color:#31445b!important;border:3px solid #ece8df!important;border-radius:28px!important;min-height:190px}.paint i,.mix-question i,.mix-options i{display:block;width:95px;height:95px;margin:auto;border-radius:50%;background:var(--c);border:4px solid rgba(0,0,0,.08);box-shadow:inset 0 10px 16px rgba(255,255,255,.35),0 9px 20px rgba(0,0,0,.12)}.paint.on{transform:scale(1.04);box-shadow:0 0 0 5px rgba(95,181,255,.25)}.mix-center{font-size:45px}.mix-center i{display:none}.mix-center.mixed span{display:none}.mix-center.mixed i{display:block;width:105px;height:105px;border-radius:44% 56% 51% 49%;background:var(--mix);animation:mixBlob .65s ease both}.mix-result{min-height:85px;font-size:28px;display:flex;gap:15px;align-items:center;justify-content:center}.mix-result b{width:58px;height:58px;border-radius:50%;background:var(--mix)}.mix-question{display:flex;gap:24px;align-items:center;justify-content:center;font-size:42px;margin:24px}.mix-options{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.mix-options button{background:#fff!important;color:#31445b!important;border:3px solid #ece8df!important;border-radius:24px!important;min-height:160px}.mix-options button.selected{border-color:#5277e8!important;box-shadow:0 0 0 5px rgba(82,119,232,.18)}.mix-options button.m262-wrong{border-color:#ff1744!important;box-shadow:0 0 18px #ff1744!important}
+.trace-wrap{position:relative;width:min(700px,94vw);aspect-ratio:700/520;margin:18px auto;background:#fff;border-radius:30px;box-shadow:0 10px 28px rgba(50,65,80,.12);overflow:hidden}.trace-wrap canvas{width:100%;height:100%;display:block}.trace-arrow{position:absolute;left:19%;top:18%;font-size:48px;color:#ff7043;filter:drop-shadow(0 3px 3px rgba(0,0,0,.2));opacity:0}.trace-arrow.go{animation:traceGuide 4.2s ease-in-out infinite}.trace-wrap.m262-wrong{box-shadow:0 0 0 5px #ff1744,0 0 22px rgba(255,23,68,.45)}
+@keyframes mixBlob{from{transform:scale(.25) rotate(-20deg);opacity:.2}to{transform:scale(1) rotate(0);opacity:1}}@keyframes traceGuide{0%{left:25%;top:72%;opacity:0}8%{opacity:1}30%{left:50%;top:16%}52%{left:75%;top:72%}72%{left:35%;top:48%}92%{left:67%;top:48%;opacity:1}100%{opacity:0}}
+@media(max-width:650px){.m264-subjects{grid-template-columns:1fr}.mix-lab{grid-template-columns:1fr 70px 1fr;gap:6px}.paint{min-height:145px;padding:10px!important}.paint i,.mix-question i,.mix-options i{width:65px;height:65px}.mix-options{grid-template-columns:1fr}.mix-options button{min-height:110px;display:flex;align-items:center;justify-content:center;gap:16px}.mix-options i{margin:0}.m264-mix,.m264-letter{padding:12px}.trace-arrow{font-size:34px}}
+</style>`);
