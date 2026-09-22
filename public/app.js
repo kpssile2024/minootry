@@ -55,10 +55,10 @@ function notify(msg){let t=document.querySelector('#toast');if(!t){t=document.cr
 function modal(html){closeModal();const d=document.createElement('div');d.id='modal';d.className='modal';d.innerHTML=`<div class="modal-card">${html}</div>`;d.onclick=e=>{if(e.target===d)closeModal()};document.body.appendChild(d)}
 function closeModal(){document.querySelector('#modal')?.remove()}
 const avatar=(s,size='')=>s.photo_data?`<img class="avatar ${size}" src="${s.photo_data}" alt="">`:`<div class="avatar placeholder ${size}">🌱</div>`;
-function home(){teacherPass='';studentSession=null;currentClass=null;app.innerHTML=`<main class="center"><div class="logo">Minoo <span>v2.6.4</span></div><p class="tag">Oyna • Keşfet • Öğren</p><section class="card"><h2>Öğrenci girişi</h2><div class="login-grid"><input id="suser" placeholder="Kullanıcı adı" autocomplete="username"><input id="scode" type="password" placeholder="İlk giriş kodu / şifre" autocomplete="current-password" onkeydown="if(event.key==='Enter')studentLogin()"><button onclick="studentLogin()">Giriş yap</button></div></section><button class="link" onclick="teacherLogin()">Öğretmen girişi</button><p class="safe">Reklamsız • Sohbetsiz • Öğretmen kontrollü</p></main>`}
+function home(){teacherPass='';studentSession=null;currentClass=null;app.innerHTML=`<main class="center"><div class="logo">Minoo <span>v2.6.5</span></div><p class="tag">Oyna • Keşfet • Öğren</p><section class="card"><h2>Öğrenci girişi</h2><div class="login-grid"><input id="suser" placeholder="Kullanıcı adı" autocomplete="username"><input id="scode" type="password" placeholder="İlk giriş kodu / şifre" autocomplete="current-password" onkeydown="if(event.key==='Enter')studentLogin()"><button onclick="studentLogin()">Giriş yap</button></div></section><button class="link" onclick="teacherLogin()">Öğretmen girişi</button><p class="safe">Reklamsız • Sohbetsiz • Öğretmen kontrollü</p></main>`}
 function teacherLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="home()">← Geri</button><div class="logo">Minoo <span>Öğretmen</span></div><p class="tag">Öğretmen paneline güvenli giriş</p><section class="card login-card"><h2>Öğretmen Girişi</h2><label for="tp">Şifre</label><input id="tp" type="password" placeholder="Şifrenizi girin" autocomplete="current-password" autofocus onkeydown="if(event.key==='Enter')doTeacherLogin()"><button class="login-btn" onclick="doTeacherLogin()">Giriş yap</button></section></main>`}
 async function doTeacherLogin(){const p=document.querySelector('#tp').value;if(!p)return;try{teacherPass=p;await api('/api/teacher/login',{method:'POST',body:JSON.stringify({password:p})});closeModal();dashboard()}catch(e){teacherPass='';notify(e.message)}}
-async function dashboard(){const cs=await api('/api/classes');app.innerHTML=`<header><div><b>Minoo Öğretmen</b><small>v2.6.4</small></div><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="toolbar"><h1>Sınıflarım</h1><button onclick="addClass()">+ Sınıf</button></div><div class="grid">${cs.map(c=>`<article class="card"><h3>${esc(c.name)}</h3><p>${c.student_count} öğrenci</p><button onclick="openClass(${c.id})">Aç</button><div class="row"><button class="ghost" onclick="renameClass(${c.id},'${encodeURIComponent(c.name)}')">Adını değiştir</button><button class="danger ghost" onclick="deleteClass(${c.id},'${encodeURIComponent(c.name)}')">Sil</button></div></article>`).join('')}</div><hr><div class="toolbar"><h2>Oyun Kütüphanesi</h2><button onclick="gameForm()">+ Oyun ekle</button></div><div id="library"></div></main>`;loadLibrary()}
+async function dashboard(){const cs=await api('/api/classes');app.innerHTML=`<header><div><b>Minoo Öğretmen</b><small>v2.6.5</small></div><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="toolbar"><h1>Sınıflarım</h1><button onclick="addClass()">+ Sınıf</button></div><div class="grid">${cs.map(c=>`<article class="card"><h3>${esc(c.name)}</h3><p>${c.student_count} öğrenci</p><button onclick="openClass(${c.id})">Aç</button><div class="row"><button class="ghost" onclick="renameClass(${c.id},'${encodeURIComponent(c.name)}')">Adını değiştir</button><button class="danger ghost" onclick="deleteClass(${c.id},'${encodeURIComponent(c.name)}')">Sil</button></div></article>`).join('')}</div><hr><div class="toolbar"><h2>Oyun Kütüphanesi</h2><button onclick="gameForm()">+ Oyun ekle</button></div><div id="library"></div></main>`;loadLibrary()}
 async function loadLibrary(){const gs=await api('/api/games'),el=document.querySelector('#library');el.innerHTML=gs.length?`<div class="grid">${gs.map(g=>`<article class="card"><h3>${esc(g.title)}</h3><p>${g.game_type==='matching'?'🧩 Minoo Eşleştirme':g.game_type==='chess_intro'?'♟️ Satranç Taşlarını Tanı':g.game_type==='chess_names'?'🔊 Satranç Taşlarının İsimleri':g.game_type==='chess_setup'?'♟️ Satranç Taşlarını Dizelim':'🔗 Canva oyunu'}</p><p>${g.completed_count||0}/${g.assigned_count||0} tamamlandı</p><div class="row"><button class="ghost" onclick="teacherPreviewEncoded('${encodeURIComponent(JSON.stringify(g))}')">▶ Oyunu oyna</button><button onclick="gameForm(${g.id},'${encodeURIComponent(g.title)}','${encodeURIComponent(g.canva_url||'')}','${g.game_type||'external'}','${encodeURIComponent(g.game_data||'') }')">Düzenle</button><button class="danger ghost" onclick="deleteGame(${g.id},'${encodeURIComponent(g.title)}')">Sil</button></div></article>`).join('')}</div>`:'<p>Henüz oyun yok.</p>'}
 function addClass(){modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>Yeni sınıf</h2><label>Sınıf adı</label><input id="cn" autofocus><div class="modal-actions"><button class="ghost" onclick="closeModal()">Vazgeç</button><button onclick="saveClass()">Oluştur</button></div>`)}
 async function saveClass(){const name=document.querySelector('#cn').value.trim();if(!name)return;try{await api('/api/classes',{method:'POST',body:JSON.stringify({name})});closeModal();dashboard()}catch(e){notify(e.message)}}
@@ -983,3 +983,164 @@ document.head.insertAdjacentHTML('beforeend',`<style id="minoo264">
 @keyframes mixBlob{from{transform:scale(.25) rotate(-20deg);opacity:.2}to{transform:scale(1) rotate(0);opacity:1}}@keyframes traceGuide{0%{left:25%;top:72%;opacity:0}8%{opacity:1}30%{left:50%;top:16%}52%{left:75%;top:72%}72%{left:35%;top:48%}92%{left:67%;top:48%;opacity:1}100%{opacity:0}}
 @media(max-width:650px){.m264-subjects{grid-template-columns:1fr}.mix-lab{grid-template-columns:1fr 70px 1fr;gap:6px}.paint{min-height:145px;padding:10px!important}.paint i,.mix-question i,.mix-options i{width:65px;height:65px}.mix-options{grid-template-columns:1fr}.mix-options button{min-height:110px;display:flex;align-items:center;justify-content:center;gap:16px}.mix-options i{margin:0}.m264-mix,.m264-letter{padding:12px}.trace-arrow{font-size:34px}}
 </style>`);
+
+
+/* ===== Minoo v2.6.5 • toplu düzeltme ===== */
+const MINOO_VERSION_265='v2.6.5';
+
+/* Güvenli ortak ana sayfa */
+async function m265Home(){
+  try{
+    closeModal();
+    if(window.speechSynthesis) speechSynthesis.cancel();
+    if(window._m265raf) cancelAnimationFrame(window._m265raf);
+    if(typeof teacherPreviewMode!=='undefined' && teacherPreviewMode) return previewBack();
+    if(typeof studentSession!=='undefined' && studentSession && studentSession.id) return await studentDash();
+    return home();
+  }catch(e){ try{return home()}catch(_){location.reload()} }
+}
+m262Home=m265Home;
+
+/* Satranç öğretici okları: kesintisiz, gerçek ok ucu; At gerçek L */
+function m263ShowMoves(type,pos){
+ const svg=document.querySelector('.m262-overlay'); if(!svg)return;
+ const [f,r]=m263Coord(pos), fy=8-r+.5, fx=f+.5, c=M263_PIECES[type], ends=[];
+ if(c.jumps||c.pawn) ends.push(...m263Targets(type,pos));
+ else c.dirs.forEach(([df,dr])=>{let x=f,y=r,k;while((k=m263Key(x+df,y+dr))){x+=df;y+=dr;if(c.one)break}if(x!==f||y!==r)ends.push(m263Key(x,y))});
+ const defs=`<defs><marker id="m265arr" markerWidth="7" markerHeight="7" refX="5.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#ef476f"/></marker></defs>`;
+ svg.innerHTML=defs+ends.map((k,i)=>{
+   const [x,y]=m263Coord(k), ex=(x+.5)*12.5, ey=(8-y+.5)*12.5, sx=fx*12.5, sy=fy*12.5;
+   if(type==='knight'){
+     const df=x-f,dr=y-r;
+     let mx,my;
+     if(Math.abs(df)===2){mx=(f+df)*12.5+6.25;my=sy}else{mx=sx;my=(8-(r+dr)+.5)*12.5}
+     return `<polyline class="m265-move" points="${sx},${sy} ${mx},${my} ${ex},${ey}" marker-end="url(#m265arr)" style="animation-delay:${i*.12}s"/>`;
+   }
+   return `<line class="m265-move" x1="${sx}%" y1="${sy}%" x2="${ex}%" y2="${ey}%" marker-end="url(#m265arr)" style="animation-delay:${i*.12}s"/>`
+ }).join('');
+}
+
+/* Taş alma: sonsuz döngü yok + tek hamlede ilk engel */
+function m265Reachable(type,pos,occupied){
+ const c=M263_PIECES[type],[f,r]=m263Coord(pos),out=[];
+ if(c.jumps)c.jumps.forEach(([df,dr])=>{const k=m263Key(f+df,r+dr);if(k&&occupied.has(k))out.push(k)});
+ else if(c.pawn)[-1,1].forEach(df=>{const k=m263Key(f+df,r+1);if(k&&occupied.has(k))out.push(k)});
+ else c.dirs.forEach(([df,dr])=>{let x=f+df,y=r+dr;while(1){const k=m263Key(x,y);if(!k)break;if(occupied.has(k)){out.push(k);break}if(c.one)break;x+=df;y+=dr}});
+ return out;
+}
+function m263PieceQuiz(){
+ const s=window._m263piece,c=M263_PIECES[s.type],pos=c.positions[s.round%3],board={[pos]:m262Piece(c.name,false)};
+ const all=[];for(let r=1;r<=8;r++)for(const f of M262_FILES){const k=f+r;if(k!==pos)all.push(k)}
+ const seed=s.round*11+s.type.length*7;
+ const ordered=all.slice().sort((a,b)=>((a.charCodeAt(0)*17+Number(a[1])*13+seed)%97)-((b.charCodeAt(0)*17+Number(b[1])*13+seed)%97));
+ const natural=m263Targets(s.type,pos);
+ let picks=[];
+ /* en az birkaç yasal hat üzerinde hedef */
+ for(const k of natural){if(!picks.includes(k)&&picks.length<3)picks.push(k)}
+ for(const k of ordered){if(!picks.includes(k)&&picks.length<6)picks.push(k)}
+ const occupied=new Set(picks), reachable=new Set(m265Reachable(s.type,pos,occupied));
+ s.targets=picks.map((k,i)=>({k,reachable:reachable.has(k)}));s.selected=new Set();
+ picks.forEach((k,i)=>board[k]=s.round<4?M263_FRUIT[i%M263_FRUIT.length]:m262Piece(['Piyon','At','Fil','Vezir','Kale','Şah'][i%6],true));
+ app.innerHTML=`<header class="chess-header"><button class="ghost" onclick="m265Home()">⌂ Ana Sayfa</button><b>${c.title}</b><span>${s.round+1}/5</span></header><main class="m262-game"><div class="v261-instruction">${c.name} <b>tek hamlede</b> hangi ${s.round<4?'meyveleri':'rakip taşları'} alabilir? Alabileceklerini çember içine al.</div>${m262Board(board,'m263-quiz')}<div class="v261-actions"><button class="retry" onclick="m263PieceQuiz()">↻ Temizle</button><button onclick="m263PieceCheck()">✓ Kontrol Et</button></div></main>`;
+ document.querySelectorAll('.m263-quiz .m262-sq').forEach(q=>{if(q.dataset.key===pos||!q.innerHTML)return;q.onclick=()=>m263Circle(q,s.selected,q.dataset.key)})
+}
+function m263PieceCheck(){
+ const s=window._m263piece;let ok=true;
+ s.targets.forEach(t=>{const q=document.querySelector(`.m263-quiz [data-key="${t.k}"]`),sel=s.selected.has(t.k);q?.classList.remove('m262-wrong');if(sel!==t.reachable){ok=false;q?.classList.add('m262-wrong')}});
+ if(!ok)return modal(`<h2>Bir daha bakalım 🌱</h2><p>Yalnızca <b>tek hamlede</b> alınabilen hedefleri düşün.</p><div class="modal-actions"><button onclick="closeModal()">Yeniden Dene</button><button class="ghost" onclick="closeModal();m265Home()">Ana Sayfa</button></div>`);
+ if(s.round<4){s.round++;return setTimeout(m263PieceQuiz,80)}
+ modal(`<h2>Aferin! 🎉</h2><p>${M263_PIECES[s.type].name} oyununu tamamladın.</p><div class="modal-actions"><button onclick="closeModal();m265Home()">Ana Sayfa</button></div>`)
+}
+
+/* Harfler: kalın font çevresi değil, gerçek yazım vuruşları */
+const M265_STROKES={
+ A:[[[25,85],[50,15],[75,85]],[[35,58],[65,58]]],
+ B:[[[28,15],[28,85]],[[28,15],[57,15],[70,25],[70,38],[58,48],[28,48]],[[28,48],[60,48],[73,59],[73,74],[60,85],[28,85]]],
+ C:[[[75,25],[62,15],[40,15],[25,30],[20,50],[25,70],[40,85],[62,85],[75,75]]],
+ Ç:[[[75,25],[62,15],[40,15],[25,30],[20,50],[25,70],[40,85],[62,85],[75,75]],[[48,87],[45,96],[55,96]]],
+ D:[[[28,15],[28,85]],[[28,15],[55,15],[72,30],[72,70],[55,85],[28,85]]],
+ E:[[[70,15],[28,15],[28,85],[70,85]],[[28,50],[62,50]]],
+ F:[[[28,85],[28,15],[72,15]],[[28,50],[62,50]]],
+ G:[[[75,27],[63,15],[40,15],[24,31],[20,52],[27,72],[42,85],[66,83],[76,70],[76,55],[55,55]]],
+ Ğ:[[[75,27],[63,15],[40,15],[24,31],[20,52],[27,72],[42,85],[66,83],[76,70],[76,55],[55,55]],[[38,5],[48,11],[58,5]]],
+ H:[[[27,15],[27,85]],[[73,15],[73,85]],[[27,50],[73,50]]],
+ I:[[[50,15],[50,85]]], İ:[[[50,15],[50,85]],[[50,5],[50,5]]],
+ J:[[[70,15],[70,68],[62,82],[47,86],[33,80],[28,68]]],
+ K:[[[28,15],[28,85]],[[72,15],[28,53],[74,85]]],
+ L:[[[28,15],[28,85],[72,85]]],
+ M:[[[22,85],[22,15],[50,55],[78,15],[78,85]]],
+ N:[[[25,85],[25,15],[75,85],[75,15]]],
+ O:[[[50,15],[35,18],[23,32],[20,52],[27,72],[40,84],[58,84],[73,70],[78,50],[73,30],[60,16],[50,15]]],
+ Ö:[[[50,15],[35,18],[23,32],[20,52],[27,72],[40,84],[58,84],[73,70],[78,50],[73,30],[60,16],[50,15]],[[38,5],[38,5]],[[62,5],[62,5]]],
+ P:[[[28,85],[28,15],[58,15],[72,26],[72,40],[59,51],[28,51]]],
+ R:[[[28,85],[28,15],[58,15],[72,26],[72,40],[59,51],[28,51]],[[52,51],[76,85]]],
+ S:[[[74,25],[62,15],[40,15],[26,27],[28,42],[42,50],[61,53],[74,64],[72,77],[60,85],[39,85],[25,75]]],
+ Ş:[[[74,25],[62,15],[40,15],[26,27],[28,42],[42,50],[61,53],[74,64],[72,77],[60,85],[39,85],[25,75]],[[48,87],[45,96],[55,96]]],
+ T:[[[20,15],[80,15]],[[50,15],[50,85]]],
+ U:[[[25,15],[25,65],[33,80],[48,86],[63,80],[75,65],[75,15]]],
+ Ü:[[[25,15],[25,65],[33,80],[48,86],[63,80],[75,65],[75,15]],[[38,5],[38,5]],[[62,5],[62,5]]],
+ V:[[[20,15],[50,85],[80,15]]],
+ Y:[[[20,15],[50,50],[80,15]],[[50,50],[50,85]]],
+ Z:[[[22,15],[78,15],[22,85],[78,85]]]
+};
+function m265LetterCanvas(){
+ const s=window._m264letter,c=document.querySelector('#traceCanvas');if(!c)return;const ctx=c.getContext('2d'),L=M264_LETTERS[s.i],st=M265_STROKES[L]||[];
+ ctx.clearRect(0,0,c.width,c.height);ctx.lineCap='round';ctx.lineJoin='round';
+ st.forEach((stroke,si)=>{ctx.beginPath();stroke.forEach((p,j)=>{const x=p[0]/100*c.width,y=p[1]/100*c.height;j?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.strokeStyle='#a9c9e9';ctx.lineWidth=18;ctx.setLineDash([3,18]);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#4f79a8';ctx.font='bold 20px Arial';ctx.fillText(String(si+1),stroke[0][0]/100*c.width-12,stroke[0][1]/100*c.height-10)});
+ if(s.phase==='learn')m265AnimateStroke(c,st);
+ else m265EnableTrace(c,st);
+}
+function m265AnimateStroke(c,st){
+ const ctx=c.getContext('2d');let si=0,pi=0;
+ function next(){
+  if(si>=st.length)return;
+  const stroke=st[si];if(pi===0){ctx.beginPath();ctx.moveTo(stroke[0][0]/100*c.width,stroke[0][1]/100*c.height);pi=1}
+  if(pi<stroke.length){const p=stroke[pi++];ctx.lineTo(p[0]/100*c.width,p[1]/100*c.height);ctx.strokeStyle='#ef6b5b';ctx.lineWidth=9;ctx.setLineDash([]);ctx.stroke();window._m265raf=requestAnimationFrame(next)}
+  else{si++;pi=0;setTimeout(next,280)}
+ } next()
+}
+function m265EnableTrace(c,st){
+ const s=window._m264letter,ctx=c.getContext('2d');s.points=[];s.strokeIndex=0;c.style.touchAction='none';
+ const pos=e=>{const r=c.getBoundingClientRect();return[(e.clientX-r.left)*c.width/r.width,(e.clientY-r.top)*c.height/r.height]};
+ c.onpointerdown=e=>{e.preventDefault();s.drawing=true;const p=pos(e);s.points.push(p);ctx.beginPath();ctx.moveTo(...p)};
+ c.onpointermove=e=>{if(!s.drawing)return;e.preventDefault();const p=pos(e);s.points.push(p);ctx.lineTo(...p);ctx.strokeStyle='#405fd1';ctx.lineWidth=13;ctx.lineCap='round';ctx.stroke()};
+ c.onpointerup=c.onpointercancel=e=>{s.drawing=false};
+}
+m264InitTrace=m265LetterCanvas;
+function m265DistPointSeg(px,py,ax,ay,bx,by){const dx=bx-ax,dy=by-ay,l=dx*dx+dy*dy;if(!l)return Math.hypot(px-ax,py-ay);let t=((px-ax)*dx+(py-ay)*dy)/l;t=Math.max(0,Math.min(1,t));return Math.hypot(px-(ax+t*dx),py-(ay+t*dy))}
+function m264CheckTrace(){
+ const s=window._m264letter,L=M264_LETTERS[s.i],st=M265_STROKES[L]||[],c=document.querySelector('#traceCanvas');if(s.points.length<12)return notify('Harfin çizgisini parmağınla takip edelim ✍️');
+ let good=0;for(const [x,y] of s.points){let d=1e9;for(const stroke of st)for(let j=1;j<stroke.length;j++){const a=stroke[j-1],b=stroke[j];d=Math.min(d,m265DistPointSeg(x,y,a[0]/100*c.width,a[1]/100*c.height,b[0]/100*c.width,b[1]/100*c.height))}if(d<42)good++}
+ if(good/s.points.length<.68){document.querySelector('.trace-wrap')?.classList.add('m262-wrong');return notify('Çizgiyi harfin yazım yoluna yakın tutalım. Yeniden deneyebilirsin 🌱')}
+ m263Speak('Aferin! Harfin yazım yolunu takip ettin.');if(s.i<M264_LETTERS.length-1){s.i++;s.phase='learn';s.points=[];setTimeout(m264LetterRender,350)}else modal(`<h2>Aferin! 🎉</h2><p>Alfabedeki bütün harfleri tamamladın.</p><div class="modal-actions"><button onclick="closeModal();m265Home()">Ana Sayfa</button></div>`)
+}
+function m265LetterBack(){const s=window._m264letter;if(s.phase==='trace'){s.phase='learn';s.points=[]}else if(s.i>0){s.i--;s.phase='learn';s.points=[]}else return m265Home();m264LetterRender()}
+const _m264LetterRender265=m264LetterRender;
+m264LetterRender=function(){_m264LetterRender265();const h=document.querySelector('header');if(h){const old=h.querySelector('button');if(old)old.outerHTML=`<div style="display:flex;gap:8px"><button class="ghost" onclick="m265LetterBack()">← Geri</button><button class="ghost" onclick="m265Home()">⌂ Ana Sayfa</button></div>`}};
+
+/* İngilizce: 4–6 yaş örnek oyun */
+const M265_EN=[['🐶','dog'],['🐱','cat'],['🐰','rabbit'],['🍎','apple'],['🍌','banana'],['🚗','car'],['☀️','sun'],['🌙','moon'],['🔴','red'],['🔵','blue']];
+function m264EnglishHome(){
+ modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>🇬🇧 İngilizce</h2>
+ <div class="m264-feature"><span>🔊</span><div><b>Listen & Choose • Dinle ve Bul</b><small>Hayvanlar, nesneler ve temel renkler. Kelimeyi dinle, doğru görsele dokun.</small></div></div>
+ <div class="modal-actions"><button class="ghost" onclick="atelierHome()">← Geri</button><button onclick="closeModal();m265EnglishGame({game_type:'english_listen',title:'Listen & Choose'})">▶ Önizle</button><button onclick="m264AddBuiltIn('english_listen','Listen & Choose')">＋ Kütüphaneye Ekle</button></div>`)
+}
+function m265EnglishGame(g){window._m265en={g,i:0,selected:null};m265EnglishRender()}
+function m265EnglishRender(){
+ const s=window._m265en,t=M265_EN[s.i],opts=[t,M265_EN[(s.i+3)%M265_EN.length],M265_EN[(s.i+6)%M265_EN.length]].sort((a,b)=>(a[1].charCodeAt(0)+s.i)%3-(b[1].charCodeAt(0)+s.i)%3);
+ app.innerHTML=`<header><button class="ghost" onclick="m265Home()">⌂ Ana Sayfa</button><b>🇬🇧 Listen & Choose</b><span>${s.i+1}/${M265_EN.length}</span></header><main class="m265-en"><h1>Listen and choose! 👂</h1><button class="m265-listen" onclick="m265Say('${t[1]}')">🔊 Dinle</button><div class="m265-enopts">${opts.map(o=>`<button class="${s.selected===o[1]?'selected':''}" onclick="window._m265en.selected='${o[1]}';m265EnglishRender()"><span>${o[0]}</span></button>`).join('')}</div><button onclick="m265EnglishCheck()">✓ Kontrol Et</button></main>`;setTimeout(()=>m265Say(t[1]),250)
+}
+function m265Say(w){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(w);u.lang='en-US';u.rate=.72;speechSynthesis.speak(u)}
+function m265EnglishCheck(){const s=window._m265en,t=M265_EN[s.i];if(!s.selected)return notify('Önce bir görsel seç 👆');if(s.selected!==t[1])return notify('Let’s try again! 🌱');m265Say('Great job! '+t[1]);if(s.i<M265_EN.length-1){s.i++;s.selected=null;setTimeout(m265EnglishRender,450)}else modal(`<h2>Great job! ⭐</h2><p>İngilizce oyununu tamamladın.</p><div class="modal-actions"><button onclick="closeModal();m265Home()">Ana Sayfa</button></div>`)}
+const _playGame265=playGame;playGame=function(g){if(g.game_type==='english_listen')return m265EnglishGame(g);return _playGame265(g)};
+
+/* Fen/Harf sonuç ve üst ana sayfa çağrılarını güvenli eve yönlendir */
+const _m264MixRender265=m264MixRender;m264MixRender=function(){_m264MixRender265();document.querySelectorAll('button').forEach(b=>{if(b.textContent.includes('Ana Sayfa'))b.onclick=m265Home})};
+const _m264MixQuiz265=m264MixQuiz;m264MixQuiz=function(){_m264MixQuiz265();document.querySelectorAll('button').forEach(b=>{if(b.textContent.includes('Ana Sayfa'))b.onclick=m265Home})};
+
+document.head.insertAdjacentHTML('beforeend',`<style>
+.m265-move{stroke:#ef476f;stroke-width:1.15;fill:none;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;stroke-dasharray:120;stroke-dashoffset:120;animation:m265draw .8s ease forwards}
+@keyframes m265draw{to{stroke-dashoffset:0}}
+.m265-en{max-width:850px;margin:auto;text-align:center;padding:30px}.m265-listen{font-size:24px!important;padding:18px 34px!important}.m265-enopts{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:30px 0}.m265-enopts button{min-height:210px;background:#fff!important;border:4px solid #e9e5dc!important;border-radius:28px!important}.m265-enopts button.selected{border-color:#5577e8!important;box-shadow:0 0 0 6px rgba(85,119,232,.15)}.m265-enopts span{font-size:88px}@media(max-width:650px){.m265-enopts{grid-template-columns:1fr}.m265-enopts button{min-height:120px}.m265-enopts span{font-size:62px}}
+</style>`);
+setInterval(()=>document.querySelectorAll('.logo span,header small').forEach(x=>{if(/^v\d/.test(x.textContent.trim()))x.textContent=MINOO_VERSION_265}),650);
