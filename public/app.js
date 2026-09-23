@@ -2137,3 +2137,47 @@ document.head.insertAdjacentHTML('beforeend',`<style id="m280css">
 .m280-help{max-width:650px;margin:12px auto;padding:12px 16px;border-radius:16px;background:#fff7e8;text-align:center;font-weight:700}.m280-promote{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.m280-promote button{font-size:22px}.m280-rules{text-align:left;line-height:1.55}
 @media(max-width:600px){.m280-main{padding:6px}.m280-board{border-width:3px}.m280-piece{font-size:clamp(28px,10vw,52px)}.m280-top{gap:7px}.m280-help{font-size:13px}}
 </style>`);
+
+
+/* ============================================================
+   MINOO v2.8.1 • GERÇEK SATRANÇ ÖĞRETMEN KÜTÜPHANESİ
+   ============================================================ */
+function m281TeacherChessCard(){
+ const el=document.querySelector('#library');if(!el||document.querySelector('#m281-real-chess-card'))return;
+ const grid=el.querySelector('.grid')||el;
+ const card=document.createElement('article');
+ card.id='m281-real-chess-card';card.className='card m281-real-chess-card';
+ card.innerHTML=`<h3>♟️ Bilgisayara Karşı Satranç</h3>
+ <p>Gerçek satranç • Kolay / Orta / Zor</p>
+ <p>Çocuk beyazlarla, bilgisayar siyahlarla oynar.</p>
+ <div class="row"><button class="ghost" onclick="m281TeacherChessPreview()">▶ Oyunu oyna</button></div>`;
+ grid.prepend(card);
+}
+function m281TeacherChessPreview(){
+ teacherPreviewMode=true;
+ window._m272DirGame=null;
+ m280ChooseLevel();
+}
+const m281LoadLibraryBase=loadLibrary;
+loadLibrary=async function(){
+ const r=await m281LoadLibraryBase();
+ setTimeout(m281TeacherChessCard,0);
+ return r;
+};
+new MutationObserver(()=>m281TeacherChessCard()).observe(document.documentElement,{childList:true,subtree:true});
+
+/* Level ekranından öğretmen önizlemesine güvenli dönüş */
+const m281ChooseLevelBase=m280ChooseLevel;
+m280ChooseLevel=function(){
+ m281ChooseLevelBase();
+ if(teacherPreviewMode){
+   const back=document.querySelector('.chess-header .ghost');
+   if(back){back.textContent='← Oyun Kütüphanesi';back.onclick=()=>{teacherPreviewMode=false;loadLibrary()}}
+ }
+};
+
+/* Öğretmen kütüphanesinde sürüm kartının görünümünü koru */
+document.head.insertAdjacentHTML('beforeend',`<style id="m281css">
+#m281-real-chess-card{border:2px solid #dce6ff;background:linear-gradient(145deg,#fff,#f5f8ff)}
+#m281-real-chess-card h3{font-size:20px;margin-bottom:7px}
+</style>`);
