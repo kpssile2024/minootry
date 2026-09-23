@@ -55,13 +55,13 @@ function notify(msg){let t=document.querySelector('#toast');if(!t){t=document.cr
 function modal(html){closeModal();const d=document.createElement('div');d.id='modal';d.className='modal';d.innerHTML=`<div class="modal-card">${html}</div>`;d.onclick=e=>{if(e.target===d)closeModal()};document.body.appendChild(d)}
 function closeModal(){document.querySelector('#modal')?.remove()}
 const avatar=(s,size='')=>s.photo_data?`<img class="avatar ${size}" src="${s.photo_data}" alt="">`:`<div class="avatar placeholder ${size}">🌱</div>`;
-function home(){teacherPass='';teacherToken='';teacherRole='';teacherName='';studentSession=null;currentClass=null;app.innerHTML=`<main class="center"><div class="logo">Minoo <span>v2.6.8</span></div><p class="tag">Oyna • Keşfet • Öğren</p><section class="card"><h2>Öğrenci girişi</h2><div class="login-grid"><input id="suser" placeholder="Kullanıcı adı" autocomplete="username"><input id="scode" type="password" placeholder="İlk giriş kodu / şifre" autocomplete="current-password" onkeydown="if(event.key==='Enter')studentLogin()"><button onclick="studentLogin()">Giriş yap</button></div></section><button class="link" onclick="staffLogin()">Öğretmen / Yönetici girişi</button><p class="safe">Reklamsız • Sohbetsiz • Öğretmen kontrollü</p></main>`}
-function staffLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="home()">← Geri</button><div class="logo">Minoo <span>v2.6.8</span></div><p class="tag">Giriş türünü seçin</p><div class="m267-role-grid"><button onclick="adminLogin()"><span>👑</span><b>Yönetici Girişi</b><small>Öğretmenleri, sınıfları ve sistemi yönet</small></button><button onclick="teacherLogin()"><span>👩‍🏫</span><b>Öğretmen Girişi</b><small>Size verilen kullanıcı adı ve şifreyle giriş yapın</small></button></div></main>`}
+function home(){teacherPass='';teacherToken='';teacherRole='';teacherName='';studentSession=null;currentClass=null;app.innerHTML=`<main class="center"><div class="logo">Minoo <span>v2.6.9</span></div><p class="tag">Oyna • Keşfet • Öğren</p><section class="card"><h2>Öğrenci girişi</h2><div class="login-grid"><input id="suser" placeholder="Kullanıcı adı" autocomplete="username"><input id="scode" type="password" placeholder="İlk giriş kodu / şifre" autocomplete="current-password" onkeydown="if(event.key==='Enter')studentLogin()"><button onclick="studentLogin()">Giriş yap</button></div></section><button class="link" onclick="staffLogin()">Öğretmen / Yönetici girişi</button><p class="safe">Reklamsız • Sohbetsiz • Öğretmen kontrollü</p></main>`}
+function staffLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="home()">← Geri</button><div class="logo">Minoo <span>v2.6.9</span></div><p class="tag">Giriş türünü seçin</p><div class="m267-role-grid"><button onclick="adminLogin()"><span>👑</span><b>Yönetici Girişi</b><small>Öğretmenleri, sınıfları ve sistemi yönet</small></button><button onclick="teacherLogin()"><span>👩‍🏫</span><b>Öğretmen Girişi</b><small>Size verilen kullanıcı adı ve şifreyle giriş yapın</small></button></div></main>`}
 function adminLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="staffLogin()">← Geri</button><div class="logo">Minoo <span>Yönetici</span></div><section class="card login-card"><h2>👑 Yönetici Girişi</h2><label>Yönetici şifresi</label><input id="ap" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAdminLogin()"><button onclick="doAdminLogin()">Giriş yap</button></section></main>`}
 async function doAdminLogin(){const p=document.querySelector('#ap').value;if(!p)return;try{teacherPass=p;const r=await api('/api/admin/login',{method:'POST',body:JSON.stringify({password:p})});teacherRole='admin';teacherName='Yönetici';dashboard()}catch(e){teacherPass='';notify(e.message)}}
 function teacherLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="staffLogin()">← Geri</button><div class="logo">Minoo <span>Öğretmen</span></div><section class="card login-card"><h2>👩‍🏫 Öğretmen Girişi</h2><label>Kullanıcı adı</label><input id="tu" autocomplete="username"><label>Şifre</label><input id="tp" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doTeacherLogin()"><button onclick="doTeacherLogin()">Giriş yap</button></section></main>`}
 async function doTeacherLogin(){const username=document.querySelector('#tu').value.trim(),password=document.querySelector('#tp').value;if(!username||!password)return notify('Kullanıcı adı ve şifre gerekli');try{const r=await fetch('/api/teacher/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})}).then(async x=>{const d=await x.json();if(!x.ok)throw Error(d.error);return d});teacherToken=r.token;teacherRole='teacher';teacherName=r.name;dashboard()}catch(e){teacherToken='';notify(e.message)}}
-async function dashboard(){const cs=await api('/api/classes');app.innerHTML=`<header><div><b>Minoo Öğretmen</b><small>v2.6.8</small></div><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="toolbar"><h1>Sınıflarım</h1><button onclick="addClass()">+ Sınıf</button></div><div class="grid">${cs.map(c=>`<article class="card"><h3>${esc(c.name)}</h3><p>${c.student_count} öğrenci</p><button onclick="openClass(${c.id})">Aç</button><div class="row"><button class="ghost" onclick="renameClass(${c.id},'${encodeURIComponent(c.name)}')">Adını değiştir</button><button class="danger ghost" onclick="deleteClass(${c.id},'${encodeURIComponent(c.name)}')">Sil</button></div></article>`).join('')}</div><hr><div class="toolbar"><h2>Oyun Kütüphanesi</h2><button onclick="gameForm()">+ Oyun ekle</button></div><div id="library"></div></main>`;loadLibrary()}
+async function dashboard(){const cs=await api('/api/classes');app.innerHTML=`<header><div><b>Minoo Öğretmen</b><small>v2.6.9</small></div><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="toolbar"><h1>Sınıflarım</h1><button onclick="addClass()">+ Sınıf</button></div><div class="grid">${cs.map(c=>`<article class="card"><h3>${esc(c.name)}</h3><p>${c.student_count} öğrenci</p><button onclick="openClass(${c.id})">Aç</button><div class="row"><button class="ghost" onclick="renameClass(${c.id},'${encodeURIComponent(c.name)}')">Adını değiştir</button><button class="danger ghost" onclick="deleteClass(${c.id},'${encodeURIComponent(c.name)}')">Sil</button></div></article>`).join('')}</div><hr><div class="toolbar"><h2>Oyun Kütüphanesi</h2><button onclick="gameForm()">+ Oyun ekle</button></div><div id="library"></div></main>`;loadLibrary()}
 async function loadLibrary(){const gs=await api('/api/games'),el=document.querySelector('#library');el.innerHTML=gs.length?`<div class="grid">${gs.map(g=>`<article class="card"><h3>${esc(g.title)}</h3><p>${g.game_type==='matching'?'🧩 Minoo Eşleştirme':g.game_type==='chess_intro'?'♟️ Satranç Taşlarını Tanı':g.game_type==='chess_names'?'🔊 Satranç Taşlarının İsimleri':g.game_type==='chess_setup'?'♟️ Satranç Taşlarını Dizelim':'🔗 Canva oyunu'}</p><p>${g.completed_count||0}/${g.assigned_count||0} tamamlandı</p><div class="row"><button class="ghost" onclick="teacherPreviewEncoded('${encodeURIComponent(JSON.stringify(g))}')">▶ Oyunu oyna</button><button onclick="gameForm(${g.id},'${encodeURIComponent(g.title)}','${encodeURIComponent(g.canva_url||'')}','${g.game_type||'external'}','${encodeURIComponent(g.game_data||'') }')">Düzenle</button><button class="danger ghost" onclick="deleteGame(${g.id},'${encodeURIComponent(g.title)}')">Sil</button></div></article>`).join('')}</div>`:'<p>Henüz oyun yok.</p>'}
 function addClass(){modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>Yeni sınıf</h2><label>Sınıf adı</label><input id="cn" autofocus><div class="modal-actions"><button class="ghost" onclick="closeModal()">Vazgeç</button><button onclick="saveClass()">Oluştur</button></div>`)}
 async function saveClass(){const name=document.querySelector('#cn').value.trim();if(!name)return;try{await api('/api/classes',{method:'POST',body:JSON.stringify({name})});closeModal();dashboard()}catch(e){notify(e.message)}}
@@ -849,7 +849,7 @@ setTimeout(()=>document.querySelectorAll('.logo span,header small').forEach(x=>{
 
 
 /* ===== Minoo v2.6.4 • Atölye alanları + Fen renk karışımı + Türkçe harf yazma ===== */
-const MINOO_VERSION='v2.6.8';
+const MINOO_VERSION='v2.6.9';
 
 function atelierHome(){
   modal(`<button class="modal-x" onclick="closeModal()">×</button>
@@ -989,7 +989,7 @@ document.head.insertAdjacentHTML('beforeend',`<style id="minoo264">
 
 
 /* ===== Minoo v2.6.5 • toplu düzeltme ===== */
-const MINOO_VERSION_265='v2.6.8';
+const MINOO_VERSION_265='v2.6.9';
 
 /* Güvenli ortak ana sayfa */
 async function m265Home(){
@@ -1125,7 +1125,7 @@ function m265LetterBack(){const s=window._m264letter;if(s.phase==='trace'){s.pha
 const _m264LetterRender265=m264LetterRender;
 m264LetterRender=function(){_m264LetterRender265();const h=document.querySelector('header');if(h){const old=h.querySelector('button');if(old)old.outerHTML=`<div style="display:flex;gap:8px"><button class="ghost" onclick="m265LetterBack()">← Geri</button><button class="ghost" onclick="m265Home()">⌂ Ana Sayfa</button></div>`}};
 
-/* İngilizce v2.6.8: önce öğretici, sonra 10 aşamalı test */
+/* İngilizce v2.6.9: önce öğretici, sonra 10 aşamalı test */
 const M266_ENGLISH={
  body:{title:'Vücudun Bölümleri',icon:'🧍',items:[['👀','eyes'],['👂','ears'],['👃','nose'],['👄','mouth'],['✋','hand'],['🦶','foot'],['🦵','leg'],['💪','arm'],['🦷','teeth'],['👅','tongue']]},
  colors:{title:'Renkler',icon:'🎨',items:[['🔴','red'],['🔵','blue'],['🟡','yellow'],['🟢','green'],['🟠','orange'],['🟣','purple'],['⚫','black'],['⚪','white'],['🩷','pink'],['🟤','brown']]},
@@ -1218,7 +1218,7 @@ document.head.insertAdjacentHTML('beforeend',`<style id="m266english">
 </style>`);
 
 
-/* ===== v2.6.8 yönetici/öğretmen + sayaç müziği + At kesin L ===== */
+/* ===== v2.6.9 yönetici/öğretmen + sayaç müziği + At kesin L ===== */
 const _dashboard267=dashboard;
 dashboard=async function(){
   await _dashboard267();
@@ -1294,7 +1294,7 @@ document.head.insertAdjacentHTML('beforeend',`<style id="m267css">
 </style>`);
 
 
-/* v2.6.8: Satranç hareket çizgileri tek parça; marker çizginin gerçek ucuna bağlı */
+/* v2.6.9: Satranç hareket çizgileri tek parça; marker çizginin gerçek ucuna bağlı */
 m263ShowMoves=function(type,pos){
  const svg=document.querySelector('.m262-overlay');if(!svg)return;
  svg.setAttribute('viewBox','0 0 100 100');svg.setAttribute('preserveAspectRatio','none');
@@ -1313,7 +1313,7 @@ m263ShowMoves=function(type,pos){
 };
 
 
-/* v2.6.8 • Fen Dijital Deneyleri */
+/* v2.6.9 • Fen Dijital Deneyleri */
 const M268_EXPERIMENTS={
  sink:{title:'Batar mı, Yüzer mi?',icon:'🛟',desc:'Nesneleri suya bırak, tahmin et ve sonucu gözlemle.'},
  shadow:{title:'Işık ve Gölge',icon:'🔦',desc:'Işığı yaklaştırıp uzaklaştır; gölgenin nasıl değiştiğini keşfet.'},
@@ -1364,3 +1364,58 @@ document.head.insertAdjacentHTML('beforeend',`<style id="m268css">
 .m268-water{height:120px;border-radius:25px;background:linear-gradient(#bfeaff,#6fc8ef);display:grid;place-items:center;font-size:45px}.m268-water span{font-size:16px}.m268-shadowlab{height:300px;border-radius:26px;background:#fff5ce;position:relative;overflow:hidden;margin:20px 0}.m268-shadowlab .lamp{position:absolute;left:8%;top:42%;font-size:70px}.m268-shadowlab .toy{position:absolute;left:48%;top:40%;font-size:80px;z-index:2}.m268-shadowlab .shadow{position:absolute;right:14%;top:43%;font-size:90px;color:#4b4655;opacity:.35;transition:transform .2s}.m268-magnet{font-size:100px;margin:15px}.m268-plant{font-size:130px;transition:.4s}.m268-plant.grown{transform:scale(1.2)}.m268-growbtns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 @media(max-width:700px){.m268-expgrid{grid-template-columns:1fr}.m268-items{grid-template-columns:repeat(2,1fr)}}
 </style>`);
+
+
+/* ===== v2.6.9 • gerçek zamana bağlı sayaç düzeltmesi ===== */
+let m269EndAt=0,m269Paused=null,m269Loop=null,m269Total=0;
+function m269Remaining(){
+ if(minooTimer.running&&m269EndAt)return Math.max(0,Math.ceil((m269EndAt-Date.now())/1000));
+ if(m269Paused!==null)return Math.max(0,m269Paused);
+ return Math.max(0,Number(minooTimer.left||0));
+}
+function m269Paint(){
+ const left=m269Remaining(); minooTimer.left=left;
+ const mm=String(Math.floor(left/60)).padStart(2,'0'),ss=String(left%60).padStart(2,'0');
+ document.querySelectorAll('.timer-time,.timer-clock,.timer-display,[data-timer-time]').forEach(el=>el.textContent=`${mm}:${ss}`);
+ const total=Math.max(1,m269Total||Number(minooTimer.total||0)||left||1);
+ document.documentElement.style.setProperty('--minoo-timer-progress',String(1-left/total));
+ document.documentElement.style.setProperty('--minoo-timer-remaining',String(left/total));
+ if(left<=0&&minooTimer.running){
+   minooTimer.running=false;m269EndAt=0;m269Paused=0;
+   if(m269Loop){clearInterval(m269Loop);m269Loop=null}
+   if(typeof m267MusicStop==='function')m267MusicStop();
+   try{if(typeof timerFinish==='function')timerFinish()}catch(e){}
+ }
+}
+function m269Run(){
+ if(m269Loop)clearInterval(m269Loop);
+ m269Paint();m269Loop=setInterval(m269Paint,250);
+}
+const m269ToggleBase=timerToggleRun;
+timerToggleRun=function(){
+ const was=Boolean(minooTimer.running);
+ if(!was){
+   const rem=m269Paused!==null?m269Paused:Math.max(1,Number(minooTimer.left||minooTimer.total||60));
+   m269Total=Math.max(m269Total,Number(minooTimer.total||0),rem);
+   m269EndAt=Date.now()+rem*1000;m269Paused=null;
+ }else{
+   m269Paused=m269Remaining();m269EndAt=0;
+ }
+ m269ToggleBase();
+ if(minooTimer.running){
+   if(!m269EndAt){const rem=m269Paused!==null?m269Paused:Math.max(1,Number(minooTimer.left||1));m269EndAt=Date.now()+rem*1000;m269Paused=null}
+   m269Run();
+ }else{
+   if(m269Loop){clearInterval(m269Loop);m269Loop=null}
+   m269Paint();
+ }
+}
+const m269ResetBase=timerReset;
+timerReset=function(){
+ if(m269Loop){clearInterval(m269Loop);m269Loop=null}
+ m269EndAt=0;m269Paused=null;m269Total=0;
+ m269ResetBase();
+ m269Total=Number(minooTimer.total||minooTimer.left||0);
+ m269Paint();
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&minooTimer&&minooTimer.running)m269Paint()});
