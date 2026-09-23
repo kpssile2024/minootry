@@ -55,13 +55,13 @@ function notify(msg){let t=document.querySelector('#toast');if(!t){t=document.cr
 function modal(html){closeModal();const d=document.createElement('div');d.id='modal';d.className='modal';d.innerHTML=`<div class="modal-card">${html}</div>`;d.onclick=e=>{if(e.target===d)closeModal()};document.body.appendChild(d)}
 function closeModal(){document.querySelector('#modal')?.remove()}
 const avatar=(s,size='')=>s.photo_data?`<img class="avatar ${size}" src="${s.photo_data}" alt="">`:`<div class="avatar placeholder ${size}">🌱</div>`;
-function home(){teacherPass='';teacherToken='';teacherRole='';teacherName='';studentSession=null;currentClass=null;app.innerHTML=`<main class="center"><div class="logo">Minoo <span>v2.7.0</span></div><p class="tag">Oyna • Keşfet • Öğren</p><section class="card"><h2>Öğrenci girişi</h2><div class="login-grid"><input id="suser" placeholder="Kullanıcı adı" autocomplete="username"><input id="scode" type="password" placeholder="İlk giriş kodu / şifre" autocomplete="current-password" onkeydown="if(event.key==='Enter')studentLogin()"><button onclick="studentLogin()">Giriş yap</button></div></section><button class="link" onclick="staffLogin()">Öğretmen / Yönetici girişi</button><p class="safe">Reklamsız • Sohbetsiz • Öğretmen kontrollü</p></main>`}
-function staffLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="home()">← Geri</button><div class="logo">Minoo <span>v2.7.0</span></div><p class="tag">Giriş türünü seçin</p><div class="m267-role-grid"><button onclick="adminLogin()"><span>👑</span><b>Yönetici Girişi</b><small>Öğretmenleri, sınıfları ve sistemi yönet</small></button><button onclick="teacherLogin()"><span>👩‍🏫</span><b>Öğretmen Girişi</b><small>Size verilen kullanıcı adı ve şifreyle giriş yapın</small></button></div></main>`}
+function home(){teacherPass='';teacherToken='';teacherRole='';teacherName='';studentSession=null;currentClass=null;app.innerHTML=`<main class="center"><div class="logo">Minoo <span>v2.7.1</span></div><p class="tag">Oyna • Keşfet • Öğren</p><section class="card"><h2>Öğrenci girişi</h2><div class="login-grid"><input id="suser" placeholder="Kullanıcı adı" autocomplete="username"><input id="scode" type="password" placeholder="İlk giriş kodu / şifre" autocomplete="current-password" onkeydown="if(event.key==='Enter')studentLogin()"><button onclick="studentLogin()">Giriş yap</button></div></section><button class="link" onclick="staffLogin()">Öğretmen / Yönetici girişi</button><p class="safe">Reklamsız • Sohbetsiz • Öğretmen kontrollü</p></main>`}
+function staffLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="home()">← Geri</button><div class="logo">Minoo <span>v2.7.1</span></div><p class="tag">Giriş türünü seçin</p><div class="m267-role-grid"><button onclick="adminLogin()"><span>👑</span><b>Yönetici Girişi</b><small>Öğretmenleri, sınıfları ve sistemi yönet</small></button><button onclick="teacherLogin()"><span>👩‍🏫</span><b>Öğretmen Girişi</b><small>Size verilen kullanıcı adı ve şifreyle giriş yapın</small></button></div></main>`}
 function adminLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="staffLogin()">← Geri</button><div class="logo">Minoo <span>Yönetici</span></div><section class="card login-card"><h2>👑 Yönetici Girişi</h2><label>Yönetici şifresi</label><input id="ap" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAdminLogin()"><button onclick="doAdminLogin()">Giriş yap</button></section></main>`}
 async function doAdminLogin(){const p=document.querySelector('#ap').value;if(!p)return;try{teacherPass=p;const r=await api('/api/admin/login',{method:'POST',body:JSON.stringify({password:p})});teacherRole='admin';teacherName='Yönetici';dashboard()}catch(e){teacherPass='';notify(e.message)}}
 function teacherLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="staffLogin()">← Geri</button><div class="logo">Minoo <span>Öğretmen</span></div><section class="card login-card"><h2>👩‍🏫 Öğretmen Girişi</h2><label>Kullanıcı adı</label><input id="tu" autocomplete="username"><label>Şifre</label><input id="tp" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doTeacherLogin()"><button onclick="doTeacherLogin()">Giriş yap</button></section></main>`}
 async function doTeacherLogin(){const username=document.querySelector('#tu').value.trim(),password=document.querySelector('#tp').value;if(!username||!password)return notify('Kullanıcı adı ve şifre gerekli');try{const r=await fetch('/api/teacher/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})}).then(async x=>{const d=await x.json();if(!x.ok)throw Error(d.error);return d});teacherToken=r.token;teacherRole='teacher';teacherName=r.name;dashboard()}catch(e){teacherToken='';notify(e.message)}}
-async function dashboard(){const cs=await api('/api/classes');app.innerHTML=`<header><div><b>Minoo Öğretmen</b><small>v2.7.0</small></div><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="toolbar"><h1>Sınıflarım</h1><button onclick="addClass()">+ Sınıf</button></div><div class="grid">${cs.map(c=>`<article class="card"><h3>${esc(c.name)}</h3><p>${c.student_count} öğrenci</p><button onclick="openClass(${c.id})">Aç</button><div class="row"><button class="ghost" onclick="renameClass(${c.id},'${encodeURIComponent(c.name)}')">Adını değiştir</button><button class="danger ghost" onclick="deleteClass(${c.id},'${encodeURIComponent(c.name)}')">Sil</button></div></article>`).join('')}</div><hr><div class="toolbar"><h2>Oyun Kütüphanesi</h2><button onclick="gameForm()">+ Oyun ekle</button></div><div id="library"></div></main>`;loadLibrary()}
+async function dashboard(){const cs=await api('/api/classes');app.innerHTML=`<header><div><b>Minoo Öğretmen</b><small>v2.7.1</small></div><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="toolbar"><h1>Sınıflarım</h1><button onclick="addClass()">+ Sınıf</button></div><div class="grid">${cs.map(c=>`<article class="card"><h3>${esc(c.name)}</h3><p>${c.student_count} öğrenci</p><button onclick="openClass(${c.id})">Aç</button><div class="row"><button class="ghost" onclick="renameClass(${c.id},'${encodeURIComponent(c.name)}')">Adını değiştir</button><button class="danger ghost" onclick="deleteClass(${c.id},'${encodeURIComponent(c.name)}')">Sil</button></div></article>`).join('')}</div><hr><div class="toolbar"><h2>Oyun Kütüphanesi</h2><button onclick="gameForm()">+ Oyun ekle</button></div><div id="library"></div></main>`;loadLibrary()}
 async function loadLibrary(){const gs=await api('/api/games'),el=document.querySelector('#library');el.innerHTML=gs.length?`<div class="grid">${gs.map(g=>`<article class="card"><h3>${esc(g.title)}</h3><p>${g.game_type==='matching'?'🧩 Minoo Eşleştirme':g.game_type==='chess_intro'?'♟️ Satranç Taşlarını Tanı':g.game_type==='chess_names'?'🔊 Satranç Taşlarının İsimleri':g.game_type==='chess_setup'?'♟️ Satranç Taşlarını Dizelim':'🔗 Canva oyunu'}</p><p>${g.completed_count||0}/${g.assigned_count||0} tamamlandı</p><div class="row"><button class="ghost" onclick="teacherPreviewEncoded('${encodeURIComponent(JSON.stringify(g))}')">▶ Oyunu oyna</button><button onclick="gameForm(${g.id},'${encodeURIComponent(g.title)}','${encodeURIComponent(g.canva_url||'')}','${g.game_type||'external'}','${encodeURIComponent(g.game_data||'') }')">Düzenle</button><button class="danger ghost" onclick="deleteGame(${g.id},'${encodeURIComponent(g.title)}')">Sil</button></div></article>`).join('')}</div>`:'<p>Henüz oyun yok.</p>'}
 function addClass(){modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>Yeni sınıf</h2><label>Sınıf adı</label><input id="cn" autofocus><div class="modal-actions"><button class="ghost" onclick="closeModal()">Vazgeç</button><button onclick="saveClass()">Oluştur</button></div>`)}
 async function saveClass(){const name=document.querySelector('#cn').value.trim();if(!name)return;try{await api('/api/classes',{method:'POST',body:JSON.stringify({name})});closeModal();dashboard()}catch(e){notify(e.message)}}
@@ -849,7 +849,7 @@ setTimeout(()=>document.querySelectorAll('.logo span,header small').forEach(x=>{
 
 
 /* ===== Minoo v2.6.4 • Atölye alanları + Fen renk karışımı + Türkçe harf yazma ===== */
-const MINOO_VERSION='v2.7.0';
+const MINOO_VERSION='v2.7.1';
 
 function atelierHome(){
   modal(`<button class="modal-x" onclick="closeModal()">×</button>
@@ -989,7 +989,7 @@ document.head.insertAdjacentHTML('beforeend',`<style id="minoo264">
 
 
 /* ===== Minoo v2.6.5 • toplu düzeltme ===== */
-const MINOO_VERSION_265='v2.7.0';
+const MINOO_VERSION_265='v2.7.1';
 
 /* Güvenli ortak ana sayfa */
 async function m265Home(){
@@ -1125,7 +1125,7 @@ function m265LetterBack(){const s=window._m264letter;if(s.phase==='trace'){s.pha
 const _m264LetterRender265=m264LetterRender;
 m264LetterRender=function(){_m264LetterRender265();const h=document.querySelector('header');if(h){const old=h.querySelector('button');if(old)old.outerHTML=`<div style="display:flex;gap:8px"><button class="ghost" onclick="m265LetterBack()">← Geri</button><button class="ghost" onclick="m265Home()">⌂ Ana Sayfa</button></div>`}};
 
-/* İngilizce v2.7.0: önce öğretici, sonra 10 aşamalı test */
+/* İngilizce v2.7.1: önce öğretici, sonra 10 aşamalı test */
 const M266_ENGLISH={
  body:{title:'Vücudun Bölümleri',icon:'🧍',items:[['👀','eyes'],['👂','ears'],['👃','nose'],['👄','mouth'],['✋','hand'],['🦶','foot'],['🦵','leg'],['💪','arm'],['🦷','teeth'],['👅','tongue']]},
  colors:{title:'Renkler',icon:'🎨',items:[['🔴','red'],['🔵','blue'],['🟡','yellow'],['🟢','green'],['🟠','orange'],['🟣','purple'],['⚫','black'],['⚪','white'],['🩷','pink'],['🟤','brown']]},
@@ -1218,7 +1218,7 @@ document.head.insertAdjacentHTML('beforeend',`<style id="m266english">
 </style>`);
 
 
-/* ===== v2.7.0 yönetici/öğretmen + sayaç müziği + At kesin L ===== */
+/* ===== v2.7.1 yönetici/öğretmen + sayaç müziği + At kesin L ===== */
 const _dashboard267=dashboard;
 dashboard=async function(){
   await _dashboard267();
@@ -1294,7 +1294,7 @@ document.head.insertAdjacentHTML('beforeend',`<style id="m267css">
 </style>`);
 
 
-/* v2.7.0: Satranç hareket çizgileri tek parça; marker çizginin gerçek ucuna bağlı */
+/* v2.7.1: Satranç hareket çizgileri tek parça; marker çizginin gerçek ucuna bağlı */
 m263ShowMoves=function(type,pos){
  const svg=document.querySelector('.m262-overlay');if(!svg)return;
  svg.setAttribute('viewBox','0 0 100 100');svg.setAttribute('preserveAspectRatio','none');
@@ -1313,7 +1313,7 @@ m263ShowMoves=function(type,pos){
 };
 
 
-/* v2.7.0 • Fen Dijital Deneyleri */
+/* v2.7.1 • Fen Dijital Deneyleri */
 const M268_EXPERIMENTS={
  sink:{title:'Batar mı, Yüzer mi?',icon:'🛟',desc:'Nesneleri suya bırak, tahmin et ve sonucu gözlemle.'},
  shadow:{title:'Işık ve Gölge',icon:'🔦',desc:'Işığı yaklaştırıp uzaklaştır; gölgenin nasıl değiştiğini keşfet.'},
@@ -1366,7 +1366,7 @@ document.head.insertAdjacentHTML('beforeend',`<style id="m268css">
 </style>`);
 
 
-/* ===== v2.7.0 • gerçek zamana bağlı sayaç düzeltmesi ===== */
+/* ===== v2.7.1 • gerçek zamana bağlı sayaç düzeltmesi ===== */
 let m269EndAt=0,m269Paused=null,m269Loop=null,m269Total=0;
 function m269Remaining(){
  if(minooTimer.running&&m269EndAt)return Math.max(0,Math.ceil((m269EndAt-Date.now())/1000));
@@ -1421,7 +1421,7 @@ timerReset=function(){
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&minooTimer&&minooTimer.running)m269Paint()});
 
 
-/* ===== Minoo v2.7.0 • İlk Güncelleme ===== */
+/* ===== Minoo v2.7.1 • İlk Güncelleme ===== */
 
 /* 1) İngilizce: öğretici görsel ve her seçenek kendi İngilizce sesini verir.
       "Soruyu Dinle" yalnız o aşamanın hedef kelimesini söyler. */
@@ -1531,3 +1531,244 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('.timer-back');if(!b)return;
   if(typeof m267MusicStop==='function')m267MusicStop();
 },true);
+
+
+/* ============================================================
+   MINOO v2.7.1 • SES + FEN ETKİLEŞİMİ + YÖN ÇİZİMİ
+   ============================================================ */
+window.m271VoiceOn = (window.m271VoiceOn!==false);
+function m271Speak(text,lang='tr-TR'){
+  if(!window.m271VoiceOn || !text || !('speechSynthesis' in window))return;
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(String(text));
+    u.lang=lang;u.rate=lang.startsWith('en')?.70:.82;u.pitch=1.03;u.volume=1;
+    const vs=speechSynthesis.getVoices()||[];
+    u.voice=vs.find(v=>v.lang.toLowerCase().startsWith(lang.slice(0,2).toLowerCase()))||null;
+    speechSynthesis.resume();setTimeout(()=>speechSynthesis.speak(u),45);
+  }catch(e){}
+}
+function m271VoiceToggle(){
+  window.m271VoiceOn=!window.m271VoiceOn;
+  if(!window.m271VoiceOn && window.speechSynthesis)speechSynthesis.cancel();
+  const b=document.querySelector('#m271VoiceBtn');if(b)b.textContent=window.m271VoiceOn?'🔊 Ses Açık':'🔇 Ses Kapalı';
+}
+function m271VoiceButton(){return `<button id="m271VoiceBtn" class="ghost" onclick="m271VoiceToggle()">${window.m271VoiceOn?'🔊 Ses Açık':'🔇 Ses Kapalı'}</button>`}
+
+/* ---------- İngilizce: Soruyu Dinle düğmesini quizde kesin göster ---------- */
+m266EnglishQuiz=function(){
+ const s=window._m266en,t=s.topic,target=t.items[s.i],ids=m268QuizOptions();
+ app.innerHTML=`<header><button class="ghost" onclick="m266EnglishRenderTeach()">← Öğretici</button><b>🇬🇧 ${t.title}</b><button class="ghost" onclick="m265Home()">⌂ Ana Sayfa</button></header>
+ <main class="m266-en"><div class="m266-progress"><i style="width:${(s.i+1)*10}%"></i></div>
+ <h1>Listen and choose! 👂</h1>
+ <div class="m271-questionbar"><button class="m271-listen-big" onclick="m271Speak(${JSON.stringify(target[1])},'en-US')">🔊 Soruyu Dinle</button></div>
+ <p>Önce soruyu dinle. Sonra bir resme dokun.</p>
+ <div class="m265-enopts">${ids.map(j=>{const o=t.items[j];return `<button type="button" data-en-index="${j}" onclick="m266EnglishPick(${j},this)"><span>${o[0]}</span><small>🔊 ${o[1]}</small></button>`}).join('')}</div>
+ <button onclick="m266EnglishCheck()">✓ Kontrol Et</button><p class="m268-qcount">${s.i+1}/10</p></main>`;
+ setTimeout(()=>m271Speak(target[1],'en-US'),180);
+}
+m265Say=function(w){m271Speak(w,'en-US')};
+
+/* ---------- Satranç: her soru/yönerge için ses + kapatma + tekrar dinleme ---------- */
+function m271ChessEnhance(){
+ const board=document.querySelector('.m262-board,.v261-board,.chess-board,[class*="chess-board"]');
+ if(!board)return;
+ const main=board.closest('main')||document.querySelector('main'); if(!main)return;
+ const ins=main.querySelector('.v261-instruction,.m263-instruction,.chess-instruction,.instruction');
+ if(!ins||ins.dataset.m271Voice)return;
+ ins.dataset.m271Voice='1';
+ const text=ins.textContent.trim();
+ const bar=document.createElement('div');bar.className='m271-voicebar';
+ bar.innerHTML=`${m271VoiceButton()}<button class="ghost" type="button">🔁 Tekrar Dinle</button>`;
+ bar.querySelectorAll('button')[1].onclick=()=>m271Speak(text,'tr-TR');
+ ins.after(bar);
+ setTimeout(()=>m271Speak(text,'tr-TR'),180);
+}
+const m271ChessObs=new MutationObserver(()=>setTimeout(m271ChessEnhance,30));
+m271ChessObs.observe(document.documentElement,{childList:true,subtree:true});
+
+/* ---------- Piyano: gerçek duyulur piyano-benzeri WebAudio ---------- */
+M267_MUSIC.classicpiano={name:'🎹 Klasik Piyano',notes:[261.63,329.63,392,523.25,493.88,392,349.23,293.66,261.63,329.63,440,392]};
+function m267MusicNote(){
+ if(!minooTimer.running||minooTimer.music==='off')return;
+ try{
+   const A=window.AudioContext||window.webkitAudioContext;
+   if(!m267MusicCtx)m267MusicCtx=new A();
+   if(m267MusicCtx.state==='suspended')m267MusicCtx.resume();
+   const ctx=m267MusicCtx,seq=M267_MUSIC[minooTimer.music]?.notes||M267_MUSIC.calm.notes;
+   const n=seq[m267MusicStep++%seq.length],now=ctx.currentTime;
+   [1,2].forEach((harm,h)=>{
+     const o=ctx.createOscillator(),g=ctx.createGain(),f=ctx.createBiquadFilter();
+     o.type=h?'triangle':'sine';o.frequency.value=Number(n)*harm;
+     f.type='lowpass';f.frequency.value=1800;
+     const vol=Math.max(.018,Number(minooTimer.musicVolume||.16)*(h?.16:.42));
+     g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(vol,now+.015);
+     g.gain.exponentialRampToValueAtTime(.0001,now+1.05);
+     o.connect(f);f.connect(g);g.connect(ctx.destination);o.start(now);o.stop(now+1.08);
+   });
+ }catch(e){console.warn('Piano',e)}
+}
+function m267MusicStart(){m267MusicStop();if(minooTimer.music==='off'||!minooTimer.running)return;m267MusicNote();m267MusicTimer=setInterval(m267MusicNote,minooTimer.music==='classicpiano'?620:780)}
+
+/* ---------- Fen: ortak sesli soru kabuğu ---------- */
+function m271ScienceShell(title,question,body){
+ app.innerHTML=`<header><button class="ghost" onclick="m264ScienceHome()">← Fen</button><b>🔬 ${title}</b><button class="ghost" onclick="m265Home()">⌂ Ana Sayfa</button></header>
+ <main class="m268-exp"><div class="m271-science-head"><h1>${question}</h1><div class="m271-voicebar">${m271VoiceButton()}<button class="ghost" onclick="m271Speak(${JSON.stringify(question)},'tr-TR')">🔁 Soruyu Dinle</button></div></div>${body}</main>`;
+ setTimeout(()=>m271Speak(question,'tr-TR'),180);
+}
+
+/* Batar-yüzer: nesneyi sürükleyip suya gerçekten bırak */
+function m268Sink(){
+ const items=[['🪨','Taş',false],['🪵','Tahta',true],['🪙','Madeni para',false],['🍃','Yaprak',true],['🧽','Sünger',true]];
+ window._m271Sink=Object.fromEntries(items.map((x,i)=>[String(i),x]));
+ m271ScienceShell('Batar mı, Yüzer mi?','Sence hangisi batar, hangisi yüzer? Nesneyi suya bırak.',
+ `<div id="m271Water" class="m271-dropzone m271-water"><span>💧</span><b>SU</b><small>Nesneyi buraya sürükle</small></div>
+ <div class="m271-dragtray">${items.map((x,i)=>`<div class="m271-dragitem" draggable="true" data-sink="${i}"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('')}</div>
+ <p id="m271ScienceResult" class="hint">Bir nesneyi tutup suyun üzerine bırak.</p>`);
+ m271BindDrag('#m271Water','sink');
+}
+function m271SinkDrop(id){
+ const x=window._m271Sink[id];if(!x)return;
+ const zone=document.querySelector('#m271Water'),res=document.querySelector('#m271ScienceResult');
+ zone.classList.remove('result-green','result-red');zone.classList.add(x[2]?'result-green':'result-red');
+ zone.querySelector('span').textContent=x[0];
+ res.textContent=`${x[1]} ${x[2]?'yüzer.':'batar.'}`;
+ m271Speak(`${x[1]} ${x[2]?'yüzer':'batar'}.`,'tr-TR');
+}
+
+/* Mıknatıs: nesneyi sürükleyip mıknatısa yaklaştır; çeker=yeşil, çekmez=kırmızı */
+function m268Magnet(){
+ const items=[['📎','Ataş',true],['🪙','Metal para',true],['🧸','Oyuncak',false],['🪵','Tahta',false],['🧴','Plastik',false]];
+ window._m271Mag=Object.fromEntries(items.map((x,i)=>[String(i),x]));
+ m271ScienceShell('Mıknatıs Neyi Çeker?','Sence mıknatıs hangisini çeker? Nesneyi mıknatısa yaklaştır.',
+ `<div id="m271Magnet" class="m271-dropzone m271-magnet"><span>🧲</span><b>MIKNATIS</b><small>Nesneyi buraya sürükle</small></div>
+ <div class="m271-dragtray">${items.map((x,i)=>`<div class="m271-dragitem" draggable="true" data-magnet="${i}"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('')}</div>
+ <p id="m271ScienceResult" class="hint">Bir nesneyi tutup mıknatısın üzerine bırak.</p>`);
+ m271BindDrag('#m271Magnet','magnet');
+}
+function m271MagDrop(id){
+ const x=window._m271Mag[id];if(!x)return;
+ const zone=document.querySelector('#m271Magnet'),res=document.querySelector('#m271ScienceResult');
+ zone.classList.remove('result-green','result-red');zone.classList.add(x[2]?'result-green':'result-red');
+ zone.querySelector('span').textContent=x[2]?'🧲 '+x[0]:'🧲';
+ res.innerHTML=`<strong class="${x[2]?'m271-green':'m271-red'}">${x[1]} ${x[2]?'mıknatıs tarafından çekilir.':'mıknatıs tarafından çekilmez.'}</strong>`;
+ m271Speak(`${x[1]} ${x[2]?'mıknatıs tarafından çekilir':'mıknatıs tarafından çekilmez'}.`,'tr-TR');
+}
+function m271BindDrag(zoneSel,type){
+ const zone=document.querySelector(zoneSel);if(!zone)return;
+ document.querySelectorAll('.m271-dragitem').forEach(el=>{
+   el.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',el.dataset.sink??el.dataset.magnet);e.dataTransfer.effectAllowed='move'});
+   /* mobil/dokunmatik için Pointer Events */
+   let ghost=null;
+   el.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')return;el.setPointerCapture?.(e.pointerId);ghost=el;el.classList.add('dragging')});
+   el.addEventListener('pointermove',e=>{if(!ghost)return;el.style.transform=`translate(${e.clientX-el.getBoundingClientRect().left-el.offsetWidth/2}px,${e.clientY-el.getBoundingClientRect().top-el.offsetHeight/2}px)`});
+   el.addEventListener('pointerup',e=>{if(!ghost)return;const r=zone.getBoundingClientRect(),inside=e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom;el.style.transform='';el.classList.remove('dragging');ghost=null;if(inside){const id=el.dataset.sink??el.dataset.magnet;type==='sink'?m271SinkDrop(id):m271MagDrop(id)}});
+ });
+ zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag-over')});
+ zone.addEventListener('dragleave',()=>zone.classList.remove('drag-over'));
+ zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('drag-over');const id=e.dataTransfer.getData('text/plain');type==='sink'?m271SinkDrop(id):m271MagDrop(id)});
+}
+
+/* Bitki: büyüme/solma animasyonlu */
+m268GrowState={water:0,sun:0};
+function m268Grow(){
+ m268GrowState={water:0,sun:0};
+ m271ScienceShell('Bitkinin İhtiyaçları','Bitkinin büyümesi için neye ihtiyacı var?',
+ `<div class="m271-plant-scene"><div class="m271-sun" id="m271Sun">☀️</div><div class="m271-cloud" id="m271Cloud">💧</div><div id="m268plant" class="m271-plant">🌱</div><div class="m271-soil"></div></div>
+ <div class="m268-growbtns"><button onclick="m268GrowDo('water')">💧 Su ver</button><button onclick="m268GrowDo('sun')">☀️ Işığa çıkar</button><button onclick="m268GrowDo('dark')">🌑 Karanlıkta bırak</button></div>
+ <p id="m268growtext">Su ve ışığı deneyerek bitkinin gelişimini gözlemle.</p>`);
+}
+function m268GrowDo(k){
+ const p=document.querySelector('#m268plant'),t=document.querySelector('#m268growtext');
+ if(k==='water'){m268GrowState.water++;document.querySelector('#m271Cloud')?.classList.add('rain');setTimeout(()=>document.querySelector('#m271Cloud')?.classList.remove('rain'),900);m271Speak('Bitkiye su verdin.','tr-TR')}
+ if(k==='sun'){m268GrowState.sun++;document.querySelector('#m271Sun')?.classList.add('shine');setTimeout(()=>document.querySelector('#m271Sun')?.classList.remove('shine'),900);m271Speak('Bitkiyi ışığa çıkardın.','tr-TR')}
+ if(k==='dark'){p.textContent='🥀';p.className='m271-plant wilt';t.textContent='Işık olmadan bitki iyi gelişemedi.';m271Speak(t.textContent,'tr-TR');return}
+ if(m268GrowState.water&&m268GrowState.sun){p.textContent='🌿';p.className='m271-plant grow';t.textContent='Su ve ışık birlikte bitkinin büyümesine yardımcı oldu.';m271Speak(t.textContent,'tr-TR')}
+ else t.textContent=k==='water'?'Su verdin. Şimdi ışığı da deneyelim.':'Işık verdin. Şimdi suyu da deneyelim.';
+}
+
+/* Işık-gölge sorusu da otomatik sesli */
+const m271ShadowBase=m268Shadow;
+m268Shadow=function(){m271ShadowBase();const h=document.querySelector('.m268-exp h1');if(h){const q=h.textContent.trim(),bar=document.createElement('div');bar.className='m271-voicebar';bar.innerHTML=`${m271VoiceButton()}<button class="ghost">🔁 Soruyu Dinle</button>`;bar.lastElementChild.onclick=()=>m271Speak(q,'tr-TR');h.after(bar);setTimeout(()=>m271Speak(q,'tr-TR'),180)}}
+
+/* ---------- Satranç yönleri: öğretici çizgiler kesintisiz + çocuk serbestçe parmağı/fareyle çizer ---------- */
+function m271DirSegments(type){
+ const L=[];
+ if(type==='vertical')for(let i=0;i<8;i++)L.push([i+.5,0,i+.5,8]);
+ if(type==='horizontal')for(let i=0;i<8;i++)L.push([0,i+.5,8,i+.5]);
+ if(type==='diag1'){
+   for(let k=-7;k<=7;k++){let x1=Math.max(0,k),y1=Math.max(0,-k),x2=Math.min(8,8+k),y2=Math.min(8,8-k);if(Math.hypot(x2-x1,y2-y1)>1)L.push([x1,y1,x2,y2])}
+ }
+ if(type==='diag2'){
+   for(let sum=1;sum<=15;sum++){let x1=Math.max(0,sum-8),y1=Math.min(8,sum),x2=Math.min(8,sum),y2=Math.max(0,sum-8);if(Math.hypot(x2-x1,y2-y1)>1)L.push([x1,y1,x2,y2])}
+ }
+ return L;
+}
+m262DrawGuide=function(type){
+ const svg=document.querySelector('.m262-overlay');if(!svg)return;
+ svg.setAttribute('viewBox','0 0 100 100');svg.setAttribute('preserveAspectRatio','none');
+ svg.innerHTML=m271DirSegments(type).map((l,i)=>`<line class="m271-guide" x1="${l[0]*12.5}" y1="${l[1]*12.5}" x2="${l[2]*12.5}" y2="${l[3]*12.5}" style="--delay:${i*.045}s"/>`).join('');
+}
+m262EnableDraw=function(type){
+ const wrap=document.querySelector('.m262-dirwrap'),svg=document.querySelector('.m262-overlay'),s=window._m262dir;if(!wrap||!svg)return;
+ svg.style.pointerEvents='auto';svg.setAttribute('viewBox','0 0 100 100');svg.setAttribute('preserveAspectRatio','none');
+ let drawing=false,current=null,pts=[];
+ const point=e=>{const r=svg.getBoundingClientRect();return [Math.max(0,Math.min(100,(e.clientX-r.left)/r.width*100)),Math.max(0,Math.min(100,(e.clientY-r.top)/r.height*100))]};
+ const down=e=>{e.preventDefault();drawing=true;pts=[point(e)];current=document.createElementNS('http://www.w3.org/2000/svg','polyline');current.setAttribute('class','m271-kidfree');current.setAttribute('points',pts[0].join(','));svg.appendChild(current);svg.setPointerCapture?.(e.pointerId)};
+ const move=e=>{if(!drawing)return;e.preventDefault();const p=point(e),last=pts[pts.length-1];if(Math.hypot(p[0]-last[0],p[1]-last[1])>.7){pts.push(p);current.setAttribute('points',pts.map(x=>x.join(',')).join(' '))}};
+ const up=e=>{if(!drawing)return;drawing=false;if(pts.length>2){const a=pts[0],z=pts[pts.length-1];s.lines.push([a,z,type,pts]);}current=null;pts=[]};
+ svg.onpointerdown=down;svg.onpointermove=move;svg.onpointerup=up;svg.onpointercancel=up;
+}
+m262PracticeLines=function(){
+ const svg=document.querySelector('.m262-overlay'),s=window._m262dir;if(!svg)return;
+ svg.innerHTML=s.lines.map(x=>`<polyline class="m271-kidfree" points="${(x[3]||[x[0],x[1]]).map(p=>p.join(',')).join(' ')}"/>`).join('');
+ m262EnableDraw(M262_DIRS[s.step][2]);
+}
+m262DirCheck=function(){
+ const s=window._m262dir,type=M262_DIRS[s.step][2],lines=s.lines||[];
+ const orientOk=([a,z])=>{
+   const dx=Math.abs(z[0]-a[0]),dy=Math.abs(z[1]-a[1]);
+   if(type==='vertical')return dy>=75&&dx<=10;
+   if(type==='horizontal')return dx>=75&&dy<=10;
+   return dx>=60&&dy>=60&&Math.abs(dx-dy)<=15;
+ };
+ const need=(type==='vertical'||type==='horizontal')?8:7;
+ const ok=lines.length>=need&&lines.every(orientOk);
+ if(!ok){document.querySelectorAll('.m271-kidfree').forEach(x=>x.classList.add('bad'));m271Speak('Çizgileri bir kenardan diğer kenara kadar tamamlayalım.','tr-TR');return notify('Çizgileri bir kenardan diğer kenara kadar tamamlayalım 🌱')}
+ if(s.step<3){s.step++;s.practice=false;s.lines=[];m262DirRender()}else{m270Applause?.();modal(`<h2>Harika! 🎉</h2><p>Dikey, yatay ve çapraz yönleri tamamladın.</p><div class="modal-actions"><button onclick="closeModal();m262Home()">Ana Sayfa</button></div>`)}
+}
+
+/* Yön etkinliğinin yönergesi de sesli; çizim ekranında geri/temizle/kontrol korunur */
+const m271DirRenderBase=m262DirRender;
+m262DirRender=function(){m271DirRenderBase();setTimeout(m271ChessEnhance,80)};
+
+/* ---------- Görünüm ---------- */
+document.head.insertAdjacentHTML('beforeend',`<style id="m271css">
+.m271-questionbar,.m271-voicebar{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin:10px auto 16px}
+.m271-listen-big{font-size:20px!important;padding:15px 24px!important;border-radius:18px!important;box-shadow:0 8px 24px rgba(75,105,190,.18)}
+.m271-science-head h1{margin-bottom:6px}
+.m271-dropzone{width:min(82vw,520px);min-height:190px;margin:18px auto;border:4px dashed #8aa6c7;border-radius:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;transition:.25s;background:#f8fbff}
+.m271-dropzone>span{font-size:78px}.m271-dropzone.drag-over{transform:scale(1.035);box-shadow:0 0 0 8px rgba(89,141,218,.12)}
+.m271-water{background:linear-gradient(#e8f8ff,#9ddcff)}.m271-magnet{background:#fff8f8}
+.m271-dropzone.result-green{border-color:#28b76b!important;background:#eafff1!important;box-shadow:0 0 0 7px rgba(40,183,107,.14)}
+.m271-dropzone.result-red{border-color:#ff365f!important;background:#fff0f3!important;box-shadow:0 0 0 7px rgba(255,54,95,.13)}
+.m271-green{color:#168c4e}.m271-red{color:#e51e49}
+.m271-dragtray{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:20px auto}
+.m271-dragitem{touch-action:none;user-select:none;background:#fff;border:2px solid #e5e1da;border-radius:20px;padding:12px 16px;min-width:105px;display:flex;flex-direction:column;gap:5px;align-items:center;cursor:grab;position:relative;z-index:3}
+.m271-dragitem span{font-size:48px}.m271-dragitem.dragging{opacity:.8;z-index:50;cursor:grabbing}
+.m271-plant-scene{height:330px;max-width:650px;margin:15px auto;position:relative;overflow:hidden;border-radius:30px;background:linear-gradient(#c9efff 0 68%,#b8875d 68% 100%)}
+.m271-plant{position:absolute;left:50%;bottom:65px;transform:translateX(-50%);font-size:95px;transform-origin:bottom center;transition:.8s}
+.m271-plant.grow{animation:m271Grow 1.2s ease both}.m271-plant.wilt{animation:m271Wilt .8s ease both}
+.m271-sun{position:absolute;right:35px;top:25px;font-size:65px}.m271-sun.shine{animation:m271Shine .8s ease}
+.m271-cloud{position:absolute;left:35px;top:30px;font-size:55px}.m271-cloud.rain{animation:m271Rain .8s ease}
+.m271-soil{position:absolute;left:0;right:0;bottom:0;height:68px;background:rgba(91,57,37,.22)}
+@keyframes m271Grow{0%{transform:translateX(-50%) scale(.65)}55%{transform:translateX(-50%) scale(1.25)}100%{transform:translateX(-50%) scale(1.05)}}
+@keyframes m271Wilt{to{transform:translateX(-50%) rotate(18deg) scale(.82);filter:saturate(.55)}}
+@keyframes m271Shine{50%{transform:scale(1.35) rotate(20deg)}}@keyframes m271Rain{50%{transform:translateY(45px)}}
+.m271-guide{stroke:#ef476f;stroke-width:1.45;stroke-linecap:round;fill:none;stroke-dasharray:none!important;stroke-dashoffset:0!important;animation:m271Guide .55s ease both;animation-delay:var(--delay)}
+@keyframes m271Guide{from{opacity:0}to{opacity:1}}
+.m271-kidfree{fill:none;stroke:#3f82f7;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;touch-action:none}
+.m271-kidfree.bad{stroke:#ff1744;filter:drop-shadow(0 0 3px #ff1744)}
+.m262-dirwrap .m262-overlay{touch-action:none}
+@media(max-width:650px){.m271-dropzone{min-height:155px}.m271-dragitem{min-width:88px}.m271-dragitem span{font-size:40px}.m271-plant-scene{height:270px}}
+</style>`);
