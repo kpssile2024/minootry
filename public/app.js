@@ -55,13 +55,13 @@ function notify(msg){let t=document.querySelector('#toast');if(!t){t=document.cr
 function modal(html){closeModal();const d=document.createElement('div');d.id='modal';d.className='modal';d.innerHTML=`<div class="modal-card">${html}</div>`;d.onclick=e=>{if(e.target===d)closeModal()};document.body.appendChild(d)}
 function closeModal(){document.querySelector('#modal')?.remove()}
 const avatar=(s,size='')=>s.photo_data?`<img class="avatar ${size}" src="${s.photo_data}" alt="">`:`<div class="avatar placeholder ${size}">🌱</div>`;
-function home(){teacherPass='';teacherToken='';teacherRole='';teacherName='';studentSession=null;currentClass=null;app.innerHTML=`<main class="center"><div class="logo">Minoo <span>v2.9.1</span></div><p class="tag">Oyna • Keşfet • Öğren</p><section class="card"><h2>Öğrenci girişi</h2><div class="login-grid"><input id="suser" placeholder="Kullanıcı adı" autocomplete="username"><input id="scode" type="password" placeholder="İlk giriş kodu / şifre" autocomplete="current-password" onkeydown="if(event.key==='Enter')studentLogin()"><button onclick="studentLogin()">Giriş yap</button></div></section><button class="link" onclick="staffLogin()">Öğretmen / Yönetici girişi</button><p class="safe">Reklamsız • Sohbetsiz • Öğretmen kontrollü</p></main>`}
-function staffLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="home()">← Geri</button><div class="logo">Minoo <span>v2.9.1</span></div><p class="tag">Giriş türünü seçin</p><div class="m267-role-grid"><button onclick="adminLogin()"><span>👑</span><b>Yönetici Girişi</b><small>Öğretmenleri, sınıfları ve sistemi yönet</small></button><button onclick="teacherLogin()"><span>👩‍🏫</span><b>Öğretmen Girişi</b><small>Size verilen kullanıcı adı ve şifreyle giriş yapın</small></button></div></main>`}
+function home(){teacherPass='';teacherToken='';teacherRole='';teacherName='';studentSession=null;currentClass=null;app.innerHTML=`<main class="center"><div class="logo">Minoo <span>v2.9.2</span></div><p class="tag">Oyna • Keşfet • Öğren</p><section class="card"><h2>Öğrenci girişi</h2><div class="login-grid"><input id="suser" placeholder="Kullanıcı adı" autocomplete="username"><input id="scode" type="password" placeholder="İlk giriş kodu / şifre" autocomplete="current-password" onkeydown="if(event.key==='Enter')studentLogin()"><button onclick="studentLogin()">Giriş yap</button></div></section><button class="link" onclick="staffLogin()">Öğretmen / Yönetici girişi</button><p class="safe">Reklamsız • Sohbetsiz • Öğretmen kontrollü</p></main>`}
+function staffLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="home()">← Geri</button><div class="logo">Minoo <span>v2.9.2</span></div><p class="tag">Giriş türünü seçin</p><div class="m267-role-grid"><button onclick="adminLogin()"><span>👑</span><b>Yönetici Girişi</b><small>Öğretmenleri, sınıfları ve sistemi yönet</small></button><button onclick="teacherLogin()"><span>👩‍🏫</span><b>Öğretmen Girişi</b><small>Size verilen kullanıcı adı ve şifreyle giriş yapın</small></button></div></main>`}
 function adminLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="staffLogin()">← Geri</button><div class="logo">Minoo <span>Yönetici</span></div><section class="card login-card"><h2>👑 Yönetici Girişi</h2><label>Yönetici şifresi</label><input id="ap" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAdminLogin()"><button onclick="doAdminLogin()">Giriş yap</button></section></main>`}
 async function doAdminLogin(){const p=document.querySelector('#ap').value;if(!p)return;try{teacherPass=p;const r=await api('/api/admin/login',{method:'POST',body:JSON.stringify({password:p})});teacherRole='admin';teacherName='Yönetici';dashboard()}catch(e){teacherPass='';notify(e.message)}}
 function teacherLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="staffLogin()">← Geri</button><div class="logo">Minoo <span>Öğretmen</span></div><section class="card login-card"><h2>👩‍🏫 Öğretmen Girişi</h2><label>Kullanıcı adı</label><input id="tu" autocomplete="username"><label>Şifre</label><input id="tp" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doTeacherLogin()"><button onclick="doTeacherLogin()">Giriş yap</button></section></main>`}
 async function doTeacherLogin(){const username=document.querySelector('#tu').value.trim(),password=document.querySelector('#tp').value;if(!username||!password)return notify('Kullanıcı adı ve şifre gerekli');try{const r=await fetch('/api/teacher/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})}).then(async x=>{const d=await x.json();if(!x.ok)throw Error(d.error);return d});teacherToken=r.token;teacherRole='teacher';teacherName=r.name;dashboard()}catch(e){teacherToken='';notify(e.message)}}
-async function dashboard(){const cs=await api('/api/classes');app.innerHTML=`<header><div><b>Minoo Öğretmen</b><small>v2.9.1</small></div><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="toolbar"><h1>Sınıflarım</h1><button onclick="addClass()">+ Sınıf</button></div><div class="grid">${cs.map(c=>`<article class="card"><h3>${esc(c.name)}</h3><p>${c.student_count} öğrenci</p><button onclick="openClass(${c.id})">Aç</button><div class="row"><button class="ghost" onclick="renameClass(${c.id},'${encodeURIComponent(c.name)}')">Adını değiştir</button><button class="danger ghost" onclick="deleteClass(${c.id},'${encodeURIComponent(c.name)}')">Sil</button></div></article>`).join('')}</div><hr><div class="toolbar"><h2>Oyun Kütüphanesi</h2><button onclick="gameForm()">+ Oyun ekle</button></div><div id="library"></div></main>`;loadLibrary()}
+async function dashboard(){const cs=await api('/api/classes');app.innerHTML=`<header><div><b>Minoo Öğretmen</b><small>v2.9.2</small></div><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="toolbar"><h1>Sınıflarım</h1><button onclick="addClass()">+ Sınıf</button></div><div class="grid">${cs.map(c=>`<article class="card"><h3>${esc(c.name)}</h3><p>${c.student_count} öğrenci</p><button onclick="openClass(${c.id})">Aç</button><div class="row"><button class="ghost" onclick="renameClass(${c.id},'${encodeURIComponent(c.name)}')">Adını değiştir</button><button class="danger ghost" onclick="deleteClass(${c.id},'${encodeURIComponent(c.name)}')">Sil</button></div></article>`).join('')}</div><hr><div class="toolbar"><h2>Oyun Kütüphanesi</h2><button onclick="gameForm()">+ Oyun ekle</button></div><div id="library"></div></main>`;loadLibrary()}
 async function loadLibrary(){const gs=await api('/api/games'),el=document.querySelector('#library');el.innerHTML=gs.length?`<div class="grid">${gs.map(g=>`<article class="card"><h3>${esc(g.title)}</h3><p>${g.game_type==='matching'?'🧩 Minoo Eşleştirme':g.game_type==='chess_intro'?'♟️ Satranç Taşlarını Tanı':g.game_type==='chess_names'?'🔊 Satranç Taşlarının İsimleri':g.game_type==='chess_setup'?'♟️ Satranç Taşlarını Dizelim':'🔗 Canva oyunu'}</p><p>${g.completed_count||0}/${g.assigned_count||0} tamamlandı</p><div class="row"><button class="ghost" onclick="teacherPreviewEncoded('${encodeURIComponent(JSON.stringify(g))}')">▶ Oyunu oyna</button><button onclick="gameForm(${g.id},'${encodeURIComponent(g.title)}','${encodeURIComponent(g.canva_url||'')}','${g.game_type||'external'}','${encodeURIComponent(g.game_data||'') }')">Düzenle</button><button class="danger ghost" onclick="deleteGame(${g.id},'${encodeURIComponent(g.title)}')">Sil</button></div></article>`).join('')}</div>`:'<p>Henüz oyun yok.</p>'}
 function addClass(){modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>Yeni sınıf</h2><label>Sınıf adı</label><input id="cn" autofocus><div class="modal-actions"><button class="ghost" onclick="closeModal()">Vazgeç</button><button onclick="saveClass()">Oluştur</button></div>`)}
 async function saveClass(){const name=document.querySelector('#cn').value.trim();if(!name)return;try{await api('/api/classes',{method:'POST',body:JSON.stringify({name})});closeModal();dashboard()}catch(e){notify(e.message)}}
@@ -2270,7 +2270,7 @@ new MutationObserver(()=>{if(teacherRole==='teacher')m282ApplyTeacherUI()}).obse
 .m282-perm-grid,.m282-game-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 18px;max-height:280px;overflow:auto}.m282-perm-grid label,.m282-game-grid label{padding:10px 12px;border-radius:12px;background:#f7f5f1;border:1px solid #ebe5dc}.m282-perm-actions{display:flex;gap:8px;margin-bottom:8px}@media(max-width:650px){.m282-perm-grid,.m282-game-grid{grid-template-columns:1fr}}`;document.head.appendChild(st)})();
 
 /* ============================================================
-   MINOO v2.9.1 • VISUAL IDENTITY + MODERN GAME PICKER
+   MINOO v2.9.2 • VISUAL IDENTITY + MODERN GAME PICKER
    Visual-only enhancement. Existing data/auth/game logic preserved.
    ============================================================ */
 (function(){
@@ -2306,4 +2306,49 @@ input,select,textarea{border-radius:14px!important;border:1.5px solid rgba(75,10
   document.addEventListener('click',e=>{if(!wrap.contains(e.target))pop.hidden=true});
  }
  new MutationObserver(enhancePicker).observe(document.documentElement,{childList:true,subtree:true}); enhancePicker();
+})();
+
+
+/* ===== Minoo v2.9.2 • Satranç görsel düzeltmeleri ===== */
+(function(){
+ const st=document.createElement('style');st.id='m292-chess-polish';st.textContent=`
+ /* Tüm yeni satranç tahtalarında krem + bej dama düzeni */
+ .m262-sq{background:#fff9ed!important;box-shadow:none!important}
+ .m262-sq:nth-child(16n+2),.m262-sq:nth-child(16n+4),.m262-sq:nth-child(16n+6),.m262-sq:nth-child(16n+8),
+ .m262-sq:nth-child(16n+9),.m262-sq:nth-child(16n+11),.m262-sq:nth-child(16n+13),.m262-sq:nth-child(16n+15){background:#dcc19a!important}
+ .setup-square.light{background:#fff9ed!important}.setup-square.dark{background:#dcc19a!important}
+ .m280-sq.light{background:#fff9ed!important}.m280-sq.dark{background:#dcc19a!important}
+ .board-light{fill:#fff9ed!important}.board-dark{fill:#dcc19a!important}
+ /* Yön etkinliğinde kareler arasında oluşan ince beyaz artefaktı engelle */
+ .m262-board{gap:0!important;background:#dcc19a!important;isolation:isolate}
+ .m262-sq{outline:1px solid transparent!important}
+ .m262-overlay{display:block!important;overflow:visible!important}
+ /* Kale öğretim çizgileri: kesiksiz, tek parça */
+ .guide-line.rook{stroke-dasharray:none!important;stroke-dashoffset:0!important;animation:none!important;stroke-linecap:round!important}
+ /* Tanıyalım + İsimler: daha açık, parlak, 3B pastel kartlar */
+ .chess-piece-grid .piece-tile{position:relative!important;overflow:hidden!important;background:linear-gradient(145deg,#83ddb1 0%,#a8edb8 54%,#d2f6ad 100%)!important;color:#233950!important;border:1px solid rgba(255,255,255,.78)!important;box-shadow:inset 0 2px 0 rgba(255,255,255,.72),inset 0 -10px 22px rgba(55,145,103,.10),0 12px 26px rgba(50,105,83,.16)!important;transform:translateZ(0);transition:transform .18s ease,box-shadow .18s ease!important}
+ .chess-piece-grid .piece-tile:before{content:"";position:absolute;left:-18%;top:-28%;width:75%;height:52%;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.72),rgba(255,255,255,0) 68%);pointer-events:none}
+ .chess-piece-grid .piece-tile:after{content:"";position:absolute;right:8%;top:7%;width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.64);filter:blur(2px);pointer-events:none}
+ .chess-piece-grid .piece-tile:hover,.chess-piece-grid .piece-tile:active{transform:translateY(-3px) scale(1.012)!important;box-shadow:inset 0 2px 0 rgba(255,255,255,.82),0 17px 31px rgba(50,105,83,.20)!important}
+ .chess-piece-grid .piece-character{position:relative;z-index:1;background:linear-gradient(145deg,rgba(255,255,255,.62),rgba(233,255,244,.34))!important;border:1px solid rgba(255,255,255,.62)!important;box-shadow:inset 0 2px 8px rgba(255,255,255,.66),0 8px 18px rgba(44,100,80,.10)!important}
+ .chess-piece-grid .piece-tile>b,.chess-piece-grid .piece-tile>small,.chess-piece-grid .piece-tile>em{position:relative;z-index:1;color:#294157!important;text-shadow:0 1px 0 rgba(255,255,255,.45)}
+ .chess-piece-grid .piece-tile>em{background:rgba(255,255,255,.72)!important;border-radius:999px;padding:8px 12px;color:#2d7255!important}
+ `;document.head.appendChild(st);
+})();
+
+/* Öğretmen önizlemesinden Oyun Kütüphanesine gerçek dönüş */
+previewBack=async function(){
+ teacherPreviewMode=false;
+ await dashboard();
+ requestAnimationFrame(()=>{const el=document.querySelector('#library');if(el)el.scrollIntoView({behavior:'smooth',block:'start'})});
+};
+
+/* Gerçek satranç bölüm seçimindeki geri düğmesini de kütüphaneye bağla */
+(function(){
+ const old=m280ChooseLevel;
+ m280ChooseLevel=function(){
+   old();
+   const back=[...document.querySelectorAll('button')].find(b=>/Oyun Kütüphanesi/i.test(b.textContent||''));
+   if(back)back.onclick=previewBack;
+ };
 })();
