@@ -309,6 +309,17 @@ if('speechSynthesis' in window){
  minooPickVoice();
  speechSynthesis.addEventListener?.('voiceschanged',minooPickVoice);
 }
+const MINOO_CHARACTER_VOICE='/minoo-voice.wav?v=2.9.11';
+let minooCharacterAudio=null;
+function minooPlayCharacterVoice(){
+ try{
+  if(minooCharacterAudio){minooCharacterAudio.pause();minooCharacterAudio.currentTime=0;}
+  minooCharacterAudio=new Audio(MINOO_CHARACTER_VOICE);
+  minooCharacterAudio.preload='auto';
+  minooCharacterAudio.volume=1;
+  minooCharacterAudio.play().catch(()=>{});
+ }catch(e){}
+}
 function minooSpeak(text,opts={}){
  if(!('speechSynthesis' in window))return;
  speechSynthesis.cancel();
@@ -2479,7 +2490,61 @@ document.head.insertAdjacentHTML('beforeend',`<style id="m296css">
 @media(max-width:720px){.m296-shell{padding:8px}.m296-topnav{display:flex;overflow-x:auto}.m296-brand{min-width:120px}.m296-topnav button{min-width:110px;padding:11px!important;font-size:13px}.m296-layout{display:block}.m296-side{display:grid;grid-template-columns:repeat(2,1fr);margin-bottom:10px}.m296-side button{min-height:58px;font-size:13px}.m296-center{padding:8px;border-radius:20px}.m296-title p{display:none}.m296-right{display:grid;grid-template-columns:1fr 1fr;margin-top:10px}.m296-actions,.m296-mini,.m296-level{grid-column:1/-1}.m296-player,.m296-turn,.m296-clock{padding:10px}.m296-center .m280-board{padding:4px}.m280-piece{width:90%;height:90%}}
 </style>`);
 
-// v2.9.9 history + chess navigation polish
+// v2.9.11 history + chess navigation + resume polish
 document.head.insertAdjacentHTML('beforeend',`<style>
 .m299-move-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}.m299-move-grid button{min-height:74px;font-size:18px;border-radius:20px!important;background:linear-gradient(145deg,#fffaf0,#eef5ff)!important;color:#243b67!important;border:2px solid #dbe7f6!important;box-shadow:0 8px 18px rgba(40,65,105,.10)}\n.m299-history{max-width:1050px;margin:auto}.m299-history-hero{text-align:center;background:linear-gradient(135deg,#fff5df,#edf6ff);padding:24px;border-radius:28px;margin-bottom:20px;box-shadow:0 10px 28px rgba(50,70,100,.08)}.m299-history-hero>div{font-size:52px}.m299-history-hero h1{margin:4px 0}.m299-history-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.m299-history-card{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;background:#fff;border:2px solid #edf0f5;border-radius:24px;padding:18px;box-shadow:0 8px 20px rgba(40,60,90,.08)}.m299-history-icon{width:58px;height:58px;display:grid;place-items:center;border-radius:18px;background:#fff2dc;font-size:32px}.m299-history-card h3{margin:0 0 5px}.m299-history-card p{margin:0 0 4px;color:#43875b;font-weight:800}.m299-history-card small{color:#718096}@media(max-width:700px){.m299-history-grid{grid-template-columns:1fr}.m299-history-card{grid-template-columns:auto 1fr}.m299-history-card button{grid-column:1/-1}.m299-move-grid{grid-template-columns:1fr}}
 </style>`);
+
+
+/* ============================================================
+   MINOO v2.9.11 • SATRANÇ ÖĞRENME MODÜLLERİNDEN OYUNA DÖNÜŞ
+   Devam eden bilgisayara karşı satranç durumunu korur.
+   ============================================================ */
+function m2910SaveChess(){
+ if(!m280?.b)return;
+ window._m2910ChessResume={
+  level:m280.level,b:m280.b.map(r=>r.map(p=>p?{...p}:null)),turn:m280.turn,
+  selected:m280.selected?m280.selected.slice():null,legal:(m280.legal||[]).map(x=>({...x})),
+  castle:{...m280.castle},ep:m280.ep?m280.ep.slice():null,half:m280.half||0,status:m280.status||'',
+  thinking:false,last:m280.last?{...m280.last}:null,
+  history:(m280.history||[]).map(h=>({ ...h,b:h.b?.map(r=>r.map(p=>p?{...p}:null)),castle:h.castle?{...h.castle}:h.castle,ep:h.ep?h.ep.slice():null,last:h.last?{...h.last}:null }))
+ };
+}
+function m2910ResumeChess(){
+ const s=window._m2910ChessResume;
+ if(!s)return m280ChooseLevel();
+ m280={...s,b:s.b.map(r=>r.map(p=>p?{...p}:null)),castle:{...s.castle},ep:s.ep?s.ep.slice():null,selected:s.selected?s.selected.slice():null,legal:(s.legal||[]).map(x=>({...x})),thinking:false};
+ m272Route('realChess',{level:m280.level},false);m280Render();
+}
+function m2910PatchActivityBack(mode='chess'){
+ setTimeout(()=>{
+  const back=document.querySelector('.chess-header .ghost,.m262-game .chess-header .ghost');
+  if(back){back.textContent='← Satranç Oyununa Dön';back.onclick=()=>m2910ResumeChess();back.setAttribute('onclick','m2910ResumeChess()')}
+ },30);
+}
+// Satranç yan menüsündeki öğrenme modülleri oyunu kapatmaz; yalnızca geçici olarak açılır.
+m296OpenChessType=async function(type){
+ m2910SaveChess();
+ const gs=await m299ChessGames(),g=gs.find(x=>x.game_type===type);
+ if(!g)return notify('Bu satranç etkinliği henüz bulunamadı.');
+ playGame(g);m2910PatchActivityBack();
+}
+m296OpenDirections=async function(){
+ m2910SaveChess();
+ const gs=await m299ChessGames(),g=gs.find(x=>x.game_type==='chess_directions');
+ if(!g)return notify('Yön etkinliği henüz bulunamadı.');
+ playGame(g);m2910PatchActivityBack();
+}
+m296OpenChessLearning=async function(){
+ m2910SaveChess();
+ const gs=await m299ChessGames(),types=['rook_capture','bishop_capture','queen_capture','knight_capture','king_capture','pawn_capture'];
+ const games=types.map(t=>gs.find(x=>x.game_type===t)).filter(Boolean);
+ if(!games.length)return notify('Hamle etkinlikleri henüz bulunamadı.');
+ const labels={rook_capture:'♜ Kale',bishop_capture:'♝ Fil',queen_capture:'♛ Vezir',knight_capture:'♞ At',king_capture:'♚ Şah',pawn_capture:'♟ Piyon'};
+ window._m299MoveGames=games;
+ modal(`<button class="modal-x" onclick="closeModal();m2910ResumeChess()">×</button><h2>🎯 Hamleleri Öğrenelim</h2><p>Öğrenmek istediğin taşı seç.</p><div class="m299-move-grid">${games.map((g,i)=>`<button onclick="m2910OpenMoveLesson(${i})">${labels[g.game_type]||esc(g.title)}</button>`).join('')}</div><div class="modal-actions"><button class="ghost" onclick="closeModal();m2910ResumeChess()">← Oyuna dön</button></div>`)
+}
+function m2910OpenMoveLesson(i){
+ const g=window._m299MoveGames?.[i];if(!g)return;
+ closeModal();playGame(g);m2910PatchActivityBack();
+}
