@@ -849,7 +849,7 @@ setTimeout(()=>document.querySelectorAll('.logo span,header small').forEach(x=>{
 
 
 /* ===== Minoo v2.6.4 • Atölye alanları + Fen renk karışımı + Türkçe harf yazma ===== */
-const MINOO_VERSION='v2.9.5';
+const MINOO_VERSION='v2.9.6';
 
 function atelierHome(){
   modal(`<button class="modal-x" onclick="closeModal()">×</button>
@@ -989,7 +989,7 @@ document.head.insertAdjacentHTML('beforeend',`<style id="minoo264">
 
 
 /* ===== Minoo v2.6.5 • toplu düzeltme ===== */
-const MINOO_VERSION_265='v2.9.5';
+const MINOO_VERSION_265='v2.9.6';
 
 /* Güvenli ortak ana sayfa */
 async function m265Home(){
@@ -1964,14 +1964,14 @@ document.head.insertAdjacentHTML('beforeend',`<style id="m272css">
 
 
 /* ============================================================
-   MINOO v2.9.5 • BİLGİSAYARA KARŞI GERÇEK SATRANÇ
+   MINOO v2.9.6 • BİLGİSAYARA KARŞI GERÇEK SATRANÇ
    ============================================================ */
 const M280_GLYPH={w:{k:'♔',q:'♕',r:'♖',b:'♗',n:'♘',p:'♙'},b:{k:'♚',q:'♛',r:'♜',b:'♝',n:'♞',p:'♟'}};
 const M280_NAME={k:'Şah',q:'Vezir',r:'Kale',b:'Fil',n:'At',p:'Piyon'};
-let m280={level:1,b:null,turn:'w',selected:null,legal:[],castle:{wK:true,wQ:true,bK:true,bQ:true},ep:null,half:0,status:'',thinking:false,last:null};
+let m280={level:1,b:null,turn:'w',selected:null,legal:[],castle:{wK:true,wQ:true,bK:true,bQ:true},ep:null,half:0,status:'',thinking:false,last:null,history:[]};
 
 function m280New(level=1){
- m280={level:Number(level),b:m280StartBoard(),turn:'w',selected:null,legal:[],castle:{wK:true,wQ:true,bK:true,bQ:true},ep:null,half:0,status:'',thinking:false,last:null};
+ m280={level:Number(level),b:m280StartBoard(),turn:'w',selected:null,legal:[],castle:{wK:true,wQ:true,bK:true,bQ:true},ep:null,half:0,status:'',thinking:false,last:null,history:[]};
  m272Route('realChess',{level:Number(level)},true);m280Render();
  setTimeout(()=>m271Speak(`Bilgisayara karşı satranç. ${level==1?'Kolay':level==2?'Orta':'Zor'} seviye. Beyaz taşlar senin. İlk hamleni yap.`,'tr-TR'),250);
 }
@@ -2040,14 +2040,54 @@ function m280ChooseLevel(){
 function m280Render(){
  const legal=m280.turn==='w'&&!m280.thinking?m280Legal(m280,'w'):[];
  const inCheck=m280Check(m280,m280.turn);
- let msg=m280.thinking?'Bilgisayar düşünüyor…':m280.turn==='w'?(inCheck?'Şah çekildi! Şahını koru.':'Sıra sende • Beyaz'):'Bilgisayarın sırası';
- app.innerHTML=`<header class="chess-header"><button class="ghost" onclick="m280ChooseLevel()">← Seviyeler</button><b>♟️ Bilgisayara Karşı Satranç</b><button id="m271VoiceBtn" class="ghost" onclick="m271VoiceToggle()">${window.m271VoiceOn?'🔊 Ses Açık':'🔇 Ses Kapalı'}</button></header>
- <main class="m280-main"><div class="m280-top"><span class="m280-badge">${m280.level===1?'🌱 Kolay':m280.level===2?'🌿 Orta':'🌳 Zor'}</span><b id="m280msg">${msg}</b><button class="ghost" onclick="m280New(${m280.level})">↻ Yeni Oyun</button></div>
- <div class="m280-wrap"><div id="m280board" class="m280-board">${m280.b.map((row,y)=>row.map((p,x)=>{const sel=m280.selected?.[0]===y&&m280.selected?.[1]===x,target=m280.legal.some(m=>m.ty===y&&m.tx===x),last=m280.last&&(m280.last.ty===y&&m280.last.tx===x||m280.last.fy===y&&m280.last.fx===x);return `<button class="m280-sq ${(x+y)%2?'dark':'light'} ${sel?'sel':''} ${target?'target':''} ${last?'last':''}" data-y="${y}" data-x="${x}" onclick="m280Tap(${y},${x})">${p?`<span class="m280-piece ${p.c}">${M280_GLYPH[p.c][p.t]}</span>`:''}${target?'<i></i>':''}</button>`}).join('')).join('')}<svg id="m280arrows" viewBox="0 0 100 100"></svg></div></div>
- <div class="m280-help">${m280.level===1?'Taşa dokun: gidebileceği bütün yasal yönleri oklarla göreceksin.':m280.level===2?'Taşa dokun: gidebileceği yasal kareler işaretlenecek.':'Gerçek oyun modu: hamle yardımı gösterilmez.'}</div>
- <div class="m271-voicebar"><button class="ghost" onclick="m280SpeakState()">🔁 Yönergeyi Dinle</button><button class="ghost" onclick="m280Rules()">📖 Kurallar</button></div></main>`;
+ let msg=m280.thinking?'Bilgisayar düşünüyor…':m280.turn==='w'?(inCheck?'Şah çekildi! Şahını koru.':'Sıra sende'):'Bilgisayarın sırası';
+ const pieceSvg=p=>minooPieceSvg(v261Type(M280_NAME[p.t]),p.c==='w'?'white':'black');
+ app.innerHTML=`<main class="m296-shell">
+ <nav class="m296-topnav"><div class="m296-brand">Minoo<small>Oyna • Keşfet • Öğren</small></div><button onclick="dashboard?.()">🏠 Sınıflar</button><button class="active" onclick="m262Home()">🎮 Oyunlar</button><button onclick="timerTool()">🔧 Araçlar</button><button onclick="typeof atelierHome==='function'?atelierHome():m262Home()">🎨 Oyun Atölyesi</button></nav>
+ <section class="m296-layout">
+  <aside class="m296-side"><button onclick="m262Home()">← Oyunlara Dön</button><button class="active" onclick="m280ChooseLevel()">▦ <span>Bilgisayara<br>Karşı Oyna</span></button><button onclick="m296OpenChessType('chess_intro')">♞ <span>Taşları<br>Tanıyalım</span></button><button onclick="m296OpenChessLearning()">🎯 <span>Hamleleri<br>Öğrenelim</span></button><button onclick="m296OpenDirections()">🧭 <span>Yön Etkinliği</span></button></aside>
+  <section class="m296-center"><div class="m296-title"><span>👑</span><div><h1>Bilgisayara Karşı Satranç Oynayalım</h1><p>Taşlarını doğru hamlelerle kullan, bilgisayarı yenmeyi dene!</p></div></div>
+   <div class="m280-wrap"><div id="m280board" class="m280-board">${m280.b.map((row,y)=>row.map((p,x)=>{const sel=m280.selected?.[0]===y&&m280.selected?.[1]===x,target=m280.legal.some(m=>m.ty===y&&m.tx===x),last=m280.last&&(m280.last.ty===y&&m280.last.tx===x||m280.last.fy===y&&m280.last.fx===x);return `<button class="m280-sq ${(x+y)%2?'dark':'light'} ${sel?'sel':''} ${target?'target':''} ${last?'last':''}" data-y="${y}" data-x="${x}" onclick="m280Tap(${y},${x})">${p?`<span class="m280-piece ${p.c}">${pieceSvg(p)}</span>`:''}${target?'<i></i>':''}</button>`}).join('')).join('')}<svg id="m280arrows" viewBox="0 0 100 100"></svg></div></div>
+   <div class="m280-help">${m280.level===1?'Taşa dokun: gidebileceği bütün yasal yönleri oklarla göreceksin.':m280.level===2?'Taşa dokun: gidebileceği yasal kareler işaretlenecek.':'Gerçek oyun modu: hamle yardımı gösterilmez.'}</div>
+  </section>
+  <aside class="m296-right"><div class="m296-player"><span>🤖</span><div><b>Bilgisayar</b><button onclick="m280ChooseLevel()">Seviye: ${m280.level} (${m280.level===1?'Kolay':m280.level===2?'Orta':'Zor'})⌄</button></div></div><div class="m296-clock">◷ <b>10:00</b></div><div class="m296-turn"><span>♙</span><div><b>${msg}</b><small>◷ 10:00</small></div></div>
+   <div class="m296-actions"><button onclick="m296Undo()">↶<small>Geri Al</small></button><button onclick="m280New(${m280.level})">↻<small>Yeniden Başlat</small></button><button onclick="m296Resign()">⚑<small>Pes Et</small></button></div>
+   <div class="m296-mini"><button onclick="m296Hint()">💡 İpucu Ver</button><button onclick="m271VoiceToggle();m280Render()">⚙️ ${window.m271VoiceOn?'Ses Açık':'Ses Kapalı'}</button></div><button class="m296-level" onclick="m280ChooseLevel()">▥ Seviye Değiştir</button>
+  </aside>
+ </section></main>`;
  if(m280.level===1&&m280.selected)m280DrawArrows();
 }
+
+function m297ApplyTopNavPermissions(){
+ if(teacherRole!=='teacher')return;
+ const nav=document.querySelector('.m296-topnav'); if(!nav)return;
+ [...nav.querySelectorAll('button')].forEach(b=>{
+   const t=(b.textContent||'').trim();
+   if(/Sınıflar/i.test(t) && !m297HasClasses) b.remove();
+   if(/Araçlar/i.test(t) && !m282Has('tool:timer')) b.remove();
+   if(/Oyun Atölyesi/i.test(t) && !m282Has('tool:atelier')) b.remove();
+ });
+}
+const _m297Render=m280Render;
+m280Render=function(){_m297Render();m297ApplyTopNavPermissions()};
+
+async function m296OpenChessType(type){
+ if(teacherPreviewMode){notify('Bu etkinliği Oyun Kütüphanesi içinden açabilirsiniz.');return previewBack()}
+ try{const gs=await api(`/api/student/${studentSession.id}/games`),g=gs.find(x=>x.game_type===type);if(g)return playGame(g);notify('Bu etkinlik henüz sana atanmadı.')}catch(e){notify(e.message)}
+}
+async function m296OpenChessLearning(){
+ if(teacherPreviewMode)return previewBack();
+ try{const gs=await api(`/api/student/${studentSession.id}/games`),g=gs.find(x=>['chess_rook','chess_bishop','chess_queen','chess_knight','chess_king','chess_pawn'].includes(x.game_type));if(g)return playGame(g);notify('Hamle etkinliği henüz sana atanmadı.')}catch(e){notify(e.message)}
+}
+async function m296OpenDirections(){
+ if(teacherPreviewMode)return previewBack();
+ try{const gs=await api(`/api/student/${studentSession.id}/games`),g=gs.find(x=>x.game_type==='chess_directions');if(g)return playGame(g);notify('Yön etkinliği henüz sana atanmadı.')}catch(e){notify(e.message)}
+}
+function m296Snapshot(){return {b:m280.b.map(r=>r.map(p=>p?{...p}:null)),turn:m280.turn,castle:{...m280.castle},ep:m280.ep?m280.ep.slice():null,half:m280.half,last:m280.last?{...m280.last}:null}}
+function m296Undo(){if(m280.thinking)return notify('Bilgisayar hamlesini tamamlasın.');const h=m280.history||[];if(!h.length)return notify('Geri alınacak hamle yok.');const prev=h.shift();Object.assign(m280,prev,{selected:null,legal:[],thinking:false,history:h});m280Render()}
+function m296Hint(){if(m280.turn!=='w'||m280.thinking)return;const moves=m280Legal(m280,'w');if(!moves.length)return;const m=moves.find(z=>m280.b[z.ty][z.tx])||moves[0];m280.selected=[m.fy,m.fx];m280.legal=m280MovesFrom(m.fy,m.fx);m280Render();m271Speak(`${M280_NAME[m280.b[m.fy][m.fx].t]} taşını deneyebilirsin.`,'tr-TR')}
+function m296Resign(){if(confirm('Bu oyundan çıkmak istediğine emin misin?'))m280ChooseLevel()}
+
 function m280SpeakState(){m271Speak(m280.turn==='w'?'Sıra sende. Beyaz taşlardan birini seç ve hamleni yap.':'Bilgisayar hamlesini yapıyor.','tr-TR')}
 function m280Tap(y,x){
  if(m280.turn!=='w'||m280.thinking)return;const p=m280.b[y][x];
@@ -2067,6 +2107,7 @@ function m280DrawArrows(){
  m280.legal.map(m=>{const ex=(m.tx+.5)*12.5,ey=(m.ty+.5)*12.5,p=m280.b[m.fy][m.fx];if(p?.t==='n'){const mx=Math.abs(m.tx-m.fx)===2?ex:scx,my=Math.abs(m.tx-m.fx)===2?scy:ey;return `<polyline points="${scx},${scy} ${mx},${my} ${ex},${ey}" class="m280-arrow" marker-end="url(#m280arr)"/>`}return `<line x1="${scx}" y1="${scy}" x2="${ex}" y2="${ey}" class="m280-arrow" marker-end="url(#m280arr)"/>`}).join('');
 }
 function m280HumanMove(m){
+ m280.history=m280.history||[];m280.history.unshift(m296Snapshot());m280.history=m280.history.slice(0,20);
  const p=m280.b[m.fy][m.fx];
  if(m.special==='promotion')return m280Promotion(m);
  m280=m280Apply(m280,m);m280.selected=null;m280.legal=[];m263Fx?.('tap');m280AfterMove(p.c);
@@ -2273,7 +2314,7 @@ new MutationObserver(()=>{if(teacherRole==='teacher')m282ApplyTeacherUI()}).obse
 /* ============================================================
    MINOO v2.9.5 • KESIN GORSEL / PANEL DUZELTMELERI
    ============================================================ */
-const MINOO_294='v2.9.5';
+const MINOO_294='v2.9.7';
 
 /* Satranç tahtaları: tüm m262 tabanlı etkinliklerde gerçek dama rengi. */
 function m294PaintChessBoards(root=document){
@@ -2351,8 +2392,9 @@ document.head.insertAdjacentHTML('beforeend',`<style id="m294css">
 /* ============================================================
    MINOO v2.9.5 • SEKMEli ANA PANEL + ARAÇLAR + OYUN ATÖLYESİ
    ============================================================ */
-const MINOO_295='v2.9.5';
+const MINOO_295='v2.9.7';
 let m295ActiveTab='classes';
+let m297HasClasses=false;
 function m295Can(permission){return teacherRole==='admin'||m282Has(permission)}
 function m295Tab(tab){
   m295ActiveTab=tab;
@@ -2367,43 +2409,48 @@ async function m295Dashboard(){
   const canChess=m295Can('tool:real_chess');
   const canTimer=m295Can('tool:timer');
   const canAtelier=m295Can('tool:atelier');
+  const hasClasses=teacherRole==='admin'||cs.length>0;
+  m297HasClasses=hasClasses;
+  const hasGamePermission=teacherRole==='admin'||canChess||m282Permissions.some(k=>k.startsWith('game:'));
+  const visibleTabs=[hasClasses?'classes':null,hasGamePermission?'games':null,canTimer?'tools':null,canAtelier?'atelier':null].filter(Boolean);
   try{m295ActiveTab=sessionStorage.getItem('minoo295tab')||'classes'}catch(e){m295ActiveTab='classes'}
-  if(!['classes','games','tools','atelier'].includes(m295ActiveTab))m295ActiveTab='classes';
+  if(!visibleTabs.includes(m295ActiveTab))m295ActiveTab=visibleTabs[0]||'none';
   app.innerHTML=`<header class="m295-top"><div><b>Minoo Öğretmen</b><small>${MINOO_295}</small></div><button class="ghost" onclick="m272Logout()">Çıkış</button></header>
   <main class="m295-dashboard">
     <section class="m295-welcome"><div><span>MINOO ÖĞRETMEN PANELİ</span><h1>Bugün ne yapmak istersiniz?</h1><p>İhtiyacınız olan alanı seçin; yalnızca o bölüm ekranda görünsün.</p></div></section>
     <nav class="m295-tabs" aria-label="Öğretmen paneli bölümleri">
-      <button class="m295-tab" data-tab="classes" onclick="m295Tab('classes')"><i>🏫</i><b>Sınıflar</b><small>Öğrenci ve sınıf yönetimi</small></button>
-      <button class="m295-tab" data-tab="games" onclick="m295Tab('games')"><i>🎮</i><b>Oyunlar</b><small>Kütüphane ve satranç</small></button>
-      <button class="m295-tab" data-tab="tools" onclick="m295Tab('tools')"><i>🧰</i><b>Araçlar</b><small>Sayaç ve sınıf araçları</small></button>
-      <button class="m295-tab" data-tab="atelier" onclick="m295Tab('atelier')"><i>🎨</i><b>Oyun Atölyesi</b><small>Kendi etkinliğini oluştur</small></button>
+      ${hasClasses?`<button class="m295-tab" data-tab="classes" onclick="m295Tab('classes')"><i>🏫</i><b>Sınıflar</b><small>Öğrenci ve sınıf yönetimi</small></button>`:''}
+      ${hasGamePermission?`<button class="m295-tab" data-tab="games" onclick="m295Tab('games')"><i>🎮</i><b>Oyunlar</b><small>Kütüphane ve satranç</small></button>`:''}
+      ${canTimer?`<button class="m295-tab" data-tab="tools" onclick="m295Tab('tools')"><i>🧰</i><b>Araçlar</b><small>Sayaç ve sınıf araçları</small></button>`:''}
+      ${canAtelier?`<button class="m295-tab" data-tab="atelier" onclick="m295Tab('atelier')"><i>🎨</i><b>Oyun Atölyesi</b><small>Kendi etkinliğini oluştur</small></button>`:''}
     </nav>
 
-    <section class="m295-pane" data-pane="classes">
+    ${hasClasses?`<section class="m295-pane" data-pane="classes">
       <div class="m295-panehead"><div><h2>🏫 Sınıflar</h2><p>Sınıflarınızı ve öğrencilerinizi yönetin.</p></div>${canManage?`<button onclick="addClass()">＋ Yeni sınıf</button>`:''}</div>
       <div class="m295-classgrid">${cs.map(c=>`<article class="m295-classcard"><div class="m295-classicon">🌱</div><h3>${esc(c.name)}</h3><p>${c.student_count} öğrenci</p><div class="m295-classactions"><button onclick="openClass(${c.id})">Aç</button>${canManage?`<button class="ghost" onclick="renameClass(${c.id},'${encodeURIComponent(c.name)}')">Adını değiştir</button><button class="danger ghost" onclick="deleteClass(${c.id},'${encodeURIComponent(c.name)}')">Sil</button>`:''}</div></article>`).join('')||'<div class="m295-empty">Henüz sınıf yok.</div>'}</div>
-    </section>
+    </section>`:''}
 
-    <section class="m295-pane" data-pane="games">
+    ${hasGamePermission?`<section class="m295-pane" data-pane="games">
       <div class="m295-panehead"><div><h2>🎮 Oyunlar</h2><p>Minoo oyun kütüphanesi ve satranç alanı.</p></div>${canManage?`<button onclick="gameForm()">＋ Oyun ekle</button>`:''}</div>
       ${canChess?`<button class="m295-feature" onclick="m280ChooseLevel()"><span>♟️</span><div><b>Satranç Oynayalım</b><small>Bilgisayara karşı gerçek satranç • 3 zorluk seviyesi</small></div><strong>Oyna →</strong></button>`:''}
       <div id="library" class="m295-library"></div>
-    </section>
+    </section>`:''}
 
-    <section class="m295-pane" data-pane="tools">
+    ${canTimer?`<section class="m295-pane" data-pane="tools">
       <div class="m295-panehead"><div><h2>🧰 Araçlar</h2><p>Sınıfta kullanabileceğiniz hızlı öğretmen araçları.</p></div></div>
       <div class="m295-toolgrid">
         ${canTimer?`<button class="m295-toolcard" onclick="timerTool()"><span>⏳</span><div><b>Geri Sayım Sayacı</b><small>Pof Bomba, Roket, Balon, Yarış Arabası, Salyangoz, Kum Saati ve Mum temaları</small></div><em>Aç →</em></button>`:''}
         ${!canTimer?'<div class="m295-empty">Bu hesap için henüz araç yetkisi tanımlanmamış.</div>':''}
       </div>
-    </section>
+    </section>`:''}
 
-    <section class="m295-pane" data-pane="atelier">
+    ${canAtelier?`<section class="m295-pane" data-pane="atelier">
       <div class="m295-panehead"><div><h2>🎨 Oyun Atölyesi</h2><p>Kod yazmadan kendi okul öncesi etkinliğinizi hazırlayın.</p></div></div>
-      ${canAtelier?`<div class="m295-atelierintro"><div class="m295-atelierart">✨🎨</div><div><h3>Kendi oyununu oluştur</h3><p>Eşleştirme, sınıflandırma, karşılaştırma ve sıralama şablonlarından başlayın.</p><button onclick="atelierHome()">Oyun Atölyesini Aç</button></div></div>`:'<div class="m295-empty">Bu hesap için Oyun Atölyesi yetkisi tanımlanmamış.</div>'}
-    </section>
+      <div class="m295-atelierintro"><div class="m295-atelierart">✨🎨</div><div><h3>Kendi oyununu oluştur</h3><p>Eşleştirme, sınıflandırma, karşılaştırma ve sıralama şablonlarından başlayın.</p><button onclick="atelierHome()">Oyun Atölyesini Aç</button></div></div>
+    </section>`:''}
+    ${visibleTabs.length?'':'<section class="m295-pane active"><div class="m295-empty">Bu hesap için henüz bir bölüm yetkisi tanımlanmamış. Yönetici hesabından yetki verilebilir.</div></section>'}
   </main>`;
-  await loadLibrary();
+  if(hasGamePermission)await loadLibrary();
   m295Tab(m295ActiveTab);
   setTimeout(()=>{m282ApplyTeacherUI();m294PaintChessBoards();m294Version()},0);
 }
@@ -2427,4 +2474,11 @@ document.head.insertAdjacentHTML('beforeend',`<style id="m295css">
 .m295-feature,.m295-toolcard{width:100%!important;border-radius:22px!important;padding:17px 19px!important;display:grid!important;grid-template-columns:55px 1fr auto!important;align-items:center!important;text-align:left!important;gap:13px!important;margin:0 0 16px!important}.m295-feature{background:linear-gradient(135deg,#526b9f,#7d8fc0)!important;color:#fff!important;box-shadow:0 10px 22px rgba(64,88,142,.19)!important}.m295-feature>span,.m295-toolcard>span{font-size:37px}.m295-feature b,.m295-toolcard b{display:block;font-size:18px}.m295-feature small,.m295-toolcard small{display:block;margin-top:3px;opacity:.78}.m295-feature strong{font-size:13px}.m295-library>.grid,#library>.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.m295-toolgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.m295-toolcard{background:linear-gradient(145deg,#fff8e9,#eef9ff)!important;color:#294052!important;border:1px solid #e5e7e4!important;margin:0!important}.m295-toolcard em{font-style:normal;font-weight:900;color:#4e7b70}.m295-atelierintro{display:grid;grid-template-columns:150px 1fr;align-items:center;gap:24px;padding:24px;border-radius:23px;background:linear-gradient(135deg,#fff3f8,#f0f8ff);border:1px solid #eee1e7}.m295-atelierart{font-size:52px;text-align:center}.m295-atelierintro h3{font-size:23px;margin:0 0 5px}.m295-atelierintro p{margin:0 0 14px;opacity:.68}.m295-empty{padding:24px;text-align:center;border:1px dashed #d8dcd9;border-radius:18px;opacity:.7}
 @media(max-width:820px){.m295-dashboard{padding:11px}.m295-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.m295-tab{min-height:78px!important}.m295-classgrid,.m295-library>.grid,#library>.grid,.m295-toolgrid{grid-template-columns:1fr}.m295-pane{padding:13px}.m295-atelierintro{grid-template-columns:1fr}.m295-atelierart{font-size:42px}.m295-feature,.m295-toolcard{grid-template-columns:45px 1fr auto!important;padding:14px!important}.m295-feature>span,.m295-toolcard>span{font-size:31px}}
 @media(max-width:480px){.m295-tabs{gap:7px}.m295-tab{padding:9px!important;grid-template-columns:34px 1fr!important}.m295-tab i{font-size:23px}.m295-tab b{font-size:14px}.m295-tab small{font-size:10px}.m295-classactions{grid-template-columns:repeat(3,minmax(0,1fr))}}
+</style>`);
+
+/* Minoo v2.9.6 • Yeni nesil bilgisayara karşı satranç ekranı */
+document.head.insertAdjacentHTML('beforeend',`<style id="m296css">
+.m296-shell{min-height:100vh;background:linear-gradient(135deg,#f4f8ff 0%,#fffaf4 52%,#f6f3ff 100%);color:#18306b;padding:18px;font-family:inherit}.m296-topnav{max-width:1500px;margin:auto;display:grid;grid-template-columns:230px repeat(4,minmax(140px,1fr));gap:14px;align-items:center}.m296-brand{font-size:42px;font-weight:1000;letter-spacing:-2px}.m296-brand small{display:block;font-size:13px;letter-spacing:0}.m296-topnav button,.m296-side button,.m296-right button{background:rgba(255,255,255,.9)!important;color:#17316f!important;border:1px solid #dce7fb!important;box-shadow:0 8px 24px rgba(70,104,170,.10)!important;border-radius:20px!important}.m296-topnav button{padding:18px 12px!important;font-size:18px;font-weight:900}.m296-topnav button.active{background:linear-gradient(135deg,#78baff,#4d91f3)!important;color:white!important}.m296-layout{max-width:1500px;margin:18px auto 0;display:grid;grid-template-columns:235px minmax(540px,1fr) 300px;gap:18px}.m296-side{display:flex;flex-direction:column;gap:13px}.m296-side button{min-height:86px;padding:14px!important;display:flex!important;gap:14px;align-items:center!important;text-align:left!important;font-size:18px;font-weight:900}.m296-side button:first-child{min-height:58px}.m296-side button.active{border:2px solid #4b9cff!important;background:#edf6ff!important}.m296-center{background:rgba(255,252,248,.78);border:1px solid #f1e6dc;border-radius:32px;padding:16px;box-shadow:0 16px 50px rgba(76,86,120,.09)}.m296-title{display:flex;justify-content:center;gap:12px;align-items:center;text-align:left;margin:0 0 12px}.m296-title>span{font-size:42px}.m296-title h1{font-size:clamp(23px,2.4vw,38px);margin:0;color:#142866}.m296-title p{margin:3px 0 0;color:#68728b;font-weight:700}.m296-center .m280-wrap{width:min(100%,720px)}.m296-center .m280-board{border:0!important;border-radius:18px!important;box-shadow:0 18px 45px rgba(92,62,38,.16)!important;padding:8px;background:#fff4e7;gap:0}.m296-center .m280-sq.light{background:linear-gradient(145deg,#fff8ec,#f8ead6)!important}.m296-center .m280-sq.dark{background:linear-gradient(145deg,#e4c3a1,#cfa47e)!important}.m280-piece{width:82%;height:82%;display:grid;place-items:center;transition:.18s ease;filter:drop-shadow(0 5px 3px rgba(44,30,25,.22))!important}.m280-piece svg{width:100%;height:100%;overflow:visible}.m280-piece.b svg{filter:contrast(1.12) saturate(.8) drop-shadow(0 3px 2px rgba(0,0,0,.28))}.m280-piece.w svg{filter:drop-shadow(0 3px 2px rgba(91,56,32,.25))}.m280-sq:hover .m280-piece{transform:translateY(-3px) scale(1.04)}.m280-sq.sel{box-shadow:inset 0 0 0 5px #4b8ff5!important}.m280-sq.last{box-shadow:inset 0 0 0 5px rgba(255,205,70,.72)}.m296-right{display:flex;flex-direction:column;gap:14px}.m296-player,.m296-turn,.m296-clock,.m296-actions,.m296-mini{background:rgba(255,255,255,.88);border:1px solid #eee7e3;border-radius:25px;padding:16px;box-shadow:0 10px 28px rgba(71,87,126,.08)}.m296-player,.m296-turn{display:flex;align-items:center;gap:14px}.m296-player>span,.m296-turn>span{font-size:46px}.m296-player b,.m296-turn b{display:block;font-size:21px}.m296-player button{margin-top:8px;padding:8px 12px!important;background:#edf4ff!important}.m296-clock{text-align:center;font-size:26px;color:#6b3f22}.m296-turn small{display:block;margin-top:7px;font-size:18px;color:#3970c6}.m296-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.m296-actions button{min-height:88px;font-size:31px!important;padding:8px!important}.m296-actions small{display:block;font-size:12px;margin-top:5px}.m296-mini{display:grid;grid-template-columns:1fr 1fr;gap:8px}.m296-mini button{padding:13px 6px!important;font-weight:900}.m296-level{margin-top:auto;padding:17px!important;background:linear-gradient(135deg,#62a9ff,#347fe9)!important;color:white!important;font-size:18px;font-weight:900}.m296-center .m280-help{background:#fff7e8;border:1px solid #f3dfbf}.m280-sq.target i{background:rgba(62,163,111,.72)!important}.m280-sq.target .m280-piece+i{border-color:#3aa96f!important}
+@media(max-width:1050px){.m296-layout{grid-template-columns:170px 1fr}.m296-right{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr)}.m296-level{margin-top:0}.m296-topnav{grid-template-columns:1fr repeat(4,1fr)}.m296-brand{font-size:30px}.m296-side button{font-size:14px}}
+@media(max-width:720px){.m296-shell{padding:8px}.m296-topnav{display:flex;overflow-x:auto}.m296-brand{min-width:120px}.m296-topnav button{min-width:110px;padding:11px!important;font-size:13px}.m296-layout{display:block}.m296-side{display:grid;grid-template-columns:repeat(2,1fr);margin-bottom:10px}.m296-side button{min-height:58px;font-size:13px}.m296-center{padding:8px;border-radius:20px}.m296-title p{display:none}.m296-right{display:grid;grid-template-columns:1fr 1fr;margin-top:10px}.m296-actions,.m296-mini,.m296-level{grid-column:1/-1}.m296-player,.m296-turn,.m296-clock{padding:10px}.m296-center .m280-board{padding:4px}.m280-piece{width:90%;height:90%}}
 </style>`);
