@@ -55,13 +55,13 @@ function notify(msg){let t=document.querySelector('#toast');if(!t){t=document.cr
 function modal(html){closeModal();const d=document.createElement('div');d.id='modal';d.className='modal';d.innerHTML=`<div class="modal-card">${html}</div>`;d.onclick=e=>{if(e.target===d)closeModal()};document.body.appendChild(d)}
 function closeModal(){document.querySelector('#modal')?.remove()}
 const avatar=(s,size='')=>s.photo_data?`<img class="avatar ${size}" src="${s.photo_data}" alt="">`:`<div class="avatar placeholder ${size}">🌱</div>`;
-function home(){teacherPass='';teacherToken='';teacherRole='';teacherName='';studentSession=null;currentClass=null;app.innerHTML=`<main class="center"><div class="logo">Minoo <span>v2.9.18</span></div><p class="tag">Oyna • Keşfet • Öğren</p><section class="card"><h2>Öğrenci girişi</h2><div class="login-grid"><input id="suser" placeholder="Kullanıcı adı" autocomplete="username"><input id="scode" type="password" placeholder="İlk giriş kodu / şifre" autocomplete="current-password" onkeydown="if(event.key==='Enter')studentLogin()"><button onclick="studentLogin()">Giriş yap</button></div></section><button class="link" onclick="staffLogin()">Öğretmen / Yönetici girişi</button><p class="safe">Reklamsız • Sohbetsiz • Öğretmen kontrollü</p></main>`}
-function staffLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="home()">← Geri</button><div class="logo">Minoo <span>v2.9.18</span></div><p class="tag">Giriş türünü seçin</p><div class="m267-role-grid"><button onclick="adminLogin()"><span>👑</span><b>Yönetici Girişi</b><small>Öğretmenleri, sınıfları ve sistemi yönet</small></button><button onclick="teacherLogin()"><span>👩‍🏫</span><b>Öğretmen Girişi</b><small>Size verilen kullanıcı adı ve şifreyle giriş yapın</small></button></div></main>`}
+function home(){teacherPass='';teacherToken='';teacherRole='';teacherName='';studentSession=null;currentClass=null;app.innerHTML=`<main class="center"><div class="logo">Minoo <span>v2.9.21</span></div><p class="tag">Oyna • Keşfet • Öğren</p><section class="card"><h2>Öğrenci girişi</h2><div class="login-grid"><input id="suser" placeholder="Kullanıcı adı" autocomplete="username"><input id="scode" type="password" placeholder="İlk giriş kodu / şifre" autocomplete="current-password" onkeydown="if(event.key==='Enter')studentLogin()"><button onclick="studentLogin()">Giriş yap</button></div></section><button class="link" onclick="staffLogin()">Öğretmen / Yönetici girişi</button><p class="safe">Reklamsız • Sohbetsiz • Öğretmen kontrollü</p></main>`}
+function staffLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="home()">← Geri</button><div class="logo">Minoo <span>v2.9.21</span></div><p class="tag">Giriş türünü seçin</p><div class="m267-role-grid"><button onclick="adminLogin()"><span>👑</span><b>Yönetici Girişi</b><small>Öğretmenleri, sınıfları ve sistemi yönet</small></button><button onclick="teacherLogin()"><span>👩‍🏫</span><b>Öğretmen Girişi</b><small>Size verilen kullanıcı adı ve şifreyle giriş yapın</small></button></div></main>`}
 function adminLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="staffLogin()">← Geri</button><div class="logo">Minoo <span>Yönetici</span></div><section class="card login-card"><h2>👑 Yönetici Girişi</h2><label>Yönetici şifresi</label><input id="ap" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAdminLogin()"><button onclick="doAdminLogin()">Giriş yap</button></section></main>`}
 async function doAdminLogin(){const p=document.querySelector('#ap').value;if(!p)return;try{teacherPass=p;const r=await api('/api/admin/login',{method:'POST',body:JSON.stringify({password:p})});teacherRole='admin';teacherName='Yönetici';dashboard()}catch(e){teacherPass='';notify(e.message)}}
 function teacherLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="staffLogin()">← Geri</button><div class="logo">Minoo <span>Öğretmen</span></div><section class="card login-card"><h2>👩‍🏫 Öğretmen Girişi</h2><label>Kullanıcı adı</label><input id="tu" autocomplete="username"><label>Şifre</label><input id="tp" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doTeacherLogin()"><button onclick="doTeacherLogin()">Giriş yap</button></section></main>`}
 async function doTeacherLogin(){const username=document.querySelector('#tu').value.trim(),password=document.querySelector('#tp').value;if(!username||!password)return notify('Kullanıcı adı ve şifre gerekli');try{const r=await fetch('/api/teacher/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})}).then(async x=>{const d=await x.json();if(!x.ok)throw Error(d.error);return d});teacherToken=r.token;teacherRole='teacher';teacherName=r.name;dashboard()}catch(e){teacherToken='';notify(e.message)}}
-async function dashboard(){const cs=await api('/api/classes');app.innerHTML=`<header><div><b>Minoo Öğretmen</b><small>v2.9.18</small></div><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="toolbar"><h1>Sınıflarım</h1><button onclick="addClass()">+ Sınıf</button></div><div class="grid">${cs.map(c=>`<article class="card"><h3>${esc(c.name)}</h3><p>${c.student_count} öğrenci</p><button onclick="openClass(${c.id})">Aç</button><div class="row"><button class="ghost" onclick="renameClass(${c.id},'${encodeURIComponent(c.name)}')">Adını değiştir</button><button class="danger ghost" onclick="deleteClass(${c.id},'${encodeURIComponent(c.name)}')">Sil</button></div></article>`).join('')}</div><hr><div class="toolbar"><h2>Oyun Kütüphanesi</h2><button onclick="gameForm()">+ Oyun ekle</button></div><div id="library"></div></main>`;loadLibrary()}
+async function dashboard(){const cs=await api('/api/classes');app.innerHTML=`<header><div><b>Minoo Öğretmen</b><small>v2.9.21</small></div><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="toolbar"><h1>Sınıflarım</h1><button onclick="addClass()">+ Sınıf</button></div><div class="grid">${cs.map(c=>`<article class="card"><h3>${esc(c.name)}</h3><p>${c.student_count} öğrenci</p><button onclick="openClass(${c.id})">Aç</button><div class="row"><button class="ghost" onclick="renameClass(${c.id},'${encodeURIComponent(c.name)}')">Adını değiştir</button><button class="danger ghost" onclick="deleteClass(${c.id},'${encodeURIComponent(c.name)}')">Sil</button></div></article>`).join('')}</div><hr><div class="toolbar"><h2>Oyun Kütüphanesi</h2><button onclick="gameForm()">+ Oyun ekle</button></div><div id="library"></div></main>`;loadLibrary()}
 async function loadLibrary(){const gs=await api('/api/games'),el=document.querySelector('#library');el.innerHTML=gs.length?`<div class="grid">${gs.map(g=>`<article class="card"><h3>${esc(g.title)}</h3><p>${g.game_type==='matching'?'🧩 Minoo Eşleştirme':g.game_type==='chess_intro'?'♟️ Satranç Taşlarını Tanı':g.game_type==='chess_names'?'🔊 Satranç Taşlarının İsimleri':g.game_type==='chess_setup'?'♟️ Satranç Taşlarını Dizelim':'🔗 Canva oyunu'}</p><p>${g.completed_count||0}/${g.assigned_count||0} tamamlandı</p><div class="row"><button class="ghost" onclick="teacherPreviewEncoded('${encodeURIComponent(JSON.stringify(g))}')">▶ Oyunu oyna</button><button onclick="gameForm(${g.id},'${encodeURIComponent(g.title)}','${encodeURIComponent(g.canva_url||'')}','${g.game_type||'external'}','${encodeURIComponent(g.game_data||'') }')">Düzenle</button><button class="danger ghost" onclick="deleteGame(${g.id},'${encodeURIComponent(g.title)}')">Sil</button></div></article>`).join('')}</div>`:'<p>Henüz oyun yok.</p>'}
 function addClass(){modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>Yeni sınıf</h2><label>Sınıf adı</label><input id="cn" autofocus><div class="modal-actions"><button class="ghost" onclick="closeModal()">Vazgeç</button><button onclick="saveClass()">Oluştur</button></div>`)}
 async function saveClass(){const name=document.querySelector('#cn').value.trim();if(!name)return;try{await api('/api/classes',{method:'POST',body:JSON.stringify({name})});closeModal();dashboard()}catch(e){notify(e.message)}}
@@ -876,7 +876,7 @@ setTimeout(()=>document.querySelectorAll('.logo span,header small').forEach(x=>{
 
 
 /* ===== Minoo v2.6.4 • Atölye alanları + Fen renk karışımı + Türkçe harf yazma ===== */
-const MINOO_VERSION='v2.9.18';
+const MINOO_VERSION='v2.9.21';
 
 function atelierHome(){
   modal(`<button class="modal-x" onclick="closeModal()">×</button>
@@ -1016,7 +1016,7 @@ document.head.insertAdjacentHTML('beforeend',`<style id="minoo264">
 
 
 /* ===== Minoo v2.6.5 • toplu düzeltme ===== */
-const MINOO_VERSION_265='v2.9.18';
+const MINOO_VERSION_265='v2.9.21';
 
 /* Güvenli ortak ana sayfa */
 async function m265Home(){
@@ -2341,7 +2341,7 @@ new MutationObserver(()=>{if(teacherRole==='teacher')m282ApplyTeacherUI()}).obse
 /* ============================================================
    MINOO v2.9.5 • KESIN GORSEL / PANEL DUZELTMELERI
    ============================================================ */
-const MINOO_294='v2.9.18';
+const MINOO_294='v2.9.21';
 
 /* Satranç tahtaları: tüm m262 tabanlı etkinliklerde gerçek dama rengi. */
 function m294PaintChessBoards(root=document){
@@ -2420,7 +2420,7 @@ document.head.insertAdjacentHTML('beforeend',`<style id="m294css">
 /* ============================================================
    MINOO v2.9.5 • SEKMEli ANA PANEL + ARAÇLAR + OYUN ATÖLYESİ
    ============================================================ */
-const MINOO_295='v2.9.18';
+const MINOO_295='v2.9.21';
 let m295ActiveTab='classes';
 function m295Can(permission){return teacherRole==='admin'||m282Has(permission)}
 function m295Tab(tab){
@@ -2458,6 +2458,7 @@ async function m295Dashboard(){
     <section class="m295-pane" data-pane="games">
       <div class="m295-panehead"><div><h2>🎮 Oyunlar</h2><p>Minoo oyun kütüphanesi ve satranç alanı.</p></div>${canManage?`<button onclick="gameForm()">＋ Oyun ekle</button>`:''}</div>
       ${canChess?`<button class="m295-feature" onclick="m280ChooseLevel()"><span>♟️</span><div><b>Satranç Oynayalım</b><small>Bilgisayara karşı gerçek satranç • 3 zorluk seviyesi</small></div><strong>Oyna →</strong></button>`:''}
+      ${canChess?`<button class="m295-feature" onclick="m2921StaffChessMatches()"><span>👫♟️</span><div><b>Sınıf Arkadaşlarıyla Satranç</b><small>Öğrencilerin arkadaşlarıyla yaptığı satranç maçlarını görüntüle</small></div><strong>Aç →</strong></button>`:''}
       <div id="library" class="m295-library"></div>
     </section>
 
@@ -2483,6 +2484,10 @@ async function m295Dashboard(){
   m295Tab(m295ActiveTab);
   setTimeout(()=>{m282ApplyTeacherUI();m294PaintChessBoards();m294Version()},0);
 }
+
+async function m2921StaffChessMatches(){try{const cs=await api('/api/classes');modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>👫♟️ Sınıf Arkadaşlarıyla Satranç</h2><p>Bir sınıf seçerek öğrencilerin karşılıklı satranç kayıtlarını görüntüleyin.</p><div class="m2918-peers">${cs.map(c=>`<article><b>${esc(c.name)}</b><small>${Number(c.student_count)||0} öğrenci</small><button onclick="m2921StaffChessClass(${Number(c.id)},'${encodeURIComponent(c.name)}')">Maçları Gör</button></article>`).join('')||'<p>Görüntülenebilen sınıf yok.</p>'}</div>`)}catch(e){notify(e.message)}}
+async function m2921StaffChessClass(cid,name){try{const ss=await api(`/api/classes/${cid}/students`);modal(`<button class="modal-x" onclick="closeModal()">×</button><button class="ghost" onclick="m2921StaffChessMatches()">← Sınıflar</button><h2>♟️ ${esc(decodeURIComponent(name))}</h2><p>Maç geçmişini görmek için öğrenciyi seçin.</p><div class="m2918-peers">${ss.map(st=>`<article><b>${esc(st.name)}</b><button onclick="m2918TeacherHistory(${Number(st.id)})">Satranç Maçları</button></article>`).join('')||'<p>Bu sınıfta öğrenci yok.</p>'}</div>`)}catch(e){notify(e.message)}}
+
 dashboard=m295Dashboard;
 
 /* Araçlardan ve oyun önizlemelerinden dönüş, seçili sekmeyi korur. */
@@ -2512,14 +2517,14 @@ document.head.insertAdjacentHTML('beforeend',`<style id="m296css">
 @media(max-width:720px){.m296-shell{padding:8px}.m296-topnav{display:flex;overflow-x:auto}.m296-brand{min-width:120px}.m296-topnav button{min-width:110px;padding:11px!important;font-size:13px}.m296-layout{display:block}.m296-side{display:grid;grid-template-columns:repeat(2,1fr);margin-bottom:10px}.m296-side button{min-height:58px;font-size:13px}.m296-center{padding:8px;border-radius:20px}.m296-title p{display:none}.m296-right{display:grid;grid-template-columns:1fr 1fr;margin-top:10px}.m296-actions,.m296-mini,.m296-level{grid-column:1/-1}.m296-player,.m296-turn,.m296-clock{padding:10px}.m296-center .m280-board{padding:4px}.m280-piece{width:90%;height:90%}}
 </style>`);
 
-// v2.9.18 history + chess navigation + resume polish
+// v2.9.21 history + chess navigation + resume polish
 document.head.insertAdjacentHTML('beforeend',`<style>
 .m299-move-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}.m299-move-grid button{min-height:74px;font-size:18px;border-radius:20px!important;background:linear-gradient(145deg,#fffaf0,#eef5ff)!important;color:#243b67!important;border:2px solid #dbe7f6!important;box-shadow:0 8px 18px rgba(40,65,105,.10)}\n.m299-history{max-width:1050px;margin:auto}.m299-history-hero{text-align:center;background:linear-gradient(135deg,#fff5df,#edf6ff);padding:24px;border-radius:28px;margin-bottom:20px;box-shadow:0 10px 28px rgba(50,70,100,.08)}.m299-history-hero>div{font-size:52px}.m299-history-hero h1{margin:4px 0}.m299-history-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.m299-history-card{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;background:#fff;border:2px solid #edf0f5;border-radius:24px;padding:18px;box-shadow:0 8px 20px rgba(40,60,90,.08)}.m299-history-icon{width:58px;height:58px;display:grid;place-items:center;border-radius:18px;background:#fff2dc;font-size:32px}.m299-history-card h3{margin:0 0 5px}.m299-history-card p{margin:0 0 4px;color:#43875b;font-weight:800}.m299-history-card small{color:#718096}@media(max-width:700px){.m299-history-grid{grid-template-columns:1fr}.m299-history-card{grid-template-columns:auto 1fr}.m299-history-card button{grid-column:1/-1}.m299-move-grid{grid-template-columns:1fr}}
 </style>`);
 
 
 /* ============================================================
-   MINOO v2.9.18 • SATRANÇ ÖĞRENME MODÜLLERİNDEN OYUNA DÖNÜŞ
+   MINOO v2.9.21 • SATRANÇ ÖĞRENME MODÜLLERİNDEN OYUNA DÖNÜŞ
    Devam eden bilgisayara karşı satranç durumunu korur.
    ============================================================ */
 function m2910SaveChess(){
@@ -2572,7 +2577,7 @@ function m2910OpenMoveLesson(i){
 }
 
 
-/* ===== Minoo v2.9.18 • genişletilmiş öğretmen yetkileri ===== */
+/* ===== Minoo v2.9.21 • genişletilmiş öğretmen yetkileri ===== */
 function m2915Allowed(key){return teacherRole==='admin'||m282Permissions.includes(key)}
 const _m2915OpenType=m296OpenChessType;
 m296OpenChessType=async function(type){
@@ -2591,7 +2596,7 @@ m296OpenDirections=async function(){
 };
 
 
-/* ===== Minoo v2.9.18 • TSF satranç alıştırmaları, sekmeli panel korunarak ===== */
+/* ===== Minoo v2.9.21 • TSF satranç alıştırmaları, sekmeli panel korunarak ===== */
 
 const M2916_PUZZLES={
  attack:{title:'Saldırıyı Bul',icon:'⚔️',prompt:'Güvenli kareden rakip taşa saldır.',pieces:[['w','rook','a1'],['w','king','g1'],['b','pawn','d6'],['b','king','g8']],from:'a1',answers:['a6'],hint:'Kaleyi aynı sıraya getir; yolu açık olsun.'},
@@ -2655,7 +2660,7 @@ document.head.insertAdjacentHTML('beforeend',`<style id="m2917-style">
 .m2916-world{max-width:920px;margin:auto;padding:18px}.m2916-card{background:rgba(255,255,255,.9);border:2px solid #f0e2d4;border-radius:28px;padding:20px;box-shadow:0 14px 38px rgba(70,80,100,.10)}.m2916-board{margin:18px auto;max-width:620px;border:8px solid #f5e5d3;border-radius:20px;overflow:hidden;box-shadow:0 16px 34px rgba(92,62,38,.14)}.m2916-from{box-shadow:inset 0 0 0 5px #6ea8f7!important}.m2916-help{text-align:center;font-weight:800;color:#68728b}.m2916-choice{display:flex;justify-content:center;gap:14px;margin:18px}.m2916-choice button{min-width:150px;font-size:20px}.m2917-feature{background:linear-gradient(135deg,#fff5df,#edf6ff)!important;color:#294052!important;border:1px solid #eadcc9!important}.m2917-chess-open{background:linear-gradient(145deg,#fff6dc,#eef6ff)!important;color:#243b67!important;border:2px solid #e5d9bf!important}@media(max-width:700px){.m2916-world{padding:8px}.m2916-card{padding:10px;border-radius:20px}.m2916-board{border-width:4px}.m2916-choice button{min-width:0;flex:1}}
 </style>`);
 
-/* ===== Minoo v2.9.18 • Sınıf Arkadaşımla Satranç ===== */
+/* ===== Minoo v2.9.21 • Sınıf Arkadaşımla Satranç ===== */
 let m2918Poll=null,m2918Match=null,m2918State=null,m2918Selected=null,m2918Legal=[];
 function m2918Stop(){if(m2918Poll){clearInterval(m2918Poll);m2918Poll=null}}
 async function m2918Lobby(){
@@ -2692,12 +2697,12 @@ const _m2918StudentDash=studentDash;studentDash=async function(){m2918Stop();awa
 async function m2918TeacherHistory(sid){try{const rows=await api(`/api/students/${sid}/chess-history`);modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>♟️ Karşılıklı Satranç Geçmişi</h2>${rows.length?rows.map(x=>`<div class="m2918-row"><b>${esc(x.white_name)} – ${esc(x.black_name)}</b><span>${esc(x.result||'')} • ${esc(x.end_reason||'')} • ${Number(x.move_count)||0} hamle</span><small>${formatDate(x.finished_at)}</small></div>`).join(''):'<p>Henüz tamamlanmış karşılıklı satranç maçı yok.</p>'}`)}catch(e){notify(e.message)}}
 const _m2918Profile=profile;profile=async function(id){await _m2918Profile(id);const card=document.querySelector('#modal .modal-card');if(card&&!card.querySelector('.m2918-teacher-btn')){const d=document.createElement('div');d.className='modal-actions m2918-teacher-btn';d.innerHTML=`<button class="ghost" onclick="m2918TeacherHistory(${Number(id)})">♟️ Satranç Maçları</button>`;card.appendChild(d)}};
 
-/* v2.9.18 sürüm etiketi */
-document.querySelectorAll('.logo span').forEach(x=>{if(/^v2\.9\.17$/.test(x.textContent.trim()))x.textContent='v2.9.18'});
+/* v2.9.21 sürüm etiketi */
+document.querySelectorAll('.logo span').forEach(x=>{if(/^v2\.9\.17$/.test(x.textContent.trim()))x.textContent='v2.9.21'});
 document.head.insertAdjacentHTML('beforeend',`<style id="m2918-style">.m2918-lobby,.m2918-game{max-width:980px;margin:auto;padding:18px}.m2918-hero{display:flex;gap:16px;align-items:center;background:linear-gradient(135deg,#fff4df,#eef8ff);border:1px solid #eadcc8;border-radius:26px;padding:20px;margin-bottom:16px}.m2918-hero>span{font-size:48px}.m2918-row{display:grid;grid-template-columns:minmax(130px,1fr) minmax(180px,2fr) auto;gap:10px;align-items:center;padding:10px;border-bottom:1px solid #eee}.m2918-peers{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.m2918-peers article{display:grid;gap:8px;justify-items:center;padding:15px;border:1px solid #eee0cf;border-radius:20px;background:#fffdf9}.m2918-entry button{width:100%;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;text-align:left;background:linear-gradient(135deg,#fff5df,#eef7ff);color:#294052;border:1px solid #eadcc9;border-radius:22px;padding:16px;margin:12px 0}.m2918-entry span{font-size:32px}.m2918-entry small{display:block;margin-top:3px}.m2918-gamehead{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px;background:#fffaf1;border:1px solid #eadcc9;border-radius:18px;padding:12px 16px}.m2918-gamehead small{display:block}.m2918-board{margin:auto}.m2918-note{text-align:center;font-weight:700;color:#68728b}.m2918-prom{display:grid;grid-template-columns:1fr 1fr;gap:10px}.m2918-history{margin-top:18px}@media(max-width:700px){.m2918-row{grid-template-columns:1fr}.m2918-game{padding:8px}.m2918-gamehead{align-items:flex-start;flex-direction:column}}</style>`);
 
 /* ===== Minoo v2.9.20 • Satranç eğitim paketi ===== */
-const M2919_VERSION='2.9.20';
+const M2919_VERSION='2.9.21';
 function m2919Sq(file,rank){return file+rank}
 function m2919Make10(base){return Array.from({length:10},(_,i)=>{const p=JSON.parse(JSON.stringify(base));p.no=i+1;return p})}
 const M2919_PUZZLES={
@@ -2811,7 +2816,9 @@ function m2919MateTeach(key,step=0){
  const m=M2919_MATES[key],d=m2919MateDemo(key);if(!m||!d)return m2919MateMenu();step=Math.max(0,Math.min(step,d.moves.length));let pieces=d.start.map(x=>x.slice());for(let i=0;i<step;i++)pieces=m2919ApplyDemo(pieces,d.moves[i][0],d.moves[i][1]);const map={};pieces.forEach(([side,t,sq])=>map[sq]=m2916Piece(side,t));const last=step===d.moves.length;const text=step===0?`${m.name} nasıl oluşuyor? Tahtada hamle hamle izleyelim.`:d.moves[step-1][2];app.innerHTML=`<header class="chess-header"><button class="ghost" onclick="m2919MateMenu()">← Mat Çeşitleri</button><b>${m.icon} ${m.name}</b><span>${step}/${d.moves.length}</span></header><main class="m262-game m2916-world"><section class="m2916-card"><div class="v261-instruction">${text}</div>${m2919BoardHTML(map,'m2919DemoNoop')}<p class="setup-message">${last?'🌟 Mat tamamlandı. Şimdi sen deneyebilirsin.':'Tahtayı izle ve İleri’ye bas.'}</p><div class="modal-actions">${step?`<button class="ghost" onclick="m2919MateTeach('${key}',${step-1})">← Geri</button>`:''}<button onclick="${last?`m2919MateExercise('${key}',0)`:`m2919MateTeach('${key}',${step+1})`}">${last?'Şimdi Ben Deneyeyim →':'İleri →'}</button></div></section></main>`;if(step>0)setTimeout(()=>m2919DrawArrow(d.moves[step-1][0],d.moves[step-1][1]),80);minooSpeak(text,'tr-TR')
 }
 function m2919DemoNoop(){ }
-function m2919MateExercise(key,idx=0){const m=M2919_MATES[key],e=m?.exercise;if(!e)return;window._m2919Mate={key,idx,from:e.from,to:e.to,tries:0};const map={};e.pieces.forEach(([s,t,sq])=>map[sq]=m2916Piece(s,t));app.innerHTML=`<header class="chess-header"><button class="ghost" onclick="m2919MateMenu()">← Mat Çeşitleri</button><b>${m.icon} ${m.name} • ${idx+1}/10</b><button class="ghost" onclick="m2919MateHint()">💡 İpucu</button></header><main class="m262-game m2916-world"><section class="m2916-card"><div class="m2919-progress"><i style="width:${(idx+1)*10}%"></i></div><div class="v261-instruction">Mat hamlesini bul.</div>${m2919BoardHTML(map,'m2919MatePick',e.from)}<p id="m2916msg" class="setup-message">🌱 Önce kendin dene.</p></section></main>`}
+function m2921MirrorSq(sq,mode){const f=sq.charCodeAt(0)-97,r=Number(sq[1]);let nf=f,nr=r;if(mode&1)nf=7-f;if(mode&2)nr=9-r;return String.fromCharCode(97+nf)+nr}
+function m2921MateVariant(e,idx){const mode=idx%4;const pieces=e.pieces.map(x=>[x[0],x[1],m2921MirrorSq(x[2],mode)]);const from=m2921MirrorSq(e.from,mode),to=m2921MirrorSq(e.to,mode);const extras=[['w','pawn','a2'],['b','pawn','h7'],['w','knight','b1'],['b','bishop','c8'],['w','pawn','g2'],['b','knight','b8']];for(let j=0;j<Math.floor(idx/2);j++){const x=extras[(idx+j)%extras.length].slice(),sq=m2921MirrorSq(x[2],mode);if(!pieces.some(q=>q[2]===sq)&&sq!==from&&sq!==to)pieces.push([x[0],x[1],sq])}return {pieces,from,to}}
+function m2919MateExercise(key,idx=0){const m=M2919_MATES[key],base=m?.exercise;if(!base)return;const e=m2921MateVariant(base,idx);window._m2919Mate={key,idx,from:e.from,to:e.to,tries:0};const map={};e.pieces.forEach(([s,t,sq])=>map[sq]=m2916Piece(s,t));app.innerHTML=`<header class="chess-header"><button class="ghost" onclick="m2919MateMenu()">← Mat Çeşitleri</button><b>${m.icon} ${m.name} • ${idx+1}/10</b><button class="ghost" onclick="m2919MateHint()">💡 İpucu</button></header><main class="m262-game m2916-world"><section class="m2916-card"><div class="m2919-progress"><i style="width:${(idx+1)*10}%"></i></div><div class="v261-instruction">Mat hamlesini bul.</div>${m2919BoardHTML(map,'m2919MatePick',e.from)}<p id="m2916msg" class="setup-message">🌱 Önce kendin dene.</p></section></main>`}
 function m2919MateHint(){const s=window._m2919Mate;if(!s)return;const msg=document.querySelector('#m2916msg');if(s.tries<2){if(msg)msg.textContent='💡 Mat için şahın kaçış karelerini ve taşlarının birlikte kontrol ettiği kareleri incele.';minooSpeak('Şahın kaçış karelerini incele.','tr-TR')}else{m2919DrawArrow(s.from,s.to);if(msg)msg.textContent='💡 Şimdi doğru hamlenin yönünü gösteriyorum.';minooSpeak('Şimdi doğru hamlenin yönünü gösteriyorum.','tr-TR')}}
 function m2919MatePick(sq){const s=window._m2919Mate;if(!s||sq===s.from)return;const ok=sq===s.to,msg=document.querySelector('#m2916msg');if(ok){m2919DrawArrow(s.from,s.to);if(msg)msg.textContent='⭐ Doğru mat hamlesi!';setTimeout(()=>s.idx<9?m2919MateExercise(s.key,s.idx+1):modal(`<h2>🌟 Harika!</h2><p>${M2919_MATES[s.key].name} • 10/10 tamamlandı.</p><button onclick="closeModal();m2919MateMenu()">Mat Çeşitleri</button>`),650)}else{s.tries++;if(msg)msg.textContent=s.tries===1?'Henüz değil 🌱 Bir daha dene.':s.tries===2?'💡 Şahın kaçış karelerini kontrol et.':'İstersen İpucu düğmesine bas; doğru yönü gösterebilirim.';minooSpeak(s.tries===1?'Bir daha deneyelim.':'Şahın kaçış karelerini kontrol et.','tr-TR')}}
 
