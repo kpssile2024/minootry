@@ -42,7 +42,7 @@ document.head.insertAdjacentHTML('beforeend','\n<style>\n.setup-piece,.tray-piec
 document.head.insertAdjacentHTML('beforeend',`<style>
 /* v2.5.3: beslenme takibi + serbest satranç yerleştirme */
 .meal-btn{background:#fff7e8!important;color:#75501d!important;border:1px solid #edcf9a!important}
-.meal-table{display:grid;gap:8px;margin-top:12px}.meal-row{display:grid;grid-template-columns:minmax(130px,1.4fr) repeat(3,minmax(105px,1fr));gap:8px;align-items:center;padding:9px;border-radius:14px;background:#faf9ff}.meal-row.head{font-weight:800;background:#f0edff}.meal-name{font-weight:800}.meal-select{width:100%;padding:9px 7px;border-radius:10px;border:1px solid #ddd;background:#fff}.meal-summary{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.meal-chip{padding:6px 10px;border-radius:999px;background:#f5f2ff;font-size:12px;font-weight:800}.meal-kid{background:#fffaf0;border:1px solid #f0d9ac;border-radius:18px;padding:15px;margin-bottom:16px}.meal-kid-grid{display:flex;gap:8px;flex-wrap:wrap}.meal-kid-grid span{background:#fff;padding:7px 10px;border-radius:999px;border:1px solid #f0dfbf;font-size:13px}.setup-square.check-wrong{box-shadow:inset 0 0 0 5px #e89b55!important}.setup-square.check-right{box-shadow:inset 0 0 0 5px #62b77a!important}
+.meal-table{display:grid;gap:8px;margin-top:12px}.meal-row{display:grid;grid-template-columns:minmax(130px,1.4fr) repeat(3,minmax(105px,1fr));gap:8px;align-items:center;padding:9px;border-radius:14px;background:#faf9ff}.meal-row.head{font-weight:800;background:#f0edff}.meal-name{font-weight:800}.meal-select{width:100%;padding:9px 7px;border-radius:10px;border:1px solid #ddd;background:#fff}.meal-summary{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.meal-chip{padding:6px 10px;border-radius:999px;background:#f5f2ff;font-size:12px;font-weight:800}.meal-kid{background:#fffaf0;border:1px solid #f0d9ac;border-radius:18px;padding:15px;margin-bottom:16px}.meal-kid-grid{display:flex;gap:8px;flex-wrap:wrap}.meal-kid-grid span{background:#fff;padding:7px 10px;border-radius:999px;border:1px solid #f0dfbf;font-size:13px}.setup-square.check-wrong{box-shadow:inset 0 0 0 5px #ff1744,0 0 10px #ff1744,0 0 22px #ff1744,0 0 34px rgba(255,23,68,.95)!important;position:relative;z-index:3;animation:minooWrongNeon .8s ease-in-out infinite alternate}.setup-square.check-wrong .setup-piece{filter:drop-shadow(0 0 7px #ff1744) drop-shadow(0 0 14px #ff1744)}@keyframes minooWrongNeon{from{box-shadow:inset 0 0 0 4px #ff1744,0 0 8px #ff1744,0 0 16px rgba(255,23,68,.8)}to{box-shadow:inset 0 0 0 6px #ff1744,0 0 14px #ff1744,0 0 30px #ff1744}}.setup-square.check-right{box-shadow:inset 0 0 0 5px #62b77a!important}
 @media(max-width:720px){.meal-row{grid-template-columns:1fr}.meal-row.head{display:none}.meal-select{min-height:42px}}
 
 
@@ -214,14 +214,19 @@ function setupPieces(){
 }
 function setupPieceName(p){return ({rook:'Kale',knight:'At',bishop:'Fil',queen:'Vezir',king:'Şah',pawn:'Piyon'})[p.type]||''}
 function chessSetupGame(g){
- setupState={g,phase:'learn',placed:new Map(),pieces:setupPieces(),selected:null,audio:true,wrongPlacements:0,checks:0};
+ setupState={g,phase:'learn',placed:new Map(),pieces:setupPieces(),selected:null,audio:true,wrongPlacements:0,checks:0,wrongKeys:new Set()};
  app.innerHTML=`<header class="chess-header"><button class="ghost" onclick="${teacherPreviewMode?'previewBack()':'studentDash()'}">← ${teacherPreviewMode?'Oyun Kütüphanesi':'Oyunlarım'}</button><b>♟️ ${esc(g.title||'Satranç Taşlarını Dizelim')}</b><span id="setupProgress">0 / 32</span></header>
- <main class="setup-world"><section class="setup-card"><div class="setup-guide"><div class="setup-mascot">🌱</div><div><h1>Satranç Taşlarını Dizelim</h1><p id="setupMessage">Önce doğru dizilişi birlikte görelim.</p></div></div><div id="setupArea"></div><div class="setup-actions"><button id="setupStart" class="setup-start" hidden onclick="setupStartPlay()">▶ Oyuna Başla</button></div></section></main>`;
+ <main class="setup-world"><section class="setup-card"><div class="setup-guide"><div class="setup-mascot">🌱</div><div><h1>Satranç Taşlarını Dizelim</h1><p id="setupMessage">Taşların tahtada nereye yerleştiğini öğrenmek için taşlara dokun.</p></div></div><div id="setupArea"></div><div class="setup-actions"><button id="setupStart" class="setup-start" hidden onclick="setupStartPlay()">▶ Oyuna Başla</button></div></section></main>`;
  renderSetup();
+ setTimeout(()=>setupVoicePlay('dizelim_ogrenme.mp3'),120);
+}
+function setupVoicePlay(file){
+ if(!setupState||setupState.audio===false)return;
+ try{if(window.__setupVoice){window.__setupVoice.pause();window.__setupVoice.currentTime=0}const a=new Audio('/audio/minoo-voice/chess/'+file+'?v=2924setup2');window.__setupVoice=a;a.play().catch(()=>{})}catch(e){}
 }
 function setupBoardHtml(){
  let h='<div class="setup-board">';
- for(let r=0;r<8;r++)for(let c=0;c<8;c++){const key=`${c},${r}`,home=(r<=1||r>=6),p=setupState.placed.get(key);h+=`<div class="setup-square ${(r+c)%2?'dark':'light'} ${home?'home':''}" data-key="${key}" onclick="setupSquareClick('${key}')">${c===0?`<span class="rank">${8-r}</span>`:''}${r===7?`<span class="file">${'abcdefgh'[c]}</span>`:''}${p?`<button class="setup-piece ${p.side}" onclick="event.stopPropagation();setupBoardPieceClick('${p.id}')">${minooPieceSvg(p.type,p.side)}</button>`:''}</div>`}return h+'</div>';
+ for(let r=0;r<8;r++)for(let c=0;c<8;c++){const key=`${c},${r}`,home=(r<=1||r>=6),p=setupState.placed.get(key);h+=`<div class="setup-square ${(r+c)%2?'dark':'light'} ${home?'home':''} ${setupState.wrongKeys?.has(key)?'check-wrong':''}" data-key="${key}" onclick="setupSquareClick('${key}')">${c===0?`<span class="rank">${8-r}</span>`:''}${r===7?`<span class="file">${'abcdefgh'[c]}</span>`:''}${p?`<button class="setup-piece ${p.side}" onclick="event.stopPropagation();setupBoardPieceClick('${p.id}')">${minooPieceSvg(p.type,p.side)}</button>`:''}</div>`}return h+'</div>';
 }
 function setupTrayHtml(side){
  const remaining=setupState.pieces.filter(p=>p.side===side && ![...setupState.placed.values()].some(x=>x.id===p.id));
@@ -276,8 +281,8 @@ function setupPlaceAllLearn(){
  const m=document.querySelector('#setupMessage');
  if(m)m.textContent='Harika! Tüm taşların doğru başlangıç dizilişini gördün. Şimdi Oyuna Başla.';
 }
-function setupStartPlay(){setupState.phase='play';setupState.placed.clear();setupState.selected=null;setupState.wrongPlacements=0;setupState.checks=0;document.querySelector('#setupMessage').textContent='Bir taşa dokun, sonra istediğin kareye yerleştir. Bitirince Kontrol Et.';renderSetup()}
-function setupBoardPieceClick(id){if(setupState.phase!=='play')return;const entry=[...setupState.placed.entries()].find(([,p])=>p.id===id);if(!entry)return;setupState.placed.delete(entry[0]);setupState.selected=id;renderSetup()}
+function setupStartPlay(){setupState.phase='play';setupState.placed.clear();setupState.selected=null;setupState.wrongPlacements=0;setupState.checks=0;setupState.wrongKeys=new Set();document.querySelector('#setupMessage').textContent='Bir taşa dokun, sonra istediğin kareye yerleştir. Bitirince Kontrol Et.';renderSetup()}
+function setupBoardPieceClick(id){if(setupState.phase!=='play')return;const entry=[...setupState.placed.entries()].find(([,p])=>p.id===id);if(!entry)return;setupState.placed.delete(entry[0]);setupState.wrongKeys?.delete(entry[0]);setupState.selected=id;renderSetup()}
 function setupSquareClick(key){if(setupState.phase==='play'&&setupState.selected)setupTryPlace(setupState.selected,key)}
 function setupAllowedTargets(p){
  if(p.type==='pawn')return [...Array(8)].map((_,c)=>`${c},${p.side==='white'?6:1}`);
@@ -287,10 +292,28 @@ function setupAllowedTargets(p){
  return [p.target];
 }
 function setupTryPlace(id,key){const p=setupState.pieces.find(x=>x.id===id);if(!p||setupState.placed.has(key))return;setupState.placed.set(key,p);setupState.selected=null;if(!setupAllowedTargets(p).includes(key))setupState.wrongPlacements=(setupState.wrongPlacements||0)+1;setupPlaceSound();renderSetup();const m=document.querySelector('#setupMessage');if(m)m.textContent='Taşını yerleştirdin. Dizilimin bitince Kontrol Et.'}
-function setupClearBoard(){setupState.placed.clear();setupState.selected=null;renderSetup();document.querySelector('#setupMessage').textContent=setupState.phase==='learn'?'Tahta temizlendi. Bir taşa dokunup yeniden öğrenebilirsin.':'Tahta temizlendi. Yeniden dizmeye başlayabilirsin.'}
+function setupClearBoard(){setupState.placed.clear();setupState.wrongKeys=new Set();setupState.selected=null;renderSetup();document.querySelector('#setupMessage').textContent=setupState.phase==='learn'?'Tahta temizlendi. Bir taşa dokunup yeniden öğrenebilirsin.':'Tahta temizlendi. Yeniden dizmeye başlayabilirsin.'}
 function setupToggleAudio(){setupState.audio=setupState.audio===false;const e=document.querySelector('#setupAudio');if(e)e.textContent=setupState.audio?'Açık':'Kapalı';notify(setupState.audio?'Sesli anlatım açık':'Sesli anlatım kapalı')}
 function setupHelp(){modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>♟️ Nasıl oynanır?</h2><p><b>Öğrenirken:</b> Bir taşa dokun. Ok doğru kareyi gösterir ve taş yerine gider.</p><p><b>Oynarken:</b> Sağ veya soldan taşı seç ve istediğin kareye yerleştir. Oyun yanlış kareyi engellemez.</p><p>32 taşı dizdikten sonra <b>Kontrol Et</b>'e bas. Doğru kareler yeşil, düzeltilmesi gerekenler turuncu görünür. Yanlış taşı tahtadan seçip yeniden yerleştirebilirsin.</p><div class="modal-actions"><button onclick="closeModal()">Anladım ✓</button></div>`)}
-function setupCheck(){if(setupState.phase==='learn'){notify(setupState.placed.size===32?'Öğrenme tamamlandı ✓':'Önce 32 taşı birlikte yerleştirelim.');return}if(setupState.placed.size<32){notify(`${32-setupState.placed.size} taş daha yerleştirmen gerekiyor.`);return}setupState.checks=(setupState.checks||0)+1;let wrong=0;document.querySelectorAll('.setup-square').forEach(x=>x.classList.remove('check-wrong','check-right'));for(const [key,p] of setupState.placed){const ok=setupAllowedTargets(p).includes(key);const sq=document.querySelector(`.setup-square[data-key="${key}"]`);sq?.classList.add(ok?'check-right':'check-wrong');if(!ok)wrong++}if(!wrong){setTimeout(setupWin,450);return}const m=document.querySelector('#setupMessage');if(m)m.textContent=`${wrong} taşın yerini yeniden düşünelim. Turuncu kutudaki taşa dokunup başka bir kareye taşıyabilirsin.`;notify(`Çok güzel gidiyorsun! ${wrong} taşı yeniden deneyelim.`)}
+function setupCheck(){
+ if(setupState.phase==='learn'){notify(setupState.placed.size===32?'Öğrenme tamamlandı ✓':'Önce 32 taşı birlikte yerleştirelim.');return}
+ if(setupState.placed.size<32){notify(`${32-setupState.placed.size} taş daha yerleştirmen gerekiyor.`);return}
+ setupState.checks=(setupState.checks||0)+1;
+ const wrongKeys=new Set();
+ for(const [key,p] of setupState.placed){if(!setupAllowedTargets(p).includes(key))wrongKeys.add(key)}
+ setupState.wrongKeys=wrongKeys;
+ renderSetup();
+ if(!wrongKeys.size){setupVoicePlay('dizelim_basarili.mp3');setTimeout(setupWin,700);return}
+ const m=document.querySelector('#setupMessage');if(m)m.textContent='Hmm, bu kez olmadı. Yanlış yerleşen taşlara dikkatlice bakıp tekrar deneyelim!';
+ setupVoicePlay('dizelim_tekrar.mp3');
+ notify(`${wrongKeys.size} taşı yeniden deneyelim.`)
+}
+async function setupWin(){
+ const m=document.querySelector('#setupMessage');if(m)m.textContent='Harika! Bütün taşları doğru yerlerine yerleştirdin. Tebrik ederim!';
+ if(!teacherPreviewMode&&setupState?.g?.assignment_id){try{await api(`/api/assignments/${setupState.g.assignment_id}/complete`,{method:'POST'})}catch(e){}}
+ setTimeout(()=>modal(`<h2>Aferin! 🎉</h2><p>Bütün taşları doğru yerlerine yerleştirdin. Tebrik ederim!</p><div class="modal-actions"><button class="ghost" onclick="closeModal();chessSetupGame(setupState.g)">↻ Yeniden Oyna</button><button onclick="closeModal();${teacherPreviewMode?'previewBack()':'studentDash()'}">${teacherPreviewMode?'Kütüphaneye':'Oyunlarıma'} Dön</button></div>`),900)
+}
+
 function setupPlaceSound(){
  try{
   const A=window.AudioContext||window.webkitAudioContext;if(!A)return;
