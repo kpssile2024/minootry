@@ -3081,3 +3081,53 @@ function m2924FeedbackSound(kind){
   versionObserver.observe(document.documentElement,{subtree:true,childList:true});
   setTimeout(stamp,0);
 })();
+
+/* ===== Minoo v2.9.24 • Taşları Dizelim — Çiğdem ses paketi ===== */
+function m2924SetupVoice(n){
+  if(!setupState || setupState.audio===false)return;
+  try{
+    m2923StopVoice();
+    const a=new Audio(`/audio/minoo_satranc_${String(n).padStart(2,'0')}.mp3?v=2924setup1`);
+    m2923Audio=a;
+    a.play().catch(()=>{});
+  }catch(e){}
+}
+const _m2924SetupGame=chessSetupGame;
+chessSetupGame=function(g){
+  _m2924SetupGame(g);
+  // “Şimdi sıra sende. Doğru taşı seç bakalım...”
+  setTimeout(()=>m2924SetupVoice(8),250);
+};
+const _m2924SetupStartPlay=setupStartPlay;
+setupStartPlay=function(){
+  _m2924SetupStartPlay();
+  // Oyun aşamasına geçerken aynı kısa yönlendirme.
+  setTimeout(()=>m2924SetupVoice(8),180);
+};
+const _m2924SetupPieceClick=setupPieceClick;
+setupPieceClick=function(id){
+  const wasLearn=setupState?.phase==='learn';
+  _m2924SetupPieceClick(id);
+  // Öğrenme aşamasında taşın nereye gideceğini düşünmeye yönlendir.
+  if(wasLearn)setTimeout(()=>m2924SetupVoice(9),720);
+};
+const _m2924SetupTryPlace=setupTryPlace;
+setupTryPlace=function(id,key){
+  const p=setupState?.pieces?.find(x=>x.id===id);
+  const ok=!!p && setupAllowedTargets(p).includes(key) && !setupState.placed.has(key);
+  _m2924SetupTryPlace(id,key);
+  // Doğru yerleştirmede olumlu Minoo geri bildirimi; yanlışta yeniden düşünme.
+  setTimeout(()=>m2924SetupVoice(ok?24:19),120);
+};
+const _m2924SetupCheck=setupCheck;
+setupCheck=function(){
+  if(!setupState)return _m2924SetupCheck();
+  if(setupState.phase==='play' && setupState.placed.size===32){
+    let wrong=0;
+    for(const [key,p] of setupState.placed)if(!setupAllowedTargets(p).includes(key))wrong++;
+    _m2924SetupCheck();
+    setTimeout(()=>m2924SetupVoice(wrong?19:26),180);
+    return;
+  }
+  _m2924SetupCheck();
+};
