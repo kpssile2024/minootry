@@ -2911,7 +2911,7 @@ m2919MateDemo=function(key){
 
 /* ===== Minoo v2.9.24 • Satranç denetim düzeltmeleri (04.10.2026) ===== */
 const MINOO_2923='v2.9.24';
-const M2923_CIGDEM=Object.freeze(Array.from({length:36},(_,i)=>`/audio/clip_${String(i+1).padStart(3,'0')}.mp3`));
+const M2923_CIGDEM=Object.freeze(Array.from({length:36},(_,i)=>`/audio/minoo_satranc_${String(i+1).padStart(2,'0')}.mp3`));
 let m2923Audio=null;
 function m2923StopVoice(){try{speechSynthesis?.cancel?.()}catch(e){};try{m2923Audio?.pause?.()}catch(e){}}
 function m2923ClipFor(text=''){
@@ -2929,7 +2929,7 @@ function m2923ClipFor(text=''){
  return 8;
 }
 function m2923PlayCigdem(text){
- try{m2923StopVoice();const i=m2923ClipFor(text);const a=new Audio(M2923_CIGDEM[Math.max(0,Math.min(35,i))]+'?v=2923');m2923Audio=a;a.play().catch(()=>{});return true}catch(e){return false}
+ try{m2923StopVoice();const i=m2923ClipFor(text);const a=new Audio(M2923_CIGDEM[Math.max(0,Math.min(35,i-1))]+'?v=2924audio');m2923Audio=a;a.play().catch(()=>{});return true}catch(e){return false}
 }
 function m2923InChess(){return !!document.querySelector('.m262-board,.m2916-board,.m280-board,.chess-piece-grid,.setup-world,.m262-game,[class*="chess-"]')}
 const _m2923SpeakBase=minooSpeak;
@@ -3012,12 +3012,12 @@ function m2924FeedbackSound(kind){
   function cgStop(){try{if(cgAudio){cgAudio.pause();cgAudio.currentTime=0}}catch(e){};try{speechSynthesis.cancel()}catch(e){}}
   function cgPlay(n,onend){
     cgStop();
-    const file=`clip_${String(n).padStart(3,'0')}.mp3`;
+    const file=`minoo_satranc_${String(n).padStart(2,'0')}.mp3`;
     const paths=[`${CG_BASE}${file}`,`/${CG_BASE}${file}`,`./${CG_BASE}${file}`];
     let i=0;
     const next=()=>{
       if(i>=paths.length){console.error('[Minoo Çiğdem] Ses bulunamadı:',file);return}
-      const a=new Audio(paths[i++]+'?v=2923b'); cgAudio=a; window.__minooCigdemAudio=a;
+      const a=new Audio(paths[i++]+'?v=2924audio'); cgAudio=a; window.__minooCigdemAudio=a;
       if(onend)a.onended=onend;
       a.onerror=next;
       const p=a.play(); if(p&&p.catch)p.catch(next);
@@ -3027,8 +3027,8 @@ function m2924FeedbackSound(kind){
   window.minooPlayCigdemClip=cgPlay;
 
   // Taşları Tanıyalım: Çiğdem ana kaydındaki kesin taş sırası.
-  // 3 Şah, 4 Vezir, 5 Kale, 6 Fil, 7 At, 8 Piyon.
-  const pieceClip={Şah:3,Vezir:4,Kale:5,Fil:6,At:7,Piyon:8};
+  // 2 Şah, 3 Vezir, 4 Kale, 5 Fil, 6 At, 7 Piyon.
+  const pieceClip={Şah:2,Vezir:3,Kale:4,Fil:5,At:6,Piyon:7};
   window.speakChess=function(i){const p=CHESS_PIECES[i];if(!p)return;cgPlay(pieceClip[p.name]||2)};
 
   // İsim etkinliğinde de tarayıcı TTS yerine aynı Çiğdem taş klibi kullanılır.
