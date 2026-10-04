@@ -3082,52 +3082,37 @@ function m2924FeedbackSound(kind){
   setTimeout(stamp,0);
 })();
 
-/* ===== Minoo v2.9.24 • Taşları Dizelim — Çiğdem ses paketi ===== */
-function m2924SetupVoice(n){
-  if(!setupState || setupState.audio===false)return;
-  try{
-    m2923StopVoice();
-    const a=new Audio(`/audio/minoo_satranc_${String(n).padStart(2,'0')}.mp3?v=2924setup1`);
-    m2923Audio=a;
-    a.play().catch(()=>{});
-  }catch(e){}
-}
-const _m2924SetupGame=chessSetupGame;
-chessSetupGame=function(g){
-  _m2924SetupGame(g);
-  // “Şimdi sıra sende. Doğru taşı seç bakalım...”
-  setTimeout(()=>m2924SetupVoice(8),250);
-};
-const _m2924SetupStartPlay=setupStartPlay;
-setupStartPlay=function(){
-  _m2924SetupStartPlay();
-  // Oyun aşamasına geçerken aynı kısa yönlendirme.
-  setTimeout(()=>m2924SetupVoice(8),180);
-};
-const _m2924SetupPieceClick=setupPieceClick;
-setupPieceClick=function(id){
-  const wasLearn=setupState?.phase==='learn';
-  _m2924SetupPieceClick(id);
-  // Öğrenme aşamasında taşın nereye gideceğini düşünmeye yönlendir.
-  if(wasLearn)setTimeout(()=>m2924SetupVoice(9),720);
-};
-const _m2924SetupTryPlace=setupTryPlace;
-setupTryPlace=function(id,key){
-  const p=setupState?.pieces?.find(x=>x.id===id);
-  const ok=!!p && setupAllowedTargets(p).includes(key) && !setupState.placed.has(key);
-  _m2924SetupTryPlace(id,key);
-  // Doğru yerleştirmede olumlu Minoo geri bildirimi; yanlışta yeniden düşünme.
-  setTimeout(()=>m2924SetupVoice(ok?24:19),120);
-};
-const _m2924SetupCheck=setupCheck;
-setupCheck=function(){
-  if(!setupState)return _m2924SetupCheck();
-  if(setupState.phase==='play' && setupState.placed.size===32){
-    let wrong=0;
-    for(const [key,p] of setupState.placed)if(!setupAllowedTargets(p).includes(key))wrong++;
-    _m2924SetupCheck();
-    setTimeout(()=>m2924SetupVoice(wrong?19:26),180);
-    return;
-  }
-  _m2924SetupCheck();
-};
+/* ===== v2.9.24 • Satranç Taşlarının İsimleri • kısa Minoo sesleri ===== */
+(()=>{
+  const NAME_AUDIO=Object.freeze({
+    'Şah':'/audio/minoo-voice/chess/02_sah.mp3',
+    'Vezir':'/audio/minoo-voice/chess/03_vezir.mp3',
+    'Kale':'/audio/minoo-voice/chess/04_kale.mp3',
+    'Fil':'/audio/minoo-voice/chess/05_fil.mp3',
+    'At':'/audio/minoo-voice/chess/06_at.mp3',
+    'Piyon':'/audio/minoo-voice/chess/07_piyon.mp3'
+  });
+  let nameAudio=null;
+  window.hearChessName=function(i){
+    const st=window._chessNamesState,p=CHESS_PIECES[i];if(!st||!p)return;
+    const tiles=document.querySelectorAll('.chess-name-tile'),tile=tiles[i];
+    tiles.forEach(x=>x.classList.remove('name-speaking'));
+    tile?.classList.add('name-speaking');
+    const msg=document.querySelector('#chessNameMessage');if(msg)msg.textContent=p.name;
+    try{speechSynthesis?.cancel?.()}catch(e){}
+    try{if(nameAudio){nameAudio.pause();nameAudio.currentTime=0}}catch(e){}
+    const src=NAME_AUDIO[p.name];
+    if(src){
+      const a=new Audio(src+'?v=2924names1');nameAudio=a;
+      a.onended=()=>tile?.classList.remove('name-speaking');
+      a.onerror=()=>tile?.classList.remove('name-speaking');
+      a.play().catch(()=>tile?.classList.remove('name-speaking'));
+    }else tile?.classList.remove('name-speaking');
+    if(!st.heard.has(i)){
+      st.heard.add(i);
+      const e=document.querySelector(`#nameHeard${i}`);if(e)e.textContent='✓ Dinledin';
+      const pr=document.querySelector('#chessNamesProgress');if(pr)pr.textContent=`${st.heard.size} / 6 dinlendi`;
+      if(st.heard.size===6)setTimeout(()=>finishChessNames(),650);
+    }
+  };
+})();
