@@ -338,6 +338,33 @@ function minooSpeak(text,opts={}){
  speechSynthesis.speak(u);
 }
 
+const MINOO_CHESS_RECORDED_VOICE={
+  'Şah':'/audio/minoo-voice/chess/sah.mp3',
+  'Vezir':'/audio/minoo-voice/chess/vezir.mp3',
+  'Kale':'/audio/minoo-voice/chess/kale.mp3',
+  'Fil':'/audio/minoo-voice/chess/fil.mp3',
+  'At':'/audio/minoo-voice/chess/at.mp3',
+  'Piyon':'/audio/minoo-voice/chess/piyon.mp3'
+};
+function minooStopRecordedVoice(){
+ try{if(window.__minooRecordedVoice){window.__minooRecordedVoice.pause();window.__minooRecordedVoice.currentTime=0}}catch(e){}
+}
+function minooPlayRecordedChessPiece(pieceName,opts={}){
+ const src=MINOO_CHESS_RECORDED_VOICE[pieceName];
+ if(!src)return false;
+ try{
+  if(window.speechSynthesis)window.speechSynthesis.cancel();
+  minooStopRecordedVoice();
+  const a=new Audio(src+'?v=2.9.22-cg1');
+  window.__minooRecordedVoice=a;
+  if(opts.onend)a.onended=opts.onend;
+  a.onerror=()=>{if(opts.fallback)opts.fallback();};
+  a.play().catch(()=>{if(opts.fallback)opts.fallback();});
+  return true;
+ }catch(e){if(opts.fallback)opts.fallback();return false}
+}
+window.minooPlayRecordedChessPiece=minooPlayRecordedChessPiece;
+
 const CHESS_PIECES=[
 {name:'Kale',symbol:'♜',tone:'blue',short:'Düz yolların ustasıyım!',speech:'Merhaba! Ben Kale. Dikey ve yatay yönlerde istediğim kadar ilerleyebilirim. Taş alırken de düz yolları kullanırım.',dirs:['up','right','down','left'],note:'Dikey ve yatay gider.'},
 {name:'At',symbol:'♞',tone:'peach',short:'L şeklinde sıçrarım!',speech:'Merhaba! Ben At. İki kare bir yöne, sonra bir kare yana giderim. Hareketim L harfine benzer. Üstelik diğer taşların üzerinden atlayabilirim.',dirs:['knight'],note:'L şeklinde gider ve taşların üzerinden atlayabilir.'},
@@ -377,7 +404,7 @@ function hearChessName(i){
  tile?.classList.add('name-speaking');
  const msg=document.querySelector('#chessNameMessage'); if(msg)msg.textContent=p.name;
  try{
-  minooSpeak(p.name,{rate:.82,pitch:1.02,onend:()=>tile?.classList.remove('name-speaking')});
+  minooPlayRecordedChessPiece(p.name,{onend:()=>tile?.classList.remove('name-speaking'),fallback:()=>minooSpeak(p.name,{rate:.82,pitch:1.02,onend:()=>tile?.classList.remove('name-speaking')})});
  }catch{}
  if(!st.heard.has(i)){
   st.heard.add(i);
@@ -449,7 +476,7 @@ function chessArrows(){return ''}
 function openChessPiece(i,aid,title){const p=CHESS_PIECES[i],home=document.querySelector('#chessHome'),lesson=document.querySelector('#chessLesson');home.hidden=true;lesson.hidden=false;lesson.innerHTML=`<div class="lesson-top"><button class="round-back" onclick="closeChessPiece()">←</button><button class="ghost" onclick="openChessPiece(${(i+5)%6},${aid},'${title}')">← Önceki</button><div class="lesson-title ${p.tone}">${p.name} <small>${i+1}/6</small></div><button class="sound-btn" onclick="speakChess(${i})" aria-label="Dinle">🔊</button><button class="ghost" onclick="openChessPiece(${(i+1)%6},${aid},'${title}')">Sonraki →</button></div><div class="lesson-body"><div class="lesson-character ${p.tone}"><span>${chessPieceVisual(p)}</span><b>Merhaba! Ben ${p.name}!</b><p>${p.short}</p></div><div class="board-zone">${chessBoard(p)}<p class="movement-note">${p.note}</p></div><div class="speech-card ${p.tone}"><p>${p.speech}</p><button onclick="replayChess(${i})">▶ Hareketi tekrar göster</button></div></div>`;setTimeout(()=>lesson.classList.add('play'),30);markChessSeen(i,aid,title)}
 function closeChessPiece(){const l=document.querySelector('#chessLesson');if(l){l.classList.remove('play');l.hidden=true}document.querySelector('#chessHome').hidden=false}
 function replayChess(i){const l=document.querySelector('#chessLesson');l.classList.remove('play');void l.offsetWidth;l.classList.add('play');speakChess(i)}
-function speakChess(i){if(!('speechSynthesis' in window))return notify('Bu cihazda sesli okuma desteklenmiyor.');minooSpeak(CHESS_PIECES[i].speech,{rate:.86,pitch:1.02})}
+function speakChess(i){const p=CHESS_PIECES[i];if(!p)return;minooPlayRecordedChessPiece(p.name,{fallback:()=>minooSpeak(p.speech,{rate:.86,pitch:1.02})})}
 
 function playChessCelebration(){
  try{
