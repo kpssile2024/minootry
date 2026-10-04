@@ -338,6 +338,26 @@ function minooSpeak(text,opts={}){
  speechSynthesis.speak(u);
 }
 
+// v2.9.22-cg2 • Çiğdem ana kaydının tamamı yerel ses kütüphanesinde.
+const MINOO_CHESS_VOICE_LIBRARY=Object.freeze(Array.from({length:36},(_,i)=>`/audio/minoo-voice/chess/library/minoo_satranc_${String(i+1).padStart(2,'0')}.mp3`));
+window.MINOO_CHESS_VOICE_LIBRARY=MINOO_CHESS_VOICE_LIBRARY;
+// v2.9.22-cg3 • GitHub public/audio altındaki Çiğdem ses klipleri.
+const MINOO_CIGDEM_CLIPS=Object.freeze(Array.from({length:36},(_,i)=>`/audio/clip_${String(i+1).padStart(3,'0')}.mp3`));
+window.MINOO_CIGDEM_CLIPS=MINOO_CIGDEM_CLIPS;
+function minooPlayCigdemClip(n,opts={}){
+ const src=MINOO_CIGDEM_CLIPS[Number(n)-1]; if(!src)return false;
+ try{
+  if(window.speechSynthesis)window.speechSynthesis.cancel();
+  minooStopRecordedVoice();
+  const a=new Audio(src+'?v=2.9.22-cg3'); window.__minooRecordedVoice=a;
+  if(opts.onend)a.onended=opts.onend;
+  a.onerror=()=>{if(opts.fallback)opts.fallback();};
+  a.play().catch(()=>{if(opts.fallback)opts.fallback();}); return true;
+ }catch(e){if(opts.fallback)opts.fallback();return false}
+}
+window.minooPlayCigdemClip=minooPlayCigdemClip;
+
+
 const MINOO_CHESS_RECORDED_VOICE={
   'Şah':'/audio/minoo-voice/chess/sah.mp3',
   'Vezir':'/audio/minoo-voice/chess/vezir.mp3',
