@@ -338,33 +338,6 @@ function minooSpeak(text,opts={}){
  speechSynthesis.speak(u);
 }
 
-const MINOO_CHESS_RECORDED_VOICE={
-  'Şah':'/audio/minoo-voice/chess/sah.mp3',
-  'Vezir':'/audio/minoo-voice/chess/vezir.mp3',
-  'Kale':'/audio/minoo-voice/chess/kale.mp3',
-  'Fil':'/audio/minoo-voice/chess/fil.mp3',
-  'At':'/audio/minoo-voice/chess/at.mp3',
-  'Piyon':'/audio/minoo-voice/chess/piyon.mp3'
-};
-function minooStopRecordedVoice(){
- try{if(window.__minooRecordedVoice){window.__minooRecordedVoice.pause();window.__minooRecordedVoice.currentTime=0}}catch(e){}
-}
-function minooPlayRecordedChessPiece(pieceName,opts={}){
- const src=MINOO_CHESS_RECORDED_VOICE[pieceName];
- if(!src)return false;
- try{
-  if(window.speechSynthesis)window.speechSynthesis.cancel();
-  minooStopRecordedVoice();
-  const a=new Audio(src+'?v=2.9.22-cg1');
-  window.__minooRecordedVoice=a;
-  if(opts.onend)a.onended=opts.onend;
-  a.onerror=()=>{if(opts.fallback)opts.fallback();};
-  a.play().catch(()=>{if(opts.fallback)opts.fallback();});
-  return true;
- }catch(e){if(opts.fallback)opts.fallback();return false}
-}
-window.minooPlayRecordedChessPiece=minooPlayRecordedChessPiece;
-
 const CHESS_PIECES=[
 {name:'Kale',symbol:'♜',tone:'blue',short:'Düz yolların ustasıyım!',speech:'Merhaba! Ben Kale. Dikey ve yatay yönlerde istediğim kadar ilerleyebilirim. Taş alırken de düz yolları kullanırım.',dirs:['up','right','down','left'],note:'Dikey ve yatay gider.'},
 {name:'At',symbol:'♞',tone:'peach',short:'L şeklinde sıçrarım!',speech:'Merhaba! Ben At. İki kare bir yöne, sonra bir kare yana giderim. Hareketim L harfine benzer. Üstelik diğer taşların üzerinden atlayabilirim.',dirs:['knight'],note:'L şeklinde gider ve taşların üzerinden atlayabilir.'},
@@ -404,7 +377,7 @@ function hearChessName(i){
  tile?.classList.add('name-speaking');
  const msg=document.querySelector('#chessNameMessage'); if(msg)msg.textContent=p.name;
  try{
-  minooPlayRecordedChessPiece(p.name,{onend:()=>tile?.classList.remove('name-speaking'),fallback:()=>minooSpeak(p.name,{rate:.82,pitch:1.02,onend:()=>tile?.classList.remove('name-speaking')})});
+  minooSpeak(p.name,{rate:.82,pitch:1.02,onend:()=>tile?.classList.remove('name-speaking')});
  }catch{}
  if(!st.heard.has(i)){
   st.heard.add(i);
@@ -476,7 +449,7 @@ function chessArrows(){return ''}
 function openChessPiece(i,aid,title){const p=CHESS_PIECES[i],home=document.querySelector('#chessHome'),lesson=document.querySelector('#chessLesson');home.hidden=true;lesson.hidden=false;lesson.innerHTML=`<div class="lesson-top"><button class="round-back" onclick="closeChessPiece()">←</button><button class="ghost" onclick="openChessPiece(${(i+5)%6},${aid},'${title}')">← Önceki</button><div class="lesson-title ${p.tone}">${p.name} <small>${i+1}/6</small></div><button class="sound-btn" onclick="speakChess(${i})" aria-label="Dinle">🔊</button><button class="ghost" onclick="openChessPiece(${(i+1)%6},${aid},'${title}')">Sonraki →</button></div><div class="lesson-body"><div class="lesson-character ${p.tone}"><span>${chessPieceVisual(p)}</span><b>Merhaba! Ben ${p.name}!</b><p>${p.short}</p></div><div class="board-zone">${chessBoard(p)}<p class="movement-note">${p.note}</p></div><div class="speech-card ${p.tone}"><p>${p.speech}</p><button onclick="replayChess(${i})">▶ Hareketi tekrar göster</button></div></div>`;setTimeout(()=>lesson.classList.add('play'),30);markChessSeen(i,aid,title)}
 function closeChessPiece(){const l=document.querySelector('#chessLesson');if(l){l.classList.remove('play');l.hidden=true}document.querySelector('#chessHome').hidden=false}
 function replayChess(i){const l=document.querySelector('#chessLesson');l.classList.remove('play');void l.offsetWidth;l.classList.add('play');speakChess(i)}
-function speakChess(i){const p=CHESS_PIECES[i];if(!p)return;minooPlayRecordedChessPiece(p.name,{fallback:()=>minooSpeak(p.speech,{rate:.86,pitch:1.02})})}
+function speakChess(i){if(!('speechSynthesis' in window))return notify('Bu cihazda sesli okuma desteklenmiyor.');minooSpeak(CHESS_PIECES[i].speech,{rate:.86,pitch:1.02})}
 
 function playChessCelebration(){
  try{
@@ -2924,3 +2897,78 @@ m2919MateDemo=function(key){
  ]};
  return _m2922DemoBase(key);
 };
+
+/* ===== Minoo v2.9.23 • Satranç denetim düzeltmeleri (04.10.2026) ===== */
+const MINOO_2923='v2.9.23';
+const M2923_CIGDEM=Object.freeze(Array.from({length:36},(_,i)=>`/audio/clip_${String(i+1).padStart(3,'0')}.mp3`));
+let m2923Audio=null;
+function m2923StopVoice(){try{speechSynthesis?.cancel?.()}catch(e){};try{m2923Audio?.pause?.()}catch(e){}}
+function m2923ClipFor(text=''){
+ const t=String(text).toLocaleLowerCase('tr-TR');
+ if(/şah mat|mat!/.test(t))return 28;
+ if(/harika|doğru|başard|süper|aferin|yaşasın/.test(t))return 22;
+ if(/bir daha|olmadı|yaklaşt/.test(t))return 24;
+ if(/ipucu/.test(t))return 21;
+ if(/rok/.test(t))return 30;
+ if(/çoban/.test(t))return 31;
+ if(/merdiven/.test(t))return 32;
+ if(/arka sıra/.test(t))return 33;
+ if(/vezir.*şah/.test(t))return 34;
+ if(/kale.*şah/.test(t))return 35;
+ return 8;
+}
+function m2923PlayCigdem(text){
+ try{m2923StopVoice();const i=m2923ClipFor(text);const a=new Audio(M2923_CIGDEM[Math.max(0,Math.min(35,i))]+'?v=2923');m2923Audio=a;a.play().catch(()=>{});return true}catch(e){return false}
+}
+function m2923InChess(){return !!document.querySelector('.m262-board,.m2916-board,.m280-board,.chess-piece-grid,.setup-world,.m262-game,[class*="chess-"]')}
+const _m2923SpeakBase=minooSpeak;
+minooSpeak=function(text,opts={}){if(m2923InChess())return m2923PlayCigdem(text);return _m2923SpeakBase(text,opts)};
+// Satrançta eski tarayıcı TTS'sinin başka yardımcı fonksiyonlardan da sızmasını engelle.
+const _m2923M270=typeof m270SpeakTR==='function'?m270SpeakTR:null;
+if(_m2923M270)m270SpeakTR=function(text){if(m2923InChess())return m2923PlayCigdem(text);return _m2923M270(text)};
+if(typeof m271Speak==='function'){const _m2923M271=m271Speak;m271Speak=function(text,lang){if(m2923InChess())return m2923PlayCigdem(text);return _m2923M271(text,lang)}}
+
+function m2923Arrow(from,to,pieces=[]){
+ const svg=document.querySelector('.m2919-overlay,.m262-overlay');if(!svg||!from||!to)return;
+ const xy=s=>[(M262_FILES.indexOf(s[0])+.5)*12.5,(8-Number(s[1])+.5)*12.5],a=xy(from),b=xy(to),pc=pieces.find(x=>x[2]===from);
+ const id='m2923arr';let shape='';
+ if(pc?.[1]==='knight'){
+  const dx=Math.abs(b[0]-a[0]),dy=Math.abs(b[1]-a[1]);const mid=dx>dy?[b[0],a[1]]:[a[0],b[1]];
+  shape=`<polyline class="m2923-path" points="${a[0]},${a[1]} ${mid[0]},${mid[1]} ${b[0]},${b[1]}"/>`;
+ }else shape=`<line class="m2923-path" x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}"/>`;
+ svg.innerHTML=`<defs><marker id="${id}" markerWidth="4" markerHeight="4" refX="3.5" refY="2" orient="auto"><path d="M0,0 L4,2 L0,4 Z" fill="#ef476f"/></marker></defs>${shape}`;
+ const p=svg.querySelector('.m2923-path');if(p){p.setAttribute('marker-end',`url(#${id})`);const len=p.getTotalLength?.()||100;p.style.strokeDasharray=String(len);p.style.strokeDashoffset=String(len);requestAnimationFrame(()=>{p.style.strokeDashoffset='0'})}
+}
+m2922DrawArrow=m2923Arrow;m2919DrawArrow=function(from,to){const s=window._m2919||window._m2919Mate;m2923Arrow(from,to,s?.p?.pieces||s?.pieces||[])};
+
+// Doğru alıştırmada gerçek yapılan hamleyi önce okla göster, sonra sonraki soruya geç.
+const _m2923Result=m2919Result;
+m2919Result=function(ok,sq){
+ const s=window._m2919;if(ok&&s&&!s.p.choice&&sq){m2923Arrow(s.p.from,sq,s.p.pieces);const msg=document.querySelector('#m2916msg');if(msg){msg.textContent=s.key==='escape'?'⭐ Harika! Taşını kurtardın.':'⭐ Harika! Doğru hamle.';msg.classList.add('good')}m2923PlayCigdem('Harika! Doğru hamle.');setTimeout(()=>s.idx<9?m2919Puzzle(s.key,s.idx+1):modal(`<h2>🌟 10/10 tamamlandı!</h2><p>${M2919_PUZZLES[s.key].title} bölümünü bitirdin.</p><div class="modal-actions"><button onclick="closeModal();m2919Puzzle('${s.key}',0)">↻ Baştan Oyna</button><button onclick="closeModal();m2916Menu()">Alıştırmalar</button></div>`),1100);return}
+ return _m2923Result(ok,sq)
+};
+
+// Mat öğreticilerinde her adımda animasyonlu gerçek hamle oku + satranç ana menüsüne dönüş.
+const _m2923MateTeach=m2919MateTeach;
+m2919MateTeach=function(key,step=0){_m2923MateTeach(key,step);setTimeout(()=>{const h=document.querySelector('.chess-header');if(h&&!h.querySelector('.m2923-home'))h.insertAdjacentHTML('afterbegin','<button class="ghost m2923-home" onclick="m262Home()">← Satranç</button>');if(step>0){const d=m2919MateDemo(key),mv=d?.moves?.[step-1];if(mv)m2923Arrow(mv[0],mv[1],window._m2919Mate?.pieces||[]) }},90)};
+
+// Satranç alt ekranlarında görünür ana dönüş butonu standardı.
+function m2923EnsureBack(){if(!m2923InChess())return;const h=document.querySelector('.chess-header');if(h&&!h.querySelector('.m2923-home')&&!/Satranç/.test(h.querySelector('button')?.textContent||''))h.insertAdjacentHTML('afterbegin','<button class="ghost m2923-home" onclick="m262Home()">← Satranç</button>')}
+const m2923Observer=new MutationObserver(()=>m2923EnsureBack());m2923Observer.observe(document.documentElement,{subtree:true,childList:true});
+
+// Mat türleri öğrenci bazında seçilebilir: atanmamışsa hepsi; atanmışsa yalnız seçilenler görünür.
+function m2923MateAllowed(){try{const x=JSON.parse(localStorage.getItem('minoo-mate-assignments')||'null');const id=studentSession?.id;return id&&x?.[id]?.length?x[id]:null}catch(e){return null}}
+const _m2923MateMenu=m2919MateMenu;
+m2919MateMenu=function(){const allowed=m2923MateAllowed();if(!allowed)return _m2923MateMenu();modal(`<button class="modal-x" onclick="closeModal();m2916Menu()">×</button><h2>🎓 Mat Hamlelerini Öğrenelim</h2><p>Öğretmeninin senin için seçtiği çalışmalar:</p><div class="m299-move-grid">${Object.entries(M2922_MATE_BASES).filter(([k])=>allowed.includes(k)).map(([k,m])=>`<button onclick="closeModal();m2919MateTeach('${k}',0)">${m.icon} ${m.name}<small>Öğren + alıştırma</small></button>`).join('')}</div>`)};
+
+// Yönetici/öğretmen için öğrenciye mat türü atama yardımcı ekranı (öğrenci id ile çalışır).
+window.m2923AssignMates=function(studentId,studentName='Öğrenci'){
+ let all={};try{all=JSON.parse(localStorage.getItem('minoo-mate-assignments')||'{}')}catch(e){};const cur=new Set(all[studentId]||[]);
+ modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>♟️ ${esc(studentName)} • Mat Atamaları</h2><p>Bu öğrencinin göreceği mat çalışmalarını seçin.</p><div class="m2923-assign">${Object.entries(M2922_MATE_BASES).map(([k,m])=>`<label><input type="checkbox" value="${k}" ${cur.has(k)?'checked':''}> ${m.icon} ${m.name}</label>`).join('')}</div><div class="modal-actions"><button class="ghost" onclick="closeModal()">Vazgeç</button><button onclick="m2923SaveMates('${studentId}')">Kaydet</button></div>`)
+};
+window.m2923SaveMates=function(studentId){let all={};try{all=JSON.parse(localStorage.getItem('minoo-mate-assignments')||'{}')}catch(e){};all[studentId]=[...document.querySelectorAll('.m2923-assign input:checked')].map(x=>x.value);localStorage.setItem('minoo-mate-assignments',JSON.stringify(all));closeModal();notify('Mat atamaları kaydedildi.')};
+
+document.head.insertAdjacentHTML('beforeend',`<style id="m2923-style">
+.m2923-path{fill:none;stroke:#ef476f;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:stroke-dashoffset .85s ease-out;filter:drop-shadow(0 1px 2px rgba(239,71,111,.22))}
+.m2923-home{white-space:nowrap}.m2923-assign{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:15px 0}.m2923-assign label{padding:12px;border-radius:14px;background:#fff8ed;border:1px solid #eadfce;font-weight:800}.m2923-assign input{width:20px;height:20px;vertical-align:middle;margin-right:7px}@media(max-width:600px){.m2923-assign{grid-template-columns:1fr}.m2923-home{font-size:11px!important;padding:7px!important}}
+</style>`);
