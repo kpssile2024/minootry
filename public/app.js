@@ -338,16 +338,6 @@ function minooSpeak(text,opts={}){
  speechSynthesis.speak(u);
 }
 
-
-// v2.9.23 • Çiğdem MP3 oynatıcı — GitHub public/audio/clip_001..036 gerçek yolu
-const M293_CIGDEM=Object.freeze(Array.from({length:36},(_,i)=>`/audio/clip_${String(i+1).padStart(3,'0')}.mp3`));
-const M293_PIECE_AUDIO={Şah:'/audio/sah.mp3',Vezir:'/audio/vezir.mp3',Kale:'/audio/kale.mp3',Fil:'/audio/fil.mp3',At:'/audio/at.mp3',Piyon:'/audio/piyon.mp3'};
-function m293StopAudio(){try{speechSynthesis?.cancel?.()}catch(e){} try{if(window.__m293Audio){window.__m293Audio.pause();window.__m293Audio.currentTime=0}}catch(e){}}
-function m293PlaySrc(src,onend){if(!src)return false;try{m293StopAudio();const a=new Audio(src+(src.includes('?')?'&':'?')+'v=293');window.__m293Audio=a;if(onend)a.onended=onend;a.play().catch(()=>{});return true}catch(e){return false}}
-function m293PlayClip(n,onend){return m293PlaySrc(M293_CIGDEM[Math.max(1,Math.min(36,Number(n)||1))-1],onend)}
-function m293Piece(name,onend){return m293PlaySrc(M293_PIECE_AUDIO[name],onend)}
-window.m293PlayClip=m293PlayClip;window.m293Piece=m293Piece;
-
 const CHESS_PIECES=[
 {name:'Kale',symbol:'♜',tone:'blue',short:'Düz yolların ustasıyım!',speech:'Merhaba! Ben Kale. Dikey ve yatay yönlerde istediğim kadar ilerleyebilirim. Taş alırken de düz yolları kullanırım.',dirs:['up','right','down','left'],note:'Dikey ve yatay gider.'},
 {name:'At',symbol:'♞',tone:'peach',short:'L şeklinde sıçrarım!',speech:'Merhaba! Ben At. İki kare bir yöne, sonra bir kare yana giderim. Hareketim L harfine benzer. Üstelik diğer taşların üzerinden atlayabilirim.',dirs:['knight'],note:'L şeklinde gider ve taşların üzerinden atlayabilir.'},
@@ -387,7 +377,7 @@ function hearChessName(i){
  tile?.classList.add('name-speaking');
  const msg=document.querySelector('#chessNameMessage'); if(msg)msg.textContent=p.name;
  try{
-  m293Piece(p.name,()=>tile?.classList.remove('name-speaking'));
+  minooSpeak(p.name,{rate:.82,pitch:1.02,onend:()=>tile?.classList.remove('name-speaking')});
  }catch{}
  if(!st.heard.has(i)){
   st.heard.add(i);
@@ -459,7 +449,7 @@ function chessArrows(){return ''}
 function openChessPiece(i,aid,title){const p=CHESS_PIECES[i],home=document.querySelector('#chessHome'),lesson=document.querySelector('#chessLesson');home.hidden=true;lesson.hidden=false;lesson.innerHTML=`<div class="lesson-top"><button class="round-back" onclick="closeChessPiece()">←</button><button class="ghost" onclick="openChessPiece(${(i+5)%6},${aid},'${title}')">← Önceki</button><div class="lesson-title ${p.tone}">${p.name} <small>${i+1}/6</small></div><button class="sound-btn" onclick="speakChess(${i})" aria-label="Dinle">🔊</button><button class="ghost" onclick="openChessPiece(${(i+1)%6},${aid},'${title}')">Sonraki →</button></div><div class="lesson-body"><div class="lesson-character ${p.tone}"><span>${chessPieceVisual(p)}</span><b>Merhaba! Ben ${p.name}!</b><p>${p.short}</p></div><div class="board-zone">${chessBoard(p)}<p class="movement-note">${p.note}</p></div><div class="speech-card ${p.tone}"><p>${p.speech}</p><button onclick="replayChess(${i})">▶ Hareketi tekrar göster</button></div></div>`;setTimeout(()=>lesson.classList.add('play'),30);markChessSeen(i,aid,title)}
 function closeChessPiece(){const l=document.querySelector('#chessLesson');if(l){l.classList.remove('play');l.hidden=true}document.querySelector('#chessHome').hidden=false}
 function replayChess(i){const l=document.querySelector('#chessLesson');l.classList.remove('play');void l.offsetWidth;l.classList.add('play');speakChess(i)}
-function speakChess(i){const p=CHESS_PIECES[i];if(p)m293Piece(p.name)}
+function speakChess(i){if(!('speechSynthesis' in window))return notify('Bu cihazda sesli okuma desteklenmiyor.');minooSpeak(CHESS_PIECES[i].speech,{rate:.86,pitch:1.02})}
 
 function playChessCelebration(){
  try{
@@ -861,7 +851,7 @@ function m263PieceLearn(){const s=window._m263piece,c=M263_PIECES[s.type],pos=c.
 function m263ShowMoves(type,pos){const svg=document.querySelector('.m262-overlay'),[f,r]=m263Coord(pos),fy=8-r+.5,fx=f+.5,t=m263Targets(type,pos);let ends=[];if(M263_PIECES[type].jumps||M263_PIECES[type].pawn)ends=t;else{const c=M263_PIECES[type];c.dirs.forEach(([df,dr])=>{let x=f,y=r,k;while((k=m263Key(x+df,y+dr))){x+=df;y+=dr;if(c.one)break}if(x!==f||y!==r)ends.push(m263Key(x,y))})}svg.innerHTML=ends.map((k,i)=>{const [x,y]=m263Coord(k);return `<line class="guide-line m263-arrow" x1="${fx*12.5}%" y1="${fy*12.5}%" x2="${(x+.5)*12.5}%" y2="${(8-y+.5)*12.5}%" style="animation-delay:${i*.08}s"/>`}).join('')}
 function m263PiecePrev(){const s=window._m263piece;s.slide=Math.max(0,s.slide-1);m263PieceLearn()}
 function m263PieceNext(){const s=window._m263piece;if(s.slide<2){s.slide++;m263PieceLearn()}else{s.phase='quiz';s.round=0;m263PieceQuiz()}}
-function m263Speak(t){m293PlayClip(9)}
+function m263Speak(t){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='tr-TR';speechSynthesis.speak(u)}catch{}}
 const M263_FRUIT=['🍎','🍓','🍌','🍊','🍐','🍒'];
 function m263PieceQuiz(){const s=window._m263piece,c=M263_PIECES[s.type],pos=c.positions[s.round%3],valid=m263Targets(s.type,pos),board={[pos]:m262Piece(c.name,false)},targets=[];let picks=[];for(let i=0;i<6;i++){let k;if(i<3&&valid.length)k=valid[(i*2+s.round)%valid.length];else{do{k=M262_FILES[(i*3+s.round)%8]+(1+((i*2+s.round+2)%8))}while(k===pos||picks.includes(k))}if(picks.includes(k))continue;picks.push(k);const reachable=valid.includes(k);targets.push({k,reachable});board[k]=s.round<4?M263_FRUIT[i%M263_FRUIT.length]:m262Piece(['Piyon','At','Fil','Vezir','Kale','Şah'][i%6],true)}s.targets=targets;s.selected=new Set();app.innerHTML=`<header class="chess-header"><button class="ghost" onclick="m262Home()">⌂</button><b>${c.title}</b><span>${s.round+1}/5</span></header><main class="m262-game"><div class="v261-instruction">${s.round<4?`${c.name} tek hamlede hangi meyveleri alabilir? Dokunup çember içine al.`:`${c.name} tek hamlede hangi rakip taşları alabilir?`}</div>${m262Board(board,'m263-quiz')}<div class="v261-actions"><button class="retry" onclick="m263PieceQuiz()">↻ Temizle</button><button onclick="m263PieceCheck()">✓ Kontrol Et</button></div></main>`;document.querySelectorAll('.m263-quiz .m262-sq').forEach(q=>{if(q.dataset.key===pos||!q.innerHTML)return;q.onclick=()=>m263Circle(q,s.selected,q.dataset.key)})}
 function m263PieceCheck(){const s=window._m263piece;let ok=true;s.targets.forEach(t=>{const q=document.querySelector(`.m263-quiz [data-key="${t.k}"]`),sel=s.selected.has(t.k);if(sel!==t.reachable){ok=false;q?.classList.add('m262-wrong')}});if(!ok)return modal(`<h2>Bir daha bakalım 🌱</h2><p>Neon kırmızı işaretlenenleri yeniden düşün.</p><div class="modal-actions"><button onclick="closeModal()">Yeniden Dene</button></div>`);if(s.round<4){s.round++;m263PieceQuiz()}else modal(`<h2>Aferin! 🎉</h2><p>${M263_PIECES[s.type].name} oyununu tamamladın.</p><div class="modal-actions"><button onclick="closeModal();m262Home()">Ana Sayfa</button></div>`)}
@@ -1516,7 +1506,14 @@ m270SuccessObserver.observe(document.documentElement,{subtree:true,childList:tru
 
 /* 3) Satranç: alıştırma/yönerge metnini Türkçe seslendirme ve tekrar dinleme. */
 let m270LastChessPrompt='';
-function m270SpeakTR(text){m293PlayClip(9)}
+function m270SpeakTR(text){
+  try{
+    const value=String(text||'').trim();if(!value||!('speechSynthesis'in window))return;
+    speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(value);u.lang='tr-TR';u.rate=.82;u.pitch=1.03;
+    const vs=speechSynthesis.getVoices()||[];u.voice=vs.find(v=>/^tr/i.test(v.lang))||null;
+    speechSynthesis.resume();setTimeout(()=>speechSynthesis.speak(u),45);
+  }catch(e){}
+}
 function m270SpeakChessPrompt(){
   const candidates=['.m263-prompt','.m263-instruction','.chess-prompt','.chess-instruction','.game-instruction','.instruction'];
   let el=null;for(const q of candidates){const x=document.querySelector(q);if(x&&x.offsetParent!==null&&x.textContent.trim()){el=x;break}}
@@ -1567,7 +1564,17 @@ document.addEventListener('click',e=>{
    MINOO v2.9.5 • SES + FEN ETKİLEŞİMİ + YÖN ÇİZİMİ
    ============================================================ */
 window.m271VoiceOn = (window.m271VoiceOn!==false);
-function m271Speak(text,lang='tr-TR'){if(String(lang).toLowerCase().startsWith('tr')){const t=String(text||'');let n=/şah mat/i.test(t)?27:/şah/i.test(t)?25:/harika|doğru|başard|süper|aferin/i.test(t)?21:/tekrar|olmadı|yaklaşt/i.test(t)?22:/ipucu|düşün|kontrol/i.test(t)?23:9;return m293PlayClip(n)}return minooSpeak(text,{lang})}
+function m271Speak(text,lang='tr-TR'){
+  if(!window.m271VoiceOn || !text || !('speechSynthesis' in window))return;
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(String(text));
+    u.lang=lang;u.rate=lang.startsWith('en')?.70:.82;u.pitch=1.03;u.volume=1;
+    const vs=speechSynthesis.getVoices()||[];
+    u.voice=vs.find(v=>v.lang.toLowerCase().startsWith(lang.slice(0,2).toLowerCase()))||null;
+    speechSynthesis.resume();setTimeout(()=>speechSynthesis.speak(u),45);
+  }catch(e){}
+}
 function m271VoiceToggle(){
   window.m271VoiceOn=!window.m271VoiceOn;
   if(!window.m271VoiceOn && window.speechSynthesis)speechSynthesis.cancel();
@@ -2891,13 +2898,33 @@ m2919MateDemo=function(key){
  return _m2922DemoBase(key);
 };
 
+/* ===== Minoo v2.9.23 • Satranç Kontrol + Çiğdem Ses Güvenli Bağlantı ===== */
+const MINOO_2923='v2.9.23';
+(function(){
+  const oldSpeak=window.minooSpeak||minooSpeak;
+  const paths=n=>[`/audio/clip_${String(n).padStart(3,'0')}.mp3`,`audio/clip_${String(n).padStart(3,'0')}.mp3`,`./audio/clip_${String(n).padStart(3,'0')}.mp3`];
+  let workingPrefix=null, current=null;
+  function isChess(){return !!document.querySelector('.chess-header,.m2916-world,.m262-game,.chess-world,.chess-menu') || /satranç|şah|vezir|kale|piyon|rok|mat/i.test(document.body?.innerText||'')}
+  function clipFor(t){t=String(t||'').toLocaleLowerCase('tr-TR'); if(/şah mat|mat hamle/.test(t))return 28;if(/harika|doğru|süper|başard/.test(t))return 22;if(/bir daha|tekrar dene|olmadı/.test(t))return 24;if(/ipucu|dikkatlice|incele/.test(t))return 21;if(/rok/.test(t))return 30;if(/çoban/.test(t))return 31;if(/merdiven/.test(t))return 32;if(/arka sıra/.test(t))return 33;if(/vezir.*şah/.test(t))return 34;if(/kale.*şah/.test(t))return 35;if(/\bşah\b/.test(t))return 3;if(/\bvezir\b/.test(t))return 4;if(/\bkale\b/.test(t))return 5;if(/\bfil\b/.test(t))return 6;if(/\bat\b/.test(t))return 7;if(/\bpiyon\b/.test(t))return 8;return 1}
+  function playClip(n,onend){
+    try{if(current){current.pause();current=null}}catch(e){}
+    const tries=workingPrefix?[workingPrefix+`clip_${String(n).padStart(3,'0')}.mp3`]:paths(n);let i=0;
+    const next=()=>{if(i>=tries.length){return false}const src=tries[i++],a=new Audio(src+'?v=2923');current=a;window.__minooCigdemAudio=a;a.onended=()=>onend?.();a.onerror=()=>next();a.play().then(()=>{workingPrefix=src.slice(0,src.lastIndexOf('/')+1)}).catch(()=>next());return true};
+    return next();
+  }
+  window.m2923PlayClip=playClip;
+  window.minooSpeak=function(text,opts={}){if(isChess()){try{speechSynthesis?.cancel?.()}catch(e){};return playClip(clipFor(text),opts.onend)}return oldSpeak(text,opts)};
+  try{minooSpeak=window.minooSpeak}catch(e){}
+  if(typeof window.m270SpeakTR==='function'){const f=window.m270SpeakTR;window.m270SpeakTR=(t,...a)=>isChess()?window.minooSpeak(t):f(t,...a);try{m270SpeakTR=window.m270SpeakTR}catch(e){}}
+  if(typeof window.m271Speak==='function'){const f=window.m271Speak;window.m271Speak=(t,...a)=>isChess()?window.minooSpeak(t):f(t,...a);try{m271Speak=window.m271Speak}catch(e){}}
 
-/* v2.9.23 • Satranç ekranlarında tarayıcı TTS yerine Çiğdem kayıtları */
-const m293OriginalMinooSpeak=minooSpeak;
-minooSpeak=function(text,opts={}){
- const chessVisible=!!document.querySelector('.m262-game,.m2916-world,.m296-world,.chess-world,.chess-home,.setup-world,[class*="chess-"]');
- if(!chessVisible)return m293OriginalMinooSpeak(text,opts);
- const t=String(text||'');
- let n=/şah mat/i.test(t)?27:/\bşah\b/i.test(t)?25:/harika|doğru|başard|süper|aferin|yaşasın/i.test(t)?21:/tekrar|olmadı|yaklaşt|henüz/i.test(t)?22:/ipucu|düşün|kontrol|incele/i.test(t)?23:/rok/i.test(t)?28:9;
- return m293PlayClip(n,opts?.onend);
-};
+  function addBack(){document.querySelectorAll('.chess-header').forEach(h=>{if([...h.querySelectorAll('button')].some(b=>/geri|satranç|←/.test(b.textContent)))return;const b=document.createElement('button');b.className='ghost m2923-back';b.textContent='← Geri';b.onclick=()=>{if(typeof chessMainMenu==='function')chessMainMenu();else if(typeof m2916Menu==='function')m2916Menu();else history.back()};h.prepend(b)})}
+  new MutationObserver(addBack).observe(document.documentElement,{childList:true,subtree:true});setTimeout(addBack,100);
+  const style=document.createElement('style');style.textContent=`.m2923-back{white-space:nowrap}.m2923-anim-line{stroke-dasharray:120;stroke-dashoffset:120;animation:m2923draw .55s ease forwards}@keyframes m2923draw{to{stroke-dashoffset:0}}`;document.head.appendChild(style);
+  if(typeof m2922DrawArrow==='function'){
+    const old=m2922DrawArrow;m2922DrawArrow=function(from,to,pieces){old(from,to,pieces);document.querySelector('.m2919-overlay line,.m2919-overlay polyline')?.classList.add('m2923-anim-line')};
+    try{window.m2922DrawArrow=m2922DrawArrow}catch(e){}
+  }
+  document.querySelectorAll('.logo span,header small').forEach(x=>{if(/^v2\.9\.22$/.test(x.textContent.trim()))x.textContent=MINOO_2923});
+  const oldHome=window.home||home;window.home=function(){const r=oldHome();setTimeout(()=>document.querySelectorAll('.logo span').forEach(x=>{if(/^v2\.9\.22$/.test(x.textContent.trim()))x.textContent=MINOO_2923}),0);return r};try{home=window.home}catch(e){}
+})();
