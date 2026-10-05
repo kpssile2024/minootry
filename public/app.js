@@ -55,13 +55,13 @@ function notify(msg){let t=document.querySelector('#toast');if(!t){t=document.cr
 function modal(html){closeModal();const d=document.createElement('div');d.id='modal';d.className='modal';d.innerHTML=`<div class="modal-card">${html}</div>`;d.onclick=e=>{if(e.target===d)closeModal()};document.body.appendChild(d)}
 function closeModal(){document.querySelector('#modal')?.remove()}
 const avatar=(s,size='')=>s.photo_data?`<img class="avatar ${size}" src="${s.photo_data}" alt="">`:`<div class="avatar placeholder ${size}">🌱</div>`;
-function home(){teacherPass='';teacherToken='';teacherRole='';teacherName='';studentSession=null;currentClass=null;app.innerHTML=`<main class="center"><div class="logo">Minoo <span>v2.9.29</span></div><p class="tag">Oyna • Keşfet • Öğren</p><section class="card"><h2>Öğrenci girişi</h2><div class="login-grid"><input id="suser" placeholder="Kullanıcı adı" autocomplete="username"><input id="scode" type="password" placeholder="İlk giriş kodu / şifre" autocomplete="current-password" onkeydown="if(event.key==='Enter')studentLogin()"><button onclick="studentLogin()">Giriş yap</button></div></section><button class="link" onclick="staffLogin()">Öğretmen / Yönetici girişi</button><p class="safe">Reklamsız • Sohbetsiz • Öğretmen kontrollü</p></main>`}
-function staffLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="home()">← Geri</button><div class="logo">Minoo <span>v2.9.29</span></div><p class="tag">Giriş türünü seçin</p><div class="m267-role-grid"><button onclick="adminLogin()"><span>👑</span><b>Yönetici Girişi</b><small>Öğretmenleri, sınıfları ve sistemi yönet</small></button><button onclick="teacherLogin()"><span>👩‍🏫</span><b>Öğretmen Girişi</b><small>Size verilen kullanıcı adı ve şifreyle giriş yapın</small></button></div></main>`}
+function home(){teacherPass='';teacherToken='';teacherRole='';teacherName='';studentSession=null;currentClass=null;app.innerHTML=`<main class="center"><div class="logo">Minoo <span>v2.9.30</span></div><p class="tag">Oyna • Keşfet • Öğren</p><section class="card"><h2>Öğrenci girişi</h2><div class="login-grid"><input id="suser" placeholder="Kullanıcı adı" autocomplete="username"><input id="scode" type="password" placeholder="İlk giriş kodu / şifre" autocomplete="current-password" onkeydown="if(event.key==='Enter')studentLogin()"><button onclick="studentLogin()">Giriş yap</button></div></section><button class="link" onclick="staffLogin()">Öğretmen / Yönetici girişi</button><p class="safe">Reklamsız • Sohbetsiz • Öğretmen kontrollü</p></main>`}
+function staffLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="home()">← Geri</button><div class="logo">Minoo <span>v2.9.30</span></div><p class="tag">Giriş türünü seçin</p><div class="m267-role-grid"><button onclick="adminLogin()"><span>👑</span><b>Yönetici Girişi</b><small>Öğretmenleri, sınıfları ve sistemi yönet</small></button><button onclick="teacherLogin()"><span>👩‍🏫</span><b>Öğretmen Girişi</b><small>Size verilen kullanıcı adı ve şifreyle giriş yapın</small></button></div></main>`}
 function adminLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="staffLogin()">← Geri</button><div class="logo">Minoo <span>Yönetici</span></div><section class="card login-card"><h2>👑 Yönetici Girişi</h2><label>Yönetici şifresi</label><input id="ap" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAdminLogin()"><button onclick="doAdminLogin()">Giriş yap</button></section></main>`}
 async function doAdminLogin(){const p=document.querySelector('#ap').value;if(!p)return;try{teacherPass=p;const r=await api('/api/admin/login',{method:'POST',body:JSON.stringify({password:p})});teacherRole='admin';teacherName='Yönetici';dashboard()}catch(e){teacherPass='';notify(e.message)}}
 function teacherLogin(){app.innerHTML=`<main class="center teacher-login"><button class="back-link" onclick="staffLogin()">← Geri</button><div class="logo">Minoo <span>Öğretmen</span></div><section class="card login-card"><h2>👩‍🏫 Öğretmen Girişi</h2><label>Kullanıcı adı</label><input id="tu" autocomplete="username"><label>Şifre</label><input id="tp" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doTeacherLogin()"><button onclick="doTeacherLogin()">Giriş yap</button></section></main>`}
 async function doTeacherLogin(){const username=document.querySelector('#tu').value.trim(),password=document.querySelector('#tp').value;if(!username||!password)return notify('Kullanıcı adı ve şifre gerekli');try{const r=await fetch('/api/teacher/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})}).then(async x=>{const d=await x.json();if(!x.ok)throw Error(d.error);return d});teacherToken=r.token;teacherRole='teacher';teacherName=r.name;dashboard()}catch(e){teacherToken='';notify(e.message)}}
-async function dashboard(){const cs=await api('/api/classes');app.innerHTML=`<header><div><b>Minoo Öğretmen</b><small>v2.9.29</small></div><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="toolbar"><h1>Sınıflarım</h1><button onclick="addClass()">+ Sınıf</button></div><div class="grid">${cs.map(c=>`<article class="card"><h3>${esc(c.name)}</h3><p>${c.student_count} öğrenci</p><button onclick="openClass(${c.id})">Aç</button><div class="row"><button class="ghost" onclick="renameClass(${c.id},'${encodeURIComponent(c.name)}')">Adını değiştir</button><button class="danger ghost" onclick="deleteClass(${c.id},'${encodeURIComponent(c.name)}')">Sil</button></div></article>`).join('')}</div><hr><div class="toolbar"><h2>Oyun Kütüphanesi</h2><button onclick="gameForm()">+ Oyun ekle</button></div><div id="library"></div></main>`;}
+async function dashboard(){const cs=await api('/api/classes');app.innerHTML=`<header><div><b>Minoo Öğretmen</b><small>v2.9.30</small></div><button class="ghost" onclick="home()">Çıkış</button></header><main><div class="toolbar"><h1>Sınıflarım</h1><button onclick="addClass()">+ Sınıf</button></div><div class="grid">${cs.map(c=>`<article class="card"><h3>${esc(c.name)}</h3><p>${c.student_count} öğrenci</p><button onclick="openClass(${c.id})">Aç</button><div class="row"><button class="ghost" onclick="renameClass(${c.id},'${encodeURIComponent(c.name)}')">Adını değiştir</button><button class="danger ghost" onclick="deleteClass(${c.id},'${encodeURIComponent(c.name)}')">Sil</button></div></article>`).join('')}</div><hr><div class="toolbar"><h2>Oyun Kütüphanesi</h2><button onclick="gameForm()">+ Oyun ekle</button></div><div id="library"></div></main>`;}
 async function loadLibrary(){
  const el=document.querySelector('#library');if(!el)return;
  try{
@@ -910,7 +910,7 @@ setTimeout(()=>document.querySelectorAll('.logo span,header small').forEach(x=>{
 
 
 /* ===== Minoo v2.6.4 • Atölye alanları + Fen renk karışımı + Türkçe harf yazma ===== */
-const MINOO_VERSION='v2.9.29';
+const MINOO_VERSION='v2.9.30';
 
 function atelierHome(){
   modal(`<button class="modal-x" onclick="closeModal()">×</button>
@@ -1050,7 +1050,7 @@ document.head.insertAdjacentHTML('beforeend',`<style id="minoo264">
 
 
 /* ===== Minoo v2.6.5 • toplu düzeltme ===== */
-const MINOO_VERSION_265='v2.9.29';
+const MINOO_VERSION_265='v2.9.30';
 
 /* Güvenli ortak ana sayfa */
 async function m265Home(){
@@ -2375,7 +2375,7 @@ new MutationObserver(()=>{if(teacherRole==='teacher')m282ApplyTeacherUI()}).obse
 /* ============================================================
    MINOO v2.9.5 • KESIN GORSEL / PANEL DUZELTMELERI
    ============================================================ */
-const MINOO_294='v2.9.29';
+const MINOO_294='v2.9.30';
 
 /* Satranç tahtaları: tüm m262 tabanlı etkinliklerde gerçek dama rengi. */
 function m294PaintChessBoards(root=document){
@@ -2454,7 +2454,7 @@ document.head.insertAdjacentHTML('beforeend',`<style id="m294css">
 /* ============================================================
    MINOO v2.9.5 • SEKMEli ANA PANEL + ARAÇLAR + OYUN ATÖLYESİ
    ============================================================ */
-const MINOO_295='v2.9.29';
+const MINOO_295='v2.9.30';
 let m295ActiveTab='classes';
 function m295Can(permission){return teacherRole==='admin'||m282Has(permission)}
 function m295Tab(tab){
@@ -2551,14 +2551,14 @@ document.head.insertAdjacentHTML('beforeend',`<style id="m296css">
 @media(max-width:720px){.m296-shell{padding:8px}.m296-topnav{display:flex;overflow-x:auto}.m296-brand{min-width:120px}.m296-topnav button{min-width:110px;padding:11px!important;font-size:13px}.m296-layout{display:block}.m296-side{display:grid;grid-template-columns:repeat(2,1fr);margin-bottom:10px}.m296-side button{min-height:58px;font-size:13px}.m296-center{padding:8px;border-radius:20px}.m296-title p{display:none}.m296-right{display:grid;grid-template-columns:1fr 1fr;margin-top:10px}.m296-actions,.m296-mini,.m296-level{grid-column:1/-1}.m296-player,.m296-turn,.m296-clock{padding:10px}.m296-center .m280-board{padding:4px}.m280-piece{width:90%;height:90%}}
 </style>`);
 
-// v2.9.29 history + chess navigation + resume polish
+// v2.9.30 history + chess navigation + resume polish
 document.head.insertAdjacentHTML('beforeend',`<style>
 .m299-move-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}.m299-move-grid button{min-height:74px;font-size:18px;border-radius:20px!important;background:linear-gradient(145deg,#fffaf0,#eef5ff)!important;color:#243b67!important;border:2px solid #dbe7f6!important;box-shadow:0 8px 18px rgba(40,65,105,.10)}\n.m299-history{max-width:1050px;margin:auto}.m299-history-hero{text-align:center;background:linear-gradient(135deg,#fff5df,#edf6ff);padding:24px;border-radius:28px;margin-bottom:20px;box-shadow:0 10px 28px rgba(50,70,100,.08)}.m299-history-hero>div{font-size:52px}.m299-history-hero h1{margin:4px 0}.m299-history-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.m299-history-card{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;background:#fff;border:2px solid #edf0f5;border-radius:24px;padding:18px;box-shadow:0 8px 20px rgba(40,60,90,.08)}.m299-history-icon{width:58px;height:58px;display:grid;place-items:center;border-radius:18px;background:#fff2dc;font-size:32px}.m299-history-card h3{margin:0 0 5px}.m299-history-card p{margin:0 0 4px;color:#43875b;font-weight:800}.m299-history-card small{color:#718096}@media(max-width:700px){.m299-history-grid{grid-template-columns:1fr}.m299-history-card{grid-template-columns:auto 1fr}.m299-history-card button{grid-column:1/-1}.m299-move-grid{grid-template-columns:1fr}}
 </style>`);
 
 
 /* ============================================================
-   MINOO v2.9.29 • SATRANÇ ÖĞRENME MODÜLLERİNDEN OYUNA DÖNÜŞ
+   MINOO v2.9.30 • SATRANÇ ÖĞRENME MODÜLLERİNDEN OYUNA DÖNÜŞ
    Devam eden bilgisayara karşı satranç durumunu korur.
    ============================================================ */
 function m2910SaveChess(){
@@ -2611,7 +2611,7 @@ function m2910OpenMoveLesson(i){
 }
 
 
-/* ===== Minoo v2.9.29 • genişletilmiş öğretmen yetkileri ===== */
+/* ===== Minoo v2.9.30 • genişletilmiş öğretmen yetkileri ===== */
 function m2915Allowed(key){return teacherRole==='admin'||m282Permissions.includes(key)}
 const _m2915OpenType=m296OpenChessType;
 m296OpenChessType=async function(type){
@@ -2630,7 +2630,7 @@ m296OpenDirections=async function(){
 };
 
 
-/* ===== Minoo v2.9.29 • TSF satranç alıştırmaları, sekmeli panel korunarak ===== */
+/* ===== Minoo v2.9.30 • TSF satranç alıştırmaları, sekmeli panel korunarak ===== */
 
 const M2916_PUZZLES={
  attack:{title:'Saldırıyı Bul',icon:'⚔️',prompt:'Güvenli kareden rakip taşa saldır.',pieces:[['w','rook','a1'],['w','king','g1'],['b','pawn','d6'],['b','king','g8']],from:'a1',answers:['a6'],hint:'Kaleyi aynı sıraya getir; yolu açık olsun.'},
@@ -2694,7 +2694,7 @@ document.head.insertAdjacentHTML('beforeend',`<style id="m2917-style">
 .m2916-world{max-width:920px;margin:auto;padding:18px}.m2916-card{background:rgba(255,255,255,.9);border:2px solid #f0e2d4;border-radius:28px;padding:20px;box-shadow:0 14px 38px rgba(70,80,100,.10)}.m2916-board{margin:18px auto;max-width:620px;border:8px solid #f5e5d3;border-radius:20px;overflow:hidden;box-shadow:0 16px 34px rgba(92,62,38,.14)}.m2916-from{box-shadow:inset 0 0 0 5px #6ea8f7!important}.m2916-help{text-align:center;font-weight:800;color:#68728b}.m2916-choice{display:flex;justify-content:center;gap:14px;margin:18px}.m2916-choice button{min-width:150px;font-size:20px}.m2917-feature{background:linear-gradient(135deg,#fff5df,#edf6ff)!important;color:#294052!important;border:1px solid #eadcc9!important}.m2917-chess-open{background:linear-gradient(145deg,#fff6dc,#eef6ff)!important;color:#243b67!important;border:2px solid #e5d9bf!important}@media(max-width:700px){.m2916-world{padding:8px}.m2916-card{padding:10px;border-radius:20px}.m2916-board{border-width:4px}.m2916-choice button{min-width:0;flex:1}}
 </style>`);
 
-/* ===== Minoo v2.9.29 • Sınıf Arkadaşımla Satranç ===== */
+/* ===== Minoo v2.9.30 • Sınıf Arkadaşımla Satranç ===== */
 let m2918Poll=null,m2918Match=null,m2918State=null,m2918Selected=null,m2918Legal=[];
 function m2918Stop(){if(m2918Poll){clearInterval(m2918Poll);m2918Poll=null}}
 async function m2918Lobby(){
@@ -2731,8 +2731,8 @@ const _m2918StudentDash=studentDash;studentDash=async function(){m2918Stop();awa
 async function m2918TeacherHistory(sid){try{const rows=await api(`/api/students/${sid}/chess-history`);modal(`<button class="modal-x" onclick="closeModal()">×</button><h2>♟️ Karşılıklı Satranç Geçmişi</h2>${rows.length?rows.map(x=>`<div class="m2918-row"><b>${esc(x.white_name)} – ${esc(x.black_name)}</b><span>${esc(x.result||'')} • ${esc(x.end_reason||'')} • ${Number(x.move_count)||0} hamle</span><small>${formatDate(x.finished_at)}</small></div>`).join(''):'<p>Henüz tamamlanmış karşılıklı satranç maçı yok.</p>'}`)}catch(e){notify(e.message)}}
 const _m2918Profile=profile;profile=async function(id){await _m2918Profile(id);const card=document.querySelector('#modal .modal-card');if(card&&!card.querySelector('.m2918-teacher-btn')){const d=document.createElement('div');d.className='modal-actions m2918-teacher-btn';d.innerHTML=`<button class="ghost" onclick="m2918TeacherHistory(${Number(id)})">♟️ Satranç Maçları</button>`;card.appendChild(d)}};
 
-/* v2.9.29 sürüm etiketi */
-document.querySelectorAll('.logo span').forEach(x=>{if(/^v2\.9\.17$/.test(x.textContent.trim()))x.textContent='v2.9.29'});
+/* v2.9.30 sürüm etiketi */
+document.querySelectorAll('.logo span').forEach(x=>{if(/^v2\.9\.17$/.test(x.textContent.trim()))x.textContent='v2.9.30'});
 document.head.insertAdjacentHTML('beforeend',`<style id="m2918-style">.m2918-lobby,.m2918-game{max-width:980px;margin:auto;padding:18px}.m2918-hero{display:flex;gap:16px;align-items:center;background:linear-gradient(135deg,#fff4df,#eef8ff);border:1px solid #eadcc8;border-radius:26px;padding:20px;margin-bottom:16px}.m2918-hero>span{font-size:48px}.m2918-row{display:grid;grid-template-columns:minmax(130px,1fr) minmax(180px,2fr) auto;gap:10px;align-items:center;padding:10px;border-bottom:1px solid #eee}.m2918-peers{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.m2918-peers article{display:grid;gap:8px;justify-items:center;padding:15px;border:1px solid #eee0cf;border-radius:20px;background:#fffdf9}.m2918-entry button{width:100%;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;text-align:left;background:linear-gradient(135deg,#fff5df,#eef7ff);color:#294052;border:1px solid #eadcc9;border-radius:22px;padding:16px;margin:12px 0}.m2918-entry span{font-size:32px}.m2918-entry small{display:block;margin-top:3px}.m2918-gamehead{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px;background:#fffaf1;border:1px solid #eadcc9;border-radius:18px;padding:12px 16px}.m2918-gamehead small{display:block}.m2918-board{margin:auto}.m2918-note{text-align:center;font-weight:700;color:#68728b}.m2918-prom{display:grid;grid-template-columns:1fr 1fr;gap:10px}.m2918-history{margin-top:18px}@media(max-width:700px){.m2918-row{grid-template-columns:1fr}.m2918-game{padding:8px}.m2918-gamehead{align-items:flex-start;flex-direction:column}}</style>`);
 
 /* ===== Minoo v2.9.20 • Satranç eğitim paketi ===== */
@@ -2873,7 +2873,7 @@ document.documentElement.classList.add('m2919-ready');
 document.head.insertAdjacentHTML('beforeend',`<style id="m2919-style">.m2916-board{position:relative}.m2919-overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:6}.m2919-progress{height:10px;background:#eee5d8;border-radius:99px;overflow:hidden;margin:0 0 14px}.m2919-progress i{display:block;height:100%;background:#82b89b;border-radius:99px}.m299-move-grid button small{display:block;opacity:.7;margin-top:4px}.m2919-teach{display:grid;gap:10px;margin:20px 0}.m2919-teach>div{display:flex;gap:12px;align-items:center;padding:12px;border-radius:16px;background:#f7f2ea;opacity:.55}.m2919-teach>div.active{opacity:1;outline:3px solid #a8cfba}.m2919-teach b{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:#fff}.m296-right{align-self:start}.m2919-coord-board .m262-sq{position:relative}.m2919-rank,.m2919-file{position:absolute;z-index:8;font-size:10px;font-weight:800;line-height:1;pointer-events:none;opacity:.78}.m2919-rank{left:2px;top:2px}.m2919-file{right:2px;bottom:2px;text-transform:lowercase}</style>`);
 
 
-/* ===== Minoo v2.9.29 • doğrulanmış satranç kural motoru ve alıştırmalar ===== */
+/* ===== Minoo v2.9.30 • doğrulanmış satranç kural motoru ve alıştırmalar ===== */
 const M2922_GENERATED={"attack": [{"pieces": [["w", "bishop", "d4"], ["w", "king", "a8"], ["b", "king", "a3"], ["b", "rook", "f4"]], "from": "d4", "target": "f4", "answers": ["e3", "e5"], "prompt": "Seçili taşla rakip taşa güvenli bir saldırı hazırla.", "hint": "Taşın hareket yolunu ve rakip taşın karesini düşün."}, {"pieces": [["w", "bishop", "c3"], ["w", "king", "e3"], ["b", "king", "e6"], ["b", "knight", "d6"]], "from": "c3", "target": "d6", "answers": ["b4"], "prompt": "Seçili taşla rakip taşa güvenli bir saldırı hazırla.", "hint": "Taşın hareket yolunu ve rakip taşın karesini düşün."}, {"pieces": [["w", "queen", "b4"], ["w", "king", "c8"], ["b", "king", "d6"], ["b", "knight", "g8"]], "from": "b4", "target": "g8", "answers": ["b3", "c4", "g4"], "prompt": "Seçili taşla rakip taşa güvenli bir saldırı hazırla.", "hint": "Taşın hareket yolunu ve rakip taşın karesini düşün."}, {"pieces": [["w", "knight", "b7"], ["w", "king", "b4"], ["b", "king", "h8"], ["b", "pawn", "d3"], ["w", "knight", "f6"]], "from": "b7", "target": "d3", "answers": ["c5"], "prompt": "Seçili taşla rakip taşa güvenli bir saldırı hazırla.", "hint": "Taşın hareket yolunu ve rakip taşın karesini düşün."}, {"pieces": [["w", "knight", "a5"], ["w", "king", "b1"], ["b", "king", "b5"], ["b", "pawn", "a1"]], "from": "a5", "target": "a1", "answers": ["b3"], "prompt": "Seçili taşla rakip taşa güvenli bir saldırı hazırla.", "hint": "Taşın hareket yolunu ve rakip taşın karesini düşün."}, {"pieces": [["w", "rook", "h6"], ["w", "king", "b4"], ["b", "king", "g4"], ["b", "knight", "e8"], ["b", "knight", "h8"]], "from": "h6", "target": "e8", "answers": ["e6", "h8"], "prompt": "Seçili taşla rakip taşa güvenli bir saldırı hazırla.", "hint": "Taşın hareket yolunu ve rakip taşın karesini düşün."}, {"pieces": [["w", "queen", "e4"], ["w", "king", "g2"], ["b", "king", "e2"], ["b", "rook", "d7"]], "from": "e4", "target": "d7", "answers": ["a4", "g4", "f5", "c6", "e6", "e8"], "prompt": "Seçili taşla rakip taşa güvenli bir saldırı hazırla.", "hint": "Taşın hareket yolunu ve rakip taşın karesini düşün."}, {"pieces": [["w", "knight", "a2"], ["w", "king", "a4"], ["b", "king", "a6"], ["b", "rook", "b1"]], "from": "a2", "target": "b1", "answers": ["c3"], "prompt": "Seçili taşla rakip taşa güvenli bir saldırı hazırla.", "hint": "Taşın hareket yolunu ve rakip taşın karesini düşün."}, {"pieces": [["w", "rook", "c6"], ["w", "king", "f4"], ["b", "king", "e7"], ["b", "pawn", "a4"], ["w", "rook", "e8"]], "from": "c6", "target": "a4", "answers": ["c4", "a6"], "prompt": "Seçili taşla rakip taşa güvenli bir saldırı hazırla.", "hint": "Taşın hareket yolunu ve rakip taşın karesini düşün."}, {"pieces": [["w", "bishop", "b5"], ["w", "king", "e6"], ["b", "king", "g6"], ["b", "pawn", "d1"], ["w", "knight", "e1"]], "from": "b5", "target": "d1", "answers": ["e2", "a4"], "prompt": "Seçili taşla rakip taşa güvenli bir saldırı hazırla.", "hint": "Taşın hareket yolunu ve rakip taşın karesini düşün."}], "escape": [{"pieces": [["w", "bishop", "a2"], ["w", "king", "h1"], ["b", "king", "b1"], ["b", "queen", "a4"]], "from": "a2", "target": null, "answers": ["b1", "d5", "e6", "f7", "g8"], "prompt": "Tehlikedeki taşı güvenli bir kareye kurtar.", "hint": "Taşını saldırıdan çıkarırken kendi şahını da güvende tut."}, {"pieces": [["w", "knight", "f8"], ["w", "king", "a8"], ["b", "king", "c3"], ["b", "knight", "h7"], ["b", "bishop", "c7"]], "from": "f8", "target": null, "answers": ["e6", "g6", "d7", "h7"], "prompt": "Tehlikedeki taşı güvenli bir kareye kurtar.", "hint": "Taşını saldırıdan çıkarırken kendi şahını da güvende tut."}, {"pieces": [["w", "bishop", "a6"], ["w", "king", "b2"], ["b", "king", "e2"], ["b", "rook", "h6"]], "from": "a6", "target": null, "answers": ["e2", "c4", "b5", "b7", "c8"], "prompt": "Tehlikedeki taşı güvenli bir kareye kurtar.", "hint": "Taşını saldırıdan çıkarırken kendi şahını da güvende tut."}, {"pieces": [["w", "knight", "h2"], ["w", "king", "c3"], ["b", "king", "g6"], ["b", "queen", "f2"], ["b", "bishop", "h7"]], "from": "h2", "target": null, "answers": ["g4"], "prompt": "Tehlikedeki taşı güvenli bir kareye kurtar.", "hint": "Taşını saldırıdan çıkarırken kendi şahını da güvende tut."}, {"pieces": [["w", "knight", "b1"], ["w", "king", "f5"], ["b", "king", "d2"], ["b", "rook", "d1"]], "from": "b1", "target": null, "answers": ["a3"], "prompt": "Tehlikedeki taşı güvenli bir kareye kurtar.", "hint": "Taşını saldırıdan çıkarırken kendi şahını da güvende tut."}, {"pieces": [["w", "knight", "d5"], ["w", "king", "e8"], ["b", "king", "c5"], ["b", "knight", "f1"]], "from": "d5", "target": null, "answers": ["c3", "f4", "f6", "c7", "e7"], "prompt": "Tehlikedeki taşı güvenli bir kareye kurtar.", "hint": "Taşını saldırıdan çıkarırken kendi şahını da güvende tut."}, {"pieces": [["w", "bishop", "g8"], ["w", "king", "a7"], ["b", "king", "c7"], ["b", "queen", "g5"]], "from": "g8", "target": null, "answers": ["a2", "b3", "c4", "e6", "f7", "h7"], "prompt": "Tehlikedeki taşı güvenli bir kareye kurtar.", "hint": "Taşını saldırıdan çıkarırken kendi şahını da güvende tut."}, {"pieces": [["w", "knight", "c8"], ["w", "king", "g3"], ["b", "king", "d8"], ["b", "knight", "f2"]], "from": "c8", "target": null, "answers": ["b6", "d6", "a7"], "prompt": "Tehlikedeki taşı güvenli bir kareye kurtar.", "hint": "Taşını saldırıdan çıkarırken kendi şahını da güvende tut."}, {"pieces": [["w", "bishop", "b8"], ["w", "king", "b2"], ["b", "king", "d6"], ["b", "rook", "a8"]], "from": "b8", "target": null, "answers": ["d6"], "prompt": "Tehlikedeki taşı güvenli bir kareye kurtar.", "hint": "Taşını saldırıdan çıkarırken kendi şahını da güvende tut."}, {"pieces": [["w", "knight", "g2"], ["w", "king", "b3"], ["b", "king", "c6"], ["b", "rook", "f2"], ["b", "rook", "f5"]], "from": "g2", "target": null, "answers": ["e1", "e3", "h4"], "prompt": "Tehlikedeki taşı güvenli bir kareye kurtar.", "hint": "Taşını saldırıdan çıkarırken kendi şahını da güvende tut."}], "gain": [{"pieces": [["w", "bishop", "g6"], ["w", "king", "h4"], ["b", "king", "d6"], ["b", "queen", "d3"], ["w", "knight", "h2"]], "from": "g6", "target": null, "answers": ["d3"], "prompt": "Seçili taşla daha değerli rakip taşı kazan.", "hint": "Alabileceğin taşların değerlerini karşılaştır."}, {"pieces": [["w", "rook", "b7"], ["w", "king", "f7"], ["b", "king", "d7"], ["b", "queen", "d6"]], "from": "b7", "target": null, "answers": ["d7"], "prompt": "Seçili taşla daha değerli rakip taşı kazan.", "hint": "Alabileceğin taşların değerlerini karşılaştır."}, {"pieces": [["w", "knight", "c5"], ["w", "king", "f2"], ["b", "king", "a2"], ["b", "queen", "a4"], ["w", "pawn", "c4"]], "from": "c5", "target": null, "answers": ["a4"], "prompt": "Seçili taşla daha değerli rakip taşı kazan.", "hint": "Alabileceğin taşların değerlerini karşılaştır."}, {"pieces": [["w", "bishop", "e2"], ["w", "king", "a8"], ["b", "king", "a6"], ["b", "rook", "c2"], ["w", "rook", "g8"]], "from": "e2", "target": null, "answers": ["a6"], "prompt": "Seçili taşla daha değerli rakip taşı kazan.", "hint": "Alabileceğin taşların değerlerini karşılaştır."}, {"pieces": [["w", "knight", "d8"], ["w", "king", "e8"], ["b", "king", "h8"], ["b", "rook", "c6"]], "from": "d8", "target": null, "answers": ["c6"], "prompt": "Seçili taşla daha değerli rakip taşı kazan.", "hint": "Alabileceğin taşların değerlerini karşılaştır."}, {"pieces": [["w", "rook", "a6"], ["w", "king", "h3"], ["b", "king", "d4"], ["b", "queen", "b6"], ["w", "bishop", "d7"]], "from": "a6", "target": null, "answers": ["b6"], "prompt": "Seçili taşla daha değerli rakip taşı kazan.", "hint": "Alabileceğin taşların değerlerini karşılaştır."}, {"pieces": [["w", "bishop", "d6"], ["w", "king", "a2"], ["b", "king", "h2"], ["b", "rook", "d4"]], "from": "d6", "target": null, "answers": ["h2"], "prompt": "Seçili taşla daha değerli rakip taşı kazan.", "hint": "Alabileceğin taşların değerlerini karşılaştır."}, {"pieces": [["w", "bishop", "b5"], ["w", "king", "f8"], ["b", "king", "d1"], ["b", "queen", "c6"], ["w", "bishop", "f5"]], "from": "b5", "target": null, "answers": ["c6"], "prompt": "Seçili taşla daha değerli rakip taşı kazan.", "hint": "Alabileceğin taşların değerlerini karşılaştır."}, {"pieces": [["w", "rook", "a8"], ["w", "king", "a4"], ["b", "king", "c5"], ["b", "queen", "b8"]], "from": "a8", "target": null, "answers": ["b8"], "prompt": "Seçili taşla daha değerli rakip taşı kazan.", "hint": "Alabileceğin taşların değerlerini karşılaştır."}, {"pieces": [["w", "rook", "c7"], ["w", "king", "a1"], ["b", "king", "e7"], ["b", "queen", "f2"], ["w", "knight", "f7"]], "from": "c7", "target": null, "answers": ["e7"], "prompt": "Seçili taşla daha değerli rakip taşı kazan.", "hint": "Alabileceğin taşların değerlerini karşılaştır."}], "defend": [{"pieces": [["w", "bishop", "h6"], ["w", "king", "c3"], ["b", "king", "f5"], ["b", "rook", "f3"]], "from": "h6", "target": null, "answers": ["e3"], "prompt": "Şahına yapılan saldırıyı seçili taşla savun.", "hint": "Saldıran taşı alabilir veya saldırı yolunu kapatabilirsin."}, {"pieces": [["w", "queen", "c8"], ["w", "king", "h4"], ["b", "king", "d2"], ["b", "rook", "h2"]], "from": "c8", "target": null, "answers": ["h3"], "prompt": "Şahına yapılan saldırıyı seçili taşla savun.", "hint": "Saldıran taşı alabilir veya saldırı yolunu kapatabilirsin."}, {"pieces": [["w", "rook", "d6"], ["w", "king", "a6"], ["b", "king", "e8"], ["b", "queen", "f1"]], "from": "d6", "target": null, "answers": ["d3"], "prompt": "Şahına yapılan saldırıyı seçili taşla savun.", "hint": "Saldıran taşı alabilir veya saldırı yolunu kapatabilirsin."}, {"pieces": [["w", "bishop", "d5"], ["w", "king", "f8"], ["b", "king", "b6"], ["b", "queen", "f2"], ["w", "rook", "e5"]], "from": "d5", "target": null, "answers": ["f3", "f7"], "prompt": "Şahına yapılan saldırıyı seçili taşla savun.", "hint": "Saldıran taşı alabilir veya saldırı yolunu kapatabilirsin."}, {"pieces": [["w", "bishop", "h2"], ["w", "king", "c2"], ["b", "king", "a6"], ["b", "queen", "c7"], ["b", "pawn", "e1"]], "from": "h2", "target": null, "answers": ["c7"], "prompt": "Şahına yapılan saldırıyı seçili taşla savun.", "hint": "Saldıran taşı alabilir veya saldırı yolunu kapatabilirsin."}, {"pieces": [["w", "knight", "b3"], ["w", "king", "e7"], ["b", "king", "a1"], ["b", "queen", "a3"], ["w", "bishop", "h2"]], "from": "b3", "target": null, "answers": ["c5"], "prompt": "Şahına yapılan saldırıyı seçili taşla savun.", "hint": "Saldıran taşı alabilir veya saldırı yolunu kapatabilirsin."}, {"pieces": [["w", "knight", "g6"], ["w", "king", "f3"], ["b", "king", "b2"], ["b", "queen", "f8"], ["w", "rook", "e6"]], "from": "g6", "target": null, "answers": ["f4", "f8"], "prompt": "Şahına yapılan saldırıyı seçili taşla savun.", "hint": "Saldıran taşı alabilir veya saldırı yolunu kapatabilirsin."}, {"pieces": [["w", "rook", "e4"], ["w", "king", "a8"], ["b", "king", "f5"], ["b", "rook", "g8"]], "from": "e4", "target": null, "answers": ["e8"], "prompt": "Şahına yapılan saldırıyı seçili taşla savun.", "hint": "Saldıran taşı alabilir veya saldırı yolunu kapatabilirsin."}, {"pieces": [["w", "queen", "d6"], ["w", "king", "c8"], ["b", "king", "h4"], ["b", "queen", "h3"], ["w", "rook", "e7"]], "from": "d6", "target": null, "answers": ["e6", "d7"], "prompt": "Şahına yapılan saldırıyı seçili taşla savun.", "hint": "Saldıran taşı alabilir veya saldırı yolunu kapatabilirsin."}, {"pieces": [["w", "queen", "b6"], ["w", "king", "d7"], ["b", "king", "b7"], ["b", "bishop", "a4"]], "from": "b6", "target": null, "answers": ["b5", "c6"], "prompt": "Şahına yapılan saldırıyı seçili taşla savun.", "hint": "Saldıran taşı alabilir veya saldırı yolunu kapatabilirsin."}], "check": [{"pieces": [["w", "rook", "a2"], ["w", "king", "h1"], ["b", "king", "e7"]], "from": "a2", "target": null, "answers": ["e2", "a7"], "prompt": "Seçili taşla güvenli bir kareden şah çek.", "hint": "Rakip şahı gerçekten tehdit eden ve taşını gereksiz yere bırakmayan hamleyi bul."}, {"pieces": [["w", "rook", "h8"], ["w", "king", "g7"], ["b", "king", "e5"], ["b", "bishop", "g8"]], "from": "h8", "target": null, "answers": ["h5"], "prompt": "Seçili taşla güvenli bir kareden şah çek.", "hint": "Rakip şahı gerçekten tehdit eden ve taşını gereksiz yere bırakmayan hamleyi bul."}, {"pieces": [["w", "knight", "h4"], ["w", "king", "d8"], ["b", "king", "g5"]], "from": "h4", "target": null, "answers": ["f3"], "prompt": "Seçili taşla güvenli bir kareden şah çek.", "hint": "Rakip şahı gerçekten tehdit eden ve taşını gereksiz yere bırakmayan hamleyi bul."}, {"pieces": [["w", "queen", "g1"], ["w", "king", "c2"], ["b", "king", "c7"], ["b", "rook", "d8"]], "from": "g1", "target": null, "answers": ["h2", "g3", "c5", "a7", "g7"], "prompt": "Seçili taşla güvenli bir kareden şah çek.", "hint": "Rakip şahı gerçekten tehdit eden ve taşını gereksiz yere bırakmayan hamleyi bul."}, {"pieces": [["w", "queen", "c8"], ["w", "king", "c1"], ["b", "king", "a1"], ["b", "pawn", "g2"]], "from": "c8", "target": null, "answers": ["c3", "a6", "a8", "h8"], "prompt": "Seçili taşla güvenli bir kareden şah çek.", "hint": "Rakip şahı gerçekten tehdit eden ve taşını gereksiz yere bırakmayan hamleyi bul."}, {"pieces": [["w", "queen", "e8"], ["w", "king", "b6"], ["b", "king", "g7"], ["b", "bishop", "d6"]], "from": "e8", "target": null, "answers": ["d7"], "prompt": "Seçili taşla güvenli bir kareden şah çek.", "hint": "Rakip şahı gerçekten tehdit eden ve taşını gereksiz yere bırakmayan hamleyi bul."}, {"pieces": [["w", "knight", "a4"], ["w", "king", "c4"], ["b", "king", "a2"]], "from": "a4", "target": null, "answers": ["c3"], "prompt": "Seçili taşla güvenli bir kareden şah çek.", "hint": "Rakip şahı gerçekten tehdit eden ve taşını gereksiz yere bırakmayan hamleyi bul."}, {"pieces": [["w", "knight", "f1"], ["w", "king", "g8"], ["b", "king", "d5"]], "from": "f1", "target": null, "answers": ["e3"], "prompt": "Seçili taşla güvenli bir kareden şah çek.", "hint": "Rakip şahı gerçekten tehdit eden ve taşını gereksiz yere bırakmayan hamleyi bul."}, {"pieces": [["w", "bishop", "f4"], ["w", "king", "e5"], ["b", "king", "e7"]], "from": "f4", "target": null, "answers": ["g5"], "prompt": "Seçili taşla güvenli bir kareden şah çek.", "hint": "Rakip şahı gerçekten tehdit eden ve taşını gereksiz yere bırakmayan hamleyi bul."}, {"pieces": [["w", "bishop", "f4"], ["w", "king", "h2"], ["b", "king", "e7"]], "from": "f4", "target": null, "answers": ["g5"], "prompt": "Seçili taşla güvenli bir kareden şah çek.", "hint": "Rakip şahı gerçekten tehdit eden ve taşını gereksiz yere bırakmayan hamleyi bul."}], "mate": [{"pieces": [["w", "queen", "b6"], ["w", "king", "a6"], ["b", "king", "a8"]], "from": "b6", "target": null, "answers": ["a7", "b7", "d8"], "prompt": "Tek hamlede gerçek şah matı bul.", "hint": "Şahın kaçış, alma ve perdeleme seçeneklerinin hepsini kapat."}, {"pieces": [["w", "queen", "e4"], ["w", "king", "h2"], ["b", "king", "f2"], ["w", "knight", "f4"]], "from": "e4", "target": null, "answers": ["e2"], "prompt": "Tek hamlede gerçek şah matı bul.", "hint": "Şahın kaçış, alma ve perdeleme seçeneklerinin hepsini kapat."}, {"pieces": [["w", "rook", "e2"], ["w", "king", "b5"], ["b", "king", "c8"], ["w", "rook", "h7"]], "from": "e2", "target": null, "answers": ["e8"], "prompt": "Tek hamlede gerçek şah matı bul.", "hint": "Şahın kaçış, alma ve perdeleme seçeneklerinin hepsini kapat."}, {"pieces": [["w", "queen", "h4"], ["w", "king", "c2"], ["b", "king", "a2"]], "from": "h4", "target": null, "answers": ["a4"], "prompt": "Tek hamlede gerçek şah matı bul.", "hint": "Şahın kaçış, alma ve perdeleme seçeneklerinin hepsini kapat."}, {"pieces": [["w", "queen", "f5"], ["w", "king", "c8"], ["b", "king", "a8"]], "from": "f5", "target": null, "answers": ["a5"], "prompt": "Tek hamlede gerçek şah matı bul.", "hint": "Şahın kaçış, alma ve perdeleme seçeneklerinin hepsini kapat."}, {"pieces": [["w", "queen", "f7"], ["w", "king", "f5"], ["b", "king", "h6"]], "from": "f7", "target": null, "answers": ["g6"], "prompt": "Tek hamlede gerçek şah matı bul.", "hint": "Şahın kaçış, alma ve perdeleme seçeneklerinin hepsini kapat."}, {"pieces": [["w", "queen", "b8"], ["w", "king", "b2"], ["b", "king", "a5"], ["w", "rook", "b4"]], "from": "b8", "target": null, "answers": ["b5", "b6"], "prompt": "Tek hamlede gerçek şah matı bul.", "hint": "Şahın kaçış, alma ve perdeleme seçeneklerinin hepsini kapat."}, {"pieces": [["w", "rook", "h5"], ["w", "king", "d2"], ["b", "king", "a7"], ["w", "rook", "b4"]], "from": "h5", "target": null, "answers": ["a5"], "prompt": "Tek hamlede gerçek şah matı bul.", "hint": "Şahın kaçış, alma ve perdeleme seçeneklerinin hepsini kapat."}, {"pieces": [["w", "queen", "g3"], ["w", "king", "b6"], ["b", "king", "a8"]], "from": "g3", "target": null, "answers": ["g8"], "prompt": "Tek hamlede gerçek şah matı bul.", "hint": "Şahın kaçış, alma ve perdeleme seçeneklerinin hepsini kapat."}, {"pieces": [["w", "queen", "g8"], ["w", "king", "b3"], ["b", "king", "b1"]], "from": "g8", "target": null, "answers": ["g1"], "prompt": "Tek hamlede gerçek şah matı bul.", "hint": "Şahın kaçış, alma ve perdeleme seçeneklerinin hepsini kapat."}]};
 const M2922_MATE_BASES={"ladder": {"name": "Merdiven Matı", "icon": "🪜", "pieces": [["w", "king", "e1"], ["w", "rook", "a1"], ["w", "rook", "b7"], ["b", "king", "h8"]], "from": "a1", "to": "a8", "desc": "İki kale sırayla hatları kapatır; son kale şahı kenarda mat eder."}, "backrank": {"name": "Arka Sıra Matı", "icon": "↩️", "pieces": [["w", "king", "g1"], ["w", "rook", "e1"], ["b", "king", "g8"], ["b", "pawn", "f7"], ["b", "pawn", "g7"], ["b", "pawn", "h7"]], "from": "e1", "to": "e8", "desc": "Şah kendi piyonlarının arkasında sıkışır; kale açık arka sıradan mat eder."}, "queenking": {"name": "Vezir + Şah Matı", "icon": "♕", "pieces": [["w", "king", "f6"], ["w", "queen", "g6"], ["b", "king", "h8"]], "from": "g6", "to": "g7", "desc": "Vezir, kendi şahının desteğiyle kaçış karelerini kapatır."}, "rookking": {"name": "Kale + Şah Matı", "icon": "♖", "pieces": [["w", "king", "g6"], ["w", "rook", "a1"], ["b", "king", "h8"]], "from": "a1", "to": "a8", "desc": "Şah kaçış karelerini tutar; kale son hattı kapatır."}, "tworooks": {"name": "İki Kale ile Mat", "icon": "♜", "pieces": [["w", "king", "e1"], ["w", "rook", "a1"], ["w", "rook", "b7"], ["b", "king", "h8"]], "from": "a1", "to": "a8", "desc": "Kaleler birbirini tamamlayarak şahın alanını basamak basamak daraltır."}, "smothered": {"name": "Boğmaca Matı", "icon": "♞", "pieces": [["w", "king", "e1"], ["w", "knight", "f5"], ["w", "bishop", "c3"], ["b", "king", "g8"], ["b", "rook", "f8"], ["b", "rook", "h8"], ["b", "pawn", "f7"], ["b", "pawn", "h7"]], "from": "f5", "to": "h6", "desc": "Şah kendi taşlarıyla çevrilidir; at L hamlesiyle mat eder."}, "arabian": {"name": "Arap Matı", "icon": "🌙", "pieces": [["w", "king", "e1"], ["w", "rook", "a7"], ["w", "knight", "f6"], ["b", "king", "h8"]], "from": "a7", "to": "h7", "desc": "At kaçış karelerini tutar ve kaleyi destekler; kale matı tamamlar."}, "anastasia": {"name": "Anastasia Matı", "icon": "✨", "pieces": [["w", "king", "e1"], ["w", "rook", "a3"], ["w", "knight", "e7"], ["b", "king", "h7"], ["b", "pawn", "g7"]], "from": "a3", "to": "h3", "desc": "At kritik kaçış karelerini kapatır; rakibin kendi piyonu alanı daraltır ve kale açık hattan mat eder."}, "epaulette": {"name": "Omuzluk Matı", "icon": "🎖️", "pieces": [["w", "king", "c6"], ["w", "queen", "e4"], ["w", "bishop", "b4"], ["b", "king", "e8"], ["b", "rook", "d8"], ["b", "rook", "f8"]], "from": "e4", "to": "e7", "desc": "Şahın iki yanındaki kendi taşları kaçışı kapatır; vezir önden mat eder."}, "shepherd": {"name": "Çoban Matı", "icon": "🐑", "pieces": [["w", "pawn", "a2"], ["b", "pawn", "a7"], ["w", "pawn", "b2"], ["b", "pawn", "b7"], ["w", "pawn", "c2"], ["b", "pawn", "c7"], ["w", "pawn", "d2"], ["b", "pawn", "d7"], ["w", "pawn", "e4"], ["b", "pawn", "e5"], ["w", "pawn", "f2"], ["b", "pawn", "f7"], ["w", "pawn", "g2"], ["b", "pawn", "g7"], ["w", "pawn", "h2"], ["b", "pawn", "h7"], ["w", "rook", "a1"], ["b", "rook", "a8"], ["w", "knight", "b1"], ["b", "knight", "c6"], ["w", "bishop", "c1"], ["b", "bishop", "c8"], ["w", "queen", "h5"], ["b", "queen", "d8"], ["w", "king", "e1"], ["b", "king", "e8"], ["w", "bishop", "c4"], ["b", "bishop", "f8"], ["w", "knight", "g1"], ["b", "knight", "f6"], ["w", "rook", "h1"], ["b", "rook", "h8"]], "from": "h5", "to": "f7", "desc": "Vezir ve fil birlikte f7 zayıflığına yönelir; savunulmazsa vezir f7’de mat eder."}};
 Object.assign(M2919_PUZZLES,{
@@ -2903,7 +2903,7 @@ const _m2922OldDemo=m2919MateDemo;
 m2919MateDemo=function(key){if(key==='shepherd')return _m2922OldDemo(key);const b=M2922_MATE_BASES[key];if(!b)return null;return {start:b.pieces.map(x=>x.slice()),moves:[[b.from,b.to,b.desc+' Şah mat! ⭐']]}};
 // mobilde tüm bu tahtalar tek ekrana sığar
 document.head.insertAdjacentHTML('beforeend',`<style id="m2922-style">.m2916-board{width:min(92vw,620px)!important;max-width:620px!important;aspect-ratio:1/1;height:auto!important;display:grid!important;grid-template-columns:repeat(8,1fr)!important;grid-template-rows:repeat(8,1fr)!important}.m2916-board .m262-sq{min-width:0!important;min-height:0!important;width:100%!important;height:100%!important;padding:0!important}@media(max-width:700px){.m2916-world{padding:4px!important}.m2916-card{padding:7px!important}.m2916-board{width:min(94vw,calc(100dvh - 185px))!important;min-width:280px}.chess-header{gap:5px!important}}</style>`);
-/* v2.9.29 • özgün mat varyasyonları ve Merdiven Matı adım adım öğretici */
+/* v2.9.30 • özgün mat varyasyonları ve Merdiven Matı adım adım öğretici */
 const _m2922VariantBase=m2922MateVariants;
 m2922MateVariants=function(key){
  const R=window.MinooChessRules,b=M2922_MATE_BASES[key];if(!b)return[];
@@ -2932,8 +2932,8 @@ m2919MateDemo=function(key){
  return _m2922DemoBase(key);
 };
 
-/* ===== Minoo v2.9.29 • Satranç denetim düzeltmeleri (04.10.2026) ===== */
-const MINOO_2923='v2.9.29';
+/* ===== Minoo v2.9.30 • Satranç denetim düzeltmeleri (04.10.2026) ===== */
+const MINOO_2923='v2.9.30';
 const M2923_CIGDEM=Object.freeze(Array.from({length:36},(_,i)=>`/audio/minoo_satranc_${String(i+1).padStart(2,'0')}.mp3`));
 let m2923Audio=null;
 function m2923StopVoice(){try{speechSynthesis?.cancel?.()}catch(e){};try{m2923Audio?.pause?.()}catch(e){}}
@@ -3009,7 +3009,7 @@ document.head.insertAdjacentHTML('beforeend',`<style id="m2923-style">
 </style>`);
 
 
-/* ===== Minoo v2.9.29 STABLE • güvenli geri bildirim sesleri ===== */
+/* ===== Minoo v2.9.30 STABLE • güvenli geri bildirim sesleri ===== */
 let m2924FxCtx=null;
 function m2924FeedbackSound(kind){
  try{
@@ -3028,7 +3028,7 @@ function m2924FeedbackSound(kind){
  }catch(e){}
 }
 
-/* ===== Minoo v2.9.29 • Çiğdem doğrudan MP3 bağlantısı ===== */
+/* ===== Minoo v2.9.30 • Çiğdem doğrudan MP3 bağlantısı ===== */
 (function(){
   const CG_BASE='audio/';
   let cgAudio=null;
@@ -3097,7 +3097,7 @@ function m2924FeedbackSound(kind){
     if(stampBusy)return; stampBusy=true;
     try{document.querySelectorAll('small,.version,[class*="version"]').forEach(el=>{
       const cur=el.textContent||'';
-      if(/v?2\.9\.[0-9]+/i.test(cur)){const next=cur.replace(/v?2\.9\.\d+/i,'v2.9.29');if(next!==cur)el.textContent=next}
+      if(/v?2\.9\.[0-9]+/i.test(cur)){const next=cur.replace(/v?2\.9\.\d+/i,'v2.9.30');if(next!==cur)el.textContent=next}
     })}finally{stampBusy=false}
   };
   const versionObserver=new MutationObserver(()=>stamp());
@@ -3105,7 +3105,7 @@ function m2924FeedbackSound(kind){
   setTimeout(stamp,0);
 })();
 
-/* ===== v2.9.29 • Satranç Taşlarının İsimleri • kısa Minoo sesleri ===== */
+/* ===== v2.9.30 • Satranç Taşlarının İsimleri • kısa Minoo sesleri ===== */
 (()=>{
   const NAME_AUDIO=Object.freeze({
     'Şah':'/audio/minoo-voice/chess/02_sah.mp3',
@@ -3141,7 +3141,7 @@ function m2924FeedbackSound(kind){
 })();
 
 
-/* ===== Minoo v2.9.29 • iki satranç oyunu için gerçek Minoo sesleri ===== */
+/* ===== Minoo v2.9.30 • iki satranç oyunu için gerçek Minoo sesleri ===== */
 const V295_MATCH_Q=['eslestir_sah.mp3','eslestir_vezir.mp3','eslestir_kale.mp3','eslestir_fil.mp3','eslestir_at.mp3','eslestir_piyon.mp3'];
 const V295_MATCH_OK=['eslestir_dogru1.mp3','eslestir_dogru2.mp3','eslestir_dogru3.mp3'];
 const V295_MATCH_BAD=['eslestir_yanlis1.mp3','eslestir_yanlis2.mp3'];
@@ -3211,7 +3211,7 @@ v261CheckCount=async function(){
 
 
 
-/* ===== Minoo v2.9.29 • dört satranç oyunu ses düzeltmesi ===== */
+/* ===== Minoo v2.9.30 • dört satranç oyunu ses düzeltmesi ===== */
 let m296Audio=null;
 function m296Play(file,onended){
  try{
@@ -3248,8 +3248,8 @@ m262FixCheck=function(){
 };
 
 
-/* ===== Minoo v2.9.29 • tek ses yöneticisi + dört oyun ses akışı ===== */
-const MINOO_297='v2.9.29';
+/* ===== Minoo v2.9.30 • tek ses yöneticisi + dört oyun ses akışı ===== */
+const MINOO_297='v2.9.30';
 let m297Audio=null, m297Token=0;
 function m297StopAll(){
   m297Token++;
@@ -3323,8 +3323,8 @@ chessDirectionsGame=function(g){m297StopAll();window._v261=null;window._m262fix=
 const _m297FixGame=chessFixGame;
 chessFixGame=function(g){m297StopAll();window._v261=null;window._m262dir=null;return _m297FixGame(g)};
 
-/* ===== Minoo v2.9.29 • öğretici sesler + yön çizme + gerçek hata bulma ===== */
-const MINOO_298='v2.9.29';
+/* ===== Minoo v2.9.30 • öğretici sesler + yön çizme + gerçek hata bulma ===== */
+const MINOO_298='v2.9.30';
 const M298_PIECE_AUDIO={
  rook:{hareket:'kale28_hareket.mp3',alma:'kale28_alma.mp3',gorev:'kale28_gorev.mp3'},
  knight:{hareket:'at28_hareket.mp3',alma:'at28_alma.mp3',gorev:'at28_gorev.mp3'},
@@ -3390,8 +3390,8 @@ const _playGame298=playGame;
 playGame=function(g){if(['rook_capture','bishop_capture','queen_capture','knight_capture','king_capture','pawn_capture','chess_fix','chess_directions'].includes(g.game_type))m297StopAll();return _playGame298(g)};
 
 
-/* ===== Minoo v2.9.29 • öğretici/alıştırma akışı ve geri bildirim düzeltmesi ===== */
-const MINOO_299='v2.9.29';
+/* ===== Minoo v2.9.30 • öğretici/alıştırma akışı ve geri bildirim düzeltmesi ===== */
+const MINOO_299='v2.9.30';
 const M299_FEEDBACK={ok:'14_dogru_1.mp3',bad:'17_yanlis_1.mp3'};
 function m299Play(file,done){return m297Play(file,done)}
 
@@ -3448,3 +3448,82 @@ m299CaptureTeach=function(type){if(type!=='pawn')return _m299CaptureTeach(type);
 /* Bu sürümde bu oyunlara girişte önceki tüm sesleri kesin. */
 const _playGame299=playGame;
 playGame=function(g){if(['rook_capture','bishop_capture','queen_capture','knight_capture','king_capture','pawn_capture','chess_fix','chess_directions'].includes(g.game_type))m297StopAll();return _playGame299(g)};
+
+
+/* ===== Minoo v2.9.30 • taş öğreticilerinde ses izolasyonu + kontrol geri bildirimi ===== */
+const MINOO_300='v2.9.30';
+function m300PieceLessonActive(){
+ return !!(window._m263piece||window._m262rook);
+}
+// Eski taktik/öğretici TTS'leri bu altı taşın dersine kesinlikle sızmasın.
+const _m300SpeakBase=minooSpeak;
+minooSpeak=function(text,opts={}){
+ if(m300PieceLessonActive())return;
+ return _m300SpeakBase(text,opts);
+};
+if(typeof m271Speak==='function'){
+ const _m300m271=m271Speak;
+ m271Speak=function(text,lang){if(m300PieceLessonActive())return;return _m300m271(text,lang)};
+}
+if(typeof m270SpeakTR==='function'){
+ const _m300m270=m270SpeakTR;
+ m270SpeakTR=function(text){if(m300PieceLessonActive())return;return _m300m270(text)};
+}
+// Eski gecikmeli konuşmalar çalışsa bile ders açılırken ve her aşama geçişinde iptal et.
+function m300LessonStop(){
+ try{speechSynthesis?.cancel?.()}catch(e){}
+ try{m297StopAll()}catch(e){}
+}
+const _m300PieceMove=m299PieceMove;
+m299PieceMove=function(){m300LessonStop();return _m300PieceMove()};
+const _m300CaptureTeach=m299CaptureTeach;
+m299CaptureTeach=function(type){m300LessonStop();return _m300CaptureTeach(type)};
+const _m300StartPieceQuiz=m299StartPieceQuiz;
+m299StartPieceQuiz=function(){m300LessonStop();return _m300StartPieceQuiz()};
+const _m300RookMove=m299RookMove;
+m299RookMove=function(){m300LessonStop();return _m300RookMove()};
+const _m300RookTeach=m299RookCaptureTeach;
+m299RookCaptureTeach=function(){m300LessonStop();return _m300RookTeach()};
+const _m300StartRook=m299StartRookQuiz;
+m299StartRookQuiz=function(){m300LessonStop();return _m300StartRook()};
+
+// Kontrol Et: altı taşın tamamında tek ve güvenilir sesli sonuç.
+function m300CheckState(s,selector){
+ let wrong=false,missing=false;
+ (s.targets||[]).forEach(t=>{
+   const q=document.querySelector(`${selector} [data-key="${t.k}"]`),sel=s.selected.has(t.k);
+   if(sel&&!t.reachable){wrong=true;q?.classList.add('m262-wrong')}
+   if(!sel&&t.reachable){missing=true;q?.classList.add('m262-wrong')}
+ });
+ return {wrong,missing,ok:!wrong&&!missing};
+}
+m263PieceCheck=function(){
+ const s=window._m263piece;if(!s)return;
+ m300LessonStop();const r=m300CheckState(s,'.m263-quiz');
+ if(!r.ok){
+   const msg=r.wrong?'Hmm, bu taşı tek hamlede alamazsın. Bir daha dikkatlice bakalım.':'Çok yaklaştın! Alabileceğin başka bir taş daha var. Tekrar bak.';
+   m299Play('17_yanlis_1.mp3');
+   return modal(`<h2>Bir daha bakalım 🌱</h2><p>${msg}</p><div class="modal-actions"><button onclick="closeModal()">Yeniden Dene</button></div>`);
+ }
+ m299Play('14_dogru_1.mp3',()=>{
+   if(s.round<4){s.round++;m263PieceQuiz()}
+   else modal(`<h2>Aferin! 🎉</h2><p>${M263_PIECES[s.type].name} oyununu tamamladın.</p><div class="modal-actions"><button onclick="closeModal();m262Home()">Ana Sayfa</button></div>`)
+ });
+};
+m262RookCheck=function(){
+ const s=window._m262rook;if(!s)return;
+ m300LessonStop();const r=m300CheckState(s,'.rook-quiz');
+ if(!r.ok){
+   const msg=r.wrong?'Hmm, bu taşı tek hamlede alamazsın. Bir daha dikkatlice bakalım.':'Çok yaklaştın! Alabileceğin başka bir taş daha var. Tekrar bak.';
+   m299Play('17_yanlis_1.mp3');
+   return modal(`<h2>Bir daha bakalım 🌱</h2><p>${msg}</p><div class="modal-actions"><button onclick="closeModal()">Yeniden Dene</button></div>`);
+ }
+ m299Play('14_dogru_1.mp3',()=>{
+   if(s.round<4){s.round++;m262RookQuiz()}
+   else modal(`<h2>Aferin! 🎉</h2><p>Kalenin hareketini ve tek hamlede taş almasını tamamladın.</p><div class="modal-actions"><button onclick="closeModal();m262Home()">Ana Sayfa</button></div>`)
+ });
+};
+
+// Taş öğreticilerinden çıkıldığında eski durumları temizle; sonraki oyuna ses taşınmasın.
+const _m300Home=m262Home;
+m262Home=function(){m300LessonStop();window._m263piece=null;window._m262rook=null;return _m300Home()};
