@@ -2099,11 +2099,15 @@ function m280ChooseLevel(){
  document.querySelectorAll('.m272-level-grid button').forEach((b,i)=>b.setAttribute('onclick',`m280New(${i+1})`));
 }
 function m280Render(){
+ // Keep the existing mobile layout mounted during moves. Replacing the entire
+ // app node causes mobile browsers to re-anchor the viewport on every tap.
+ const previousBoard=document.querySelector('#m280board');
+ const updateExisting=!!(previousBoard&&app.querySelector('.m296-shell'));
  const legal=m280.turn==='w'&&!m280.thinking?m280Legal(m280,'w'):[];
  const inCheck=m280Check(m280,m280.turn);
  let msg=m280.thinking?'Bilgisayar düşünüyor…':m280.turn==='w'?(inCheck?'Şah çekildi! Şahını koru.':'Sıra sende'):'Bilgisayarın sırası';
  const pieceSvg=p=>minooPieceSvg(v261Type(M280_NAME[p.t]),p.c==='w'?'white':'black');
- app.innerHTML=`<main class="m296-shell">
+ const html=`<main class="m296-shell">
  <nav class="m296-topnav"><div class="m296-brand">Minoo<small>Oyna • Keşfet • Öğren</small></div><button onclick="dashboard?.()">🏠 Sınıflar</button><button class="active" onclick="m262Home()">🎮 Oyunlar</button><button onclick="timerTool()">🔧 Araçlar</button><button onclick="typeof atelierHome==='function'?atelierHome():m262Home()">🎨 Oyun Atölyesi</button></nav>
  <section class="m296-layout">
   <aside class="m296-side"><button onclick="m262Home()">← Oyunlara Dön</button><button class="active" onclick="m280ChooseLevel()">▦ <span>Bilgisayara<br>Karşı Oyna</span></button><button onclick="m296OpenChessType('chess_intro')">♞ <span>Taşları<br>Tanıyalım</span></button><button onclick="m296OpenChessLearning()">🎯 <span>Hamleleri<br>Öğrenelim</span></button><button onclick="m296OpenDirections()">🧭 <span>Yön Etkinliği</span></button></aside>
@@ -2116,6 +2120,16 @@ function m280Render(){
    <div class="m296-mini"><button onclick="m296Hint()">💡 İpucu Ver</button><button onclick="m271VoiceToggle();m280Render()">⚙️ ${window.m271VoiceOn?'Ses Açık':'Ses Kapalı'}</button></div><button class="m296-level" onclick="m280ChooseLevel()">▥ Seviye Değiştir</button>
   </aside>
  </section></main>`;
+ if(updateExisting){
+  const temp=document.createElement('template');temp.innerHTML=html;
+  const nextBoard=temp.content.querySelector('#m280board');
+  const currentBoard=app.querySelector('#m280board');
+  // Update squares without removing the board or the surrounding layout.
+  currentBoard.innerHTML=nextBoard.innerHTML;
+  const nextTurn=temp.content.querySelector('.m296-turn');
+  const currentTurn=app.querySelector('.m296-turn');
+  if(currentTurn&&nextTurn)currentTurn.innerHTML=nextTurn.innerHTML;
+ }else app.innerHTML=html;
  if(m280.level===1&&m280.selected)m280DrawArrows();
 }
 async function m299ChessGames(){
