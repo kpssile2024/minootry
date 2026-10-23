@@ -3586,15 +3586,8 @@ function m301AttachInstruction(state,selector){
     b.onclick=()=>m297Speak(m301Instruction());
     header.appendChild(b);
   }
-  if(state.round===0&&!state._m301InstructionPlayed){
-    state._m301InstructionPlayed=true;
-    setTimeout(()=>{
-      if((selector==='.rook-quiz'&&window._m262rook===state)||
-         (selector==='.m263-quiz'&&window._m263piece===state)){
-        if(document.querySelector(selector))m297Speak(m301Instruction());
-      }
-    },300);
-  }
+  // Başlangıç yönergesi mevcut oyun akışında çalıyor; burada otomatik tekrar başlatma.
+
 }
 const _m301PieceQuiz=m263PieceQuiz;
 m263PieceQuiz=function(){
