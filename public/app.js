@@ -3442,13 +3442,13 @@ function m299PieceMove(){
  app.innerHTML=`<header class="chess-header"><button class="ghost" onclick="m262Home()">⌂</button><b>${c.title}</b><span>Hareket Öğreticisi</span><button class="ghost" onclick="m299Play('${a.hareket}')">🔊</button></header><main class="m262-game"><div class="v261-instruction">${c.name} nasıl hareket eder?</div><div class="m262-dirwrap">${m262Board(board,'m263-piece-board')}<svg class="m262-overlay"></svg></div><div class="v261-actions"><button onclick="window._m263piece.phase='captureTeach';m299CaptureTeach('${s.type}')">Taş Almayı Öğren →</button></div></main>`;
  setTimeout(()=>m299DrawLines(pos,m299MoveEnds(s.type,pos)),80);setTimeout(()=>m299Play(a.hareket),150)
 }
-function m299StartPieceQuiz(){const s=window._m263piece,a=M298_PIECE_AUDIO[s.type];m297StopAll();s.phase='quiz';s.round=0;m263PieceQuiz();setTimeout(()=>m299Play(a.gorev),150)}
+function m299StartPieceQuiz(){const s=window._m263piece,a=M298_PIECE_AUDIO[s.type];m297StopAll();s.phase='quiz';s.round=0;m263PieceQuiz()}
 pieceLearnGame=function(g,type){m297StopAll();window._m263piece={g,type,phase:'move',slide:0,round:0,selected:new Set()};m299PieceMove()};
 
 /* Kale de aynı üç aşamalı yapıyı kullanır. */
 function m299RookMove(){const s=window._m262rook,pos='d4',board={[pos]:m262Piece('Kale',false)};app.innerHTML=`<header class="chess-header"><button class="ghost" onclick="m262Home()">⌂</button><b>♜ Kalenin Hareketi ve Taş Alması</b><span>Hareket Öğreticisi</span><button class="ghost" onclick="m299Play('kale28_hareket.mp3')">🔊</button></header><main class="m262-game"><div class="v261-instruction">Kale nasıl hareket eder?</div><div class="m262-dirwrap">${m262Board(board,'rook-board')}<svg class="m262-overlay"></svg></div><div class="v261-actions"><button onclick="m299RookCaptureTeach()">Taş Almayı Öğren →</button></div></main>`;setTimeout(()=>m262RookArrows(pos),80);setTimeout(()=>m299Play('kale28_hareket.mp3'),150)}
 function m299RookCaptureTeach(){const pos='d4',board={[pos]:m262Piece('Kale',false)},show=['d7','g4','a4'];show.forEach(k=>board[k]=m262Piece('Piyon',true));app.innerHTML=`<header class="chess-header"><button class="ghost" onclick="m262Home()">⌂</button><b>♜ Kalenin Hareketi ve Taş Alması</b><span>Taş Alma Öğreticisi</span><button class="ghost" onclick="m299Play('kale28_alma.mp3')">🔊</button></header><main class="m262-game"><div class="v261-instruction">Kale rakip taşı nasıl alır?</div><div class="m262-dirwrap">${m262Board(board,'rook-board')}<svg class="m262-overlay"></svg></div><div class="v261-actions"><button class="retry" onclick="m299RookMove()">← Geri</button><button onclick="m299StartRookQuiz()">Alıştırmaya Geç →</button></div></main>`;setTimeout(()=>m299DrawLines(pos,show,'capture-arrow'),80);setTimeout(()=>m299Play('kale28_alma.mp3'),150)}
-function m299StartRookQuiz(){const s=window._m262rook;m297StopAll();s.phase='quiz';s.round=0;m262RookQuiz();setTimeout(()=>m299Play('kale28_gorev.mp3'),150)}
+function m299StartRookQuiz(){const s=window._m262rook;m297StopAll();s.phase='quiz';s.round=0;m262RookQuiz()}
 rookCaptureGame=function(g){m297StopAll();window._m262rook={g,phase:'move',slide:0,round:0,selected:new Set()};m299RookMove()};
 
 /* Tüm taş alma alıştırmalarında doğru/yanlış sesli geri bildirim. */
@@ -3566,4 +3566,45 @@ const _m301Circle=m263Circle;
 m263Circle=function(el,set,key){
  document.querySelectorAll('.m263-quiz .m262-sq,.rook-quiz .m262-sq').forEach(q=>q.classList.remove('m301-correct','m301-incorrect','m301-missed'));
  return _m301Circle(el,set,key);
+};
+
+
+/* v2.9.31 TEST — ilk alıştırma yönergesini geri getir.
+   Kale, at, fil, vezir, şah ve piyon için aynı davranış.
+   Yönerge ilk turda bir kez okunur; sonraki hamlelerde tekrar etmez.
+   Çocuk isterse ses düğmesinden yeniden dinler. */
+function m301Instruction(){
+  return 'Bu taşı hangi yöne hareket ettirebilirsin? Tek hamlede alabileceği meyveleri veya rakip taşları bul ve çember içine al.';
+}
+function m301AttachInstruction(state,selector){
+  if(!state)return;
+  const header=document.querySelector('.chess-header');
+  if(header&&!header.querySelector('.m301-replay')){
+    const b=document.createElement('button');
+    b.type='button';b.className='ghost m301-replay';
+    b.textContent='🔊 Yönergeyi Dinle';
+    b.onclick=()=>m297Speak(m301Instruction());
+    header.appendChild(b);
+  }
+  if(state.round===0&&!state._m301InstructionPlayed){
+    state._m301InstructionPlayed=true;
+    setTimeout(()=>{
+      if((selector==='.rook-quiz'&&window._m262rook===state)||
+         (selector==='.m263-quiz'&&window._m263piece===state)){
+        if(document.querySelector(selector))m297Speak(m301Instruction());
+      }
+    },300);
+  }
+}
+const _m301PieceQuiz=m263PieceQuiz;
+m263PieceQuiz=function(){
+  const result=_m301PieceQuiz();
+  m301AttachInstruction(window._m263piece,'.m263-quiz');
+  return result;
+};
+const _m301RookQuiz=m262RookQuiz;
+m262RookQuiz=function(){
+  const result=_m301RookQuiz();
+  m301AttachInstruction(window._m262rook,'.rook-quiz');
+  return result;
 };
