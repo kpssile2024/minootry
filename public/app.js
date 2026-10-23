@@ -3442,13 +3442,13 @@ function m299PieceMove(){
  app.innerHTML=`<header class="chess-header"><button class="ghost" onclick="m262Home()">⌂</button><b>${c.title}</b><span>Hareket Öğreticisi</span><button class="ghost" onclick="m299Play('${a.hareket}')">🔊</button></header><main class="m262-game"><div class="v261-instruction">${c.name} nasıl hareket eder?</div><div class="m262-dirwrap">${m262Board(board,'m263-piece-board')}<svg class="m262-overlay"></svg></div><div class="v261-actions"><button onclick="window._m263piece.phase='captureTeach';m299CaptureTeach('${s.type}')">Taş Almayı Öğren →</button></div></main>`;
  setTimeout(()=>m299DrawLines(pos,m299MoveEnds(s.type,pos)),80);setTimeout(()=>m299Play(a.hareket),150)
 }
-function m299StartPieceQuiz(){const s=window._m263piece,a=M298_PIECE_AUDIO[s.type];m297StopAll();s.phase='quiz';s.round=0;m263PieceQuiz()}
+function m299StartPieceQuiz(){const s=window._m263piece,a=M298_PIECE_AUDIO[s.type];m297StopAll();s.phase='quiz';s.round=0;m263PieceQuiz();setTimeout(()=>m299Play(a.gorev),150)}
 pieceLearnGame=function(g,type){m297StopAll();window._m263piece={g,type,phase:'move',slide:0,round:0,selected:new Set()};m299PieceMove()};
 
 /* Kale de aynı üç aşamalı yapıyı kullanır. */
 function m299RookMove(){const s=window._m262rook,pos='d4',board={[pos]:m262Piece('Kale',false)};app.innerHTML=`<header class="chess-header"><button class="ghost" onclick="m262Home()">⌂</button><b>♜ Kalenin Hareketi ve Taş Alması</b><span>Hareket Öğreticisi</span><button class="ghost" onclick="m299Play('kale28_hareket.mp3')">🔊</button></header><main class="m262-game"><div class="v261-instruction">Kale nasıl hareket eder?</div><div class="m262-dirwrap">${m262Board(board,'rook-board')}<svg class="m262-overlay"></svg></div><div class="v261-actions"><button onclick="m299RookCaptureTeach()">Taş Almayı Öğren →</button></div></main>`;setTimeout(()=>m262RookArrows(pos),80);setTimeout(()=>m299Play('kale28_hareket.mp3'),150)}
 function m299RookCaptureTeach(){const pos='d4',board={[pos]:m262Piece('Kale',false)},show=['d7','g4','a4'];show.forEach(k=>board[k]=m262Piece('Piyon',true));app.innerHTML=`<header class="chess-header"><button class="ghost" onclick="m262Home()">⌂</button><b>♜ Kalenin Hareketi ve Taş Alması</b><span>Taş Alma Öğreticisi</span><button class="ghost" onclick="m299Play('kale28_alma.mp3')">🔊</button></header><main class="m262-game"><div class="v261-instruction">Kale rakip taşı nasıl alır?</div><div class="m262-dirwrap">${m262Board(board,'rook-board')}<svg class="m262-overlay"></svg></div><div class="v261-actions"><button class="retry" onclick="m299RookMove()">← Geri</button><button onclick="m299StartRookQuiz()">Alıştırmaya Geç →</button></div></main>`;setTimeout(()=>m299DrawLines(pos,show,'capture-arrow'),80);setTimeout(()=>m299Play('kale28_alma.mp3'),150)}
-function m299StartRookQuiz(){const s=window._m262rook;m297StopAll();s.phase='quiz';s.round=0;m262RookQuiz()}
+function m299StartRookQuiz(){const s=window._m262rook;m297StopAll();s.phase='quiz';s.round=0;m262RookQuiz();setTimeout(()=>m299Play('kale28_gorev.mp3'),150)}
 rookCaptureGame=function(g){m297StopAll();window._m262rook={g,phase:'move',slide:0,round:0,selected:new Set()};m299RookMove()};
 
 /* Tüm taş alma alıştırmalarında doğru/yanlış sesli geri bildirim. */
@@ -3502,34 +3502,15 @@ const _m300StartRook=m299StartRookQuiz;
 m299StartRookQuiz=function(){m300LessonStop();return _m300StartRook()};
 
 // Kontrol Et: altı taşın tamamında tek ve güvenilir sesli sonuç.
-/* v3 test: çocukların seçimlerini kare üstünde anlaşılır simgelerle göster. */
-document.head.insertAdjacentHTML('beforeend', `<style>
-.m262-sq.m301-correct,.m262-sq.m301-incorrect,.m262-sq.m301-missed{position:relative!important}
-.m262-sq.m301-correct{box-shadow:inset 0 0 0 4px #18a34a!important}
-.m262-sq.m301-incorrect{box-shadow:inset 0 0 0 4px #e63946!important}
-.m262-sq.m301-missed{box-shadow:inset 0 0 0 4px #f5b942!important}
-.m262-sq.m301-correct::before,.m262-sq.m301-incorrect::before,.m262-sq.m301-missed::before{
- position:absolute;top:2px;right:2px;z-index:25;display:grid;place-items:center;
- width:25px;height:25px;border-radius:50%;font:bold 19px/1 system-ui;color:white;
- border:2px solid white;pointer-events:none;box-shadow:0 2px 5px #0004;
-}
-.m262-sq.m301-correct::before{content:'✓';background:#18a34a}
-.m262-sq.m301-incorrect::before{content:'✕';background:#e63946}
-.m262-sq.m301-missed::before{content:'!';background:#e9a323}
-</style>`);
 function m300CheckState(s,selector){
  let wrong=false,missing=false;
  (s.targets||[]).forEach(t=>{
-   const q=document.querySelector(`${selector} [data-key="${t.k}"]`);
-   const sel=s.selected.has(t.k);
-   q?.classList.remove('m262-wrong','m301-correct','m301-incorrect','m301-missed');
-   if(sel&&t.reachable)q?.classList.add('m301-correct');
-   else if(sel&&!t.reachable){wrong=true;q?.classList.add('m301-incorrect')}
-   else if(!sel&&t.reachable){missing=true;q?.classList.add('m301-missed')}
+   const q=document.querySelector(`${selector} [data-key="${t.k}"]`),sel=s.selected.has(t.k);
+   if(sel&&!t.reachable){wrong=true;q?.classList.add('m262-wrong')}
+   if(!sel&&t.reachable){missing=true;q?.classList.add('m262-wrong')}
  });
  return {wrong,missing,ok:!wrong&&!missing};
 }
-
 m263PieceCheck=function(){
  const s=window._m263piece;if(!s)return;
  m300LessonStop();const r=m300CheckState(s,'.m263-quiz');
@@ -3561,43 +3542,13 @@ m262RookCheck=function(){
 const _m300Home=m262Home;
 m262Home=function(){m300LessonStop();window._m263piece=null;window._m262rook=null;return _m300Home()};
 
-/* Çocuk yeniden seçim yaptığında eski kontrol simgeleri temizlenir. */
-const _m301Circle=m263Circle;
-m263Circle=function(el,set,key){
- document.querySelectorAll('.m263-quiz .m262-sq,.rook-quiz .m262-sq').forEach(q=>q.classList.remove('m301-correct','m301-incorrect','m301-missed'));
- return _m301Circle(el,set,key);
-};
-
-
-/* v2.9.31 TEST — ilk alıştırma yönergesini geri getir.
-   Kale, at, fil, vezir, şah ve piyon için aynı davranış.
-   Yönerge ilk turda bir kez okunur; sonraki hamlelerde tekrar etmez.
-   Çocuk isterse ses düğmesinden yeniden dinler. */
-function m301Instruction(){
-  return 'Bu taşı hangi yöne hareket ettirebilirsin? Tek hamlede alabileceği meyveleri veya rakip taşları bul ve çember içine al.';
-}
-function m301AttachInstruction(state,selector){
-  if(!state)return;
-  const header=document.querySelector('.chess-header');
-  if(header&&!header.querySelector('.m301-replay')){
-    const b=document.createElement('button');
-    b.type='button';b.className='ghost m301-replay';
-    b.textContent='🔊 Yönergeyi Dinle';
-    b.onclick=()=>m297Speak(m301Instruction());
-    header.appendChild(b);
-  }
-  // Başlangıç yönergesi mevcut oyun akışında çalıyor; burada otomatik tekrar başlatma.
-
-}
-const _m301PieceQuiz=m263PieceQuiz;
-m263PieceQuiz=function(){
-  const result=_m301PieceQuiz();
-  m301AttachInstruction(window._m263piece,'.m263-quiz');
-  return result;
-};
-const _m301RookQuiz=m262RookQuiz;
-m262RookQuiz=function(){
-  const result=_m301RookQuiz();
-  m301AttachInstruction(window._m262rook,'.rook-quiz');
-  return result;
+/* v2.9.31 • Satranç Oynayalım: ilk taş seçiminde giriş sesinin tekrarını önle.
+   Genel ses eşleyicisi tanınmayan her cümleyi 09 numaralı klibe yönlendiriyordu.
+   Yalnızca gerçek satranç ekranında, taş seçimi açıklamasını bu eşleyiciye gönderme. */
+const _m301ChessSpeak = m271Speak;
+m271Speak = function(text,lang='tr-TR') {
+  const isRealChess = !!document.querySelector('.m280-main');
+  const isPieceSelection = /yasal hamle var|taşını deneyebilirsin/i.test(String(text));
+  if (isRealChess && isPieceSelection) return;
+  return _m301ChessSpeak(text,lang);
 };
