@@ -3502,15 +3502,34 @@ const _m300StartRook=m299StartRookQuiz;
 m299StartRookQuiz=function(){m300LessonStop();return _m300StartRook()};
 
 // Kontrol Et: altı taşın tamamında tek ve güvenilir sesli sonuç.
+/* v3 test: çocukların seçimlerini kare üstünde anlaşılır simgelerle göster. */
+document.head.insertAdjacentHTML('beforeend', `<style>
+.m262-sq.m301-correct,.m262-sq.m301-incorrect,.m262-sq.m301-missed{position:relative!important}
+.m262-sq.m301-correct{box-shadow:inset 0 0 0 4px #18a34a!important}
+.m262-sq.m301-incorrect{box-shadow:inset 0 0 0 4px #e63946!important}
+.m262-sq.m301-missed{box-shadow:inset 0 0 0 4px #f5b942!important}
+.m262-sq.m301-correct::before,.m262-sq.m301-incorrect::before,.m262-sq.m301-missed::before{
+ position:absolute;top:2px;right:2px;z-index:25;display:grid;place-items:center;
+ width:25px;height:25px;border-radius:50%;font:bold 19px/1 system-ui;color:white;
+ border:2px solid white;pointer-events:none;box-shadow:0 2px 5px #0004;
+}
+.m262-sq.m301-correct::before{content:'✓';background:#18a34a}
+.m262-sq.m301-incorrect::before{content:'✕';background:#e63946}
+.m262-sq.m301-missed::before{content:'!';background:#e9a323}
+</style>`);
 function m300CheckState(s,selector){
  let wrong=false,missing=false;
  (s.targets||[]).forEach(t=>{
-   const q=document.querySelector(`${selector} [data-key="${t.k}"]`),sel=s.selected.has(t.k);
-   if(sel&&!t.reachable){wrong=true;q?.classList.add('m262-wrong')}
-   if(!sel&&t.reachable){missing=true;q?.classList.add('m262-wrong')}
+   const q=document.querySelector(`${selector} [data-key="${t.k}"]`);
+   const sel=s.selected.has(t.k);
+   q?.classList.remove('m262-wrong','m301-correct','m301-incorrect','m301-missed');
+   if(sel&&t.reachable)q?.classList.add('m301-correct');
+   else if(sel&&!t.reachable){wrong=true;q?.classList.add('m301-incorrect')}
+   else if(!sel&&t.reachable){missing=true;q?.classList.add('m301-missed')}
  });
  return {wrong,missing,ok:!wrong&&!missing};
 }
+
 m263PieceCheck=function(){
  const s=window._m263piece;if(!s)return;
  m300LessonStop();const r=m300CheckState(s,'.m263-quiz');
@@ -3541,3 +3560,10 @@ m262RookCheck=function(){
 // Taş öğreticilerinden çıkıldığında eski durumları temizle; sonraki oyuna ses taşınmasın.
 const _m300Home=m262Home;
 m262Home=function(){m300LessonStop();window._m263piece=null;window._m262rook=null;return _m300Home()};
+
+/* Çocuk yeniden seçim yaptığında eski kontrol simgeleri temizlenir. */
+const _m301Circle=m263Circle;
+m263Circle=function(el,set,key){
+ document.querySelectorAll('.m263-quiz .m262-sq,.rook-quiz .m262-sq').forEach(q=>q.classList.remove('m301-correct','m301-incorrect','m301-missed'));
+ return _m301Circle(el,set,key);
+};
