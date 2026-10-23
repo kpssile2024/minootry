@@ -164,6 +164,34 @@ async function api(req,res,url){
   if(m&&req.method==='GET'){if(!needTeacher(req,res))return;const sid=Number(m[1]);const r=usePostgres?await q(`SELECT ga.*,g.title,g.game_type,g.game_data FROM game_attempts ga JOIN assignments a ON a.id=ga.assignment_id JOIN games g ON g.id=a.game_id WHERE a.student_id=$1 ORDER BY ga.id DESC`,[sid]):await q('',[sid],`SELECT ga.*,g.title,g.game_type,g.game_data FROM game_attempts ga JOIN assignments a ON a.id=ga.assignment_id JOIN games g ON g.id=a.game_id WHERE a.student_id=? ORDER BY ga.id DESC`);return json(res,200,r)}
   m=url.pathname.match(/^\/api\/assignments\/(\d+)\/complete$/);
   if(m&&req.method==='POST'){const aid=Number(m[1]),code=String(req.headers['x-student-code']||'').toUpperCase();const a=usePostgres?await one(`SELECT a.id FROM assignments a JOIN students s ON s.id=a.student_id WHERE a.id=$1 AND s.code=$2`,[aid,code]):await one('',[aid,code],`SELECT a.id FROM assignments a JOIN students s ON s.id=a.student_id WHERE a.id=? AND s.code=?`);if(!a)return json(res,401,{error:'Yetkisiz'});await run(usePostgres?'UPDATE assignments SET completed_at=COALESCE(completed_at,NOW()) WHERE id=$1':'',[aid],"UPDATE assignments SET completed_at=COALESCE(completed_at,datetime('now')) WHERE id=?");return json(res,200,{ok:true})}
+   // Bilgisayara karşı satranç: öğrencinin bitirdiği maçları kaydet ve görüntüle.
+   m=url.pathname.match(/^\/api\/student\/(\d+)\/computer-chess-history$/);
+   if(m&&req.method==='GET'){
+    const sid=Number(m[1]),code=String(req.headers['x-student-code']||'').toUpperCase();
+    const me=usePostgres?await one('SELECT id FROM students WHERE id=$1 AND code=$2',[sid,code]):await one('',[sid,code],'SELECT id FROM students WHERE id=? AND code=?');
+    if(!me)return json(res,401,{error:'Geçersiz öğrenci erişimi'});
+    const rows=usePostgres?await q('SELECT id,level,result,move_count,created_at FROM computer_chess_matches WHERE student_id=$1 ORDER BY id DESC LIMIT 100',[sid]):await q('',[sid],'SELECT id,level,result,move_count,created_at FROM computer_chess_matches WHERE student_id=? ORDER BY id DESC LIMIT 100');
+    return json(res,200,rows);
+   }
+   if(m&&req.method==='POST'){
+    const sid=Number(m[1]),code=String(req.headers['x-student-code']||'').toUpperCase(),b=await body(req);
+    const me=usePostgres?await one('SELECT id FROM students WHERE id=$1 AND code=$2',[sid,code]):await one('',[sid,code],'SELECT id FROM students WHERE id=? AND code=?');
+    if(!me)return json(res,401,{error:'Geçersiz öğrenci erişimi'});
+    const level=Number(b.level),result=String(b.result||''),move_count=Number(b.move_count);
+    if(!Number.isInteger(level)||level<1||level>3||!['win','loss','draw'].includes(result)||!Number.isInteger(move_count)||move_count<0||move_count>1000)return json(res,400,{error:'Geçersiz maç bilgisi'});
+    if(usePostgres)await pool.query('INSERT INTO computer_chess_matches(student_id,level,result,move_count) VALUES($1,$2,$3,$4)',[sid,level,result,move_count]);
+    else sqlite.prepare('INSERT INTO computer_chess_matches(student_id,level,result,move_count) VALUES(?,?,?,?)').run(sid,level,result,move_count);
+    return json(res,201,{ok:true});
+   }
+   m=url.pathname.match(/^\/api\/students\/(\d+)\/computer-chess-history$/);
+   if(m&&req.method==='GET'){
+    if(!needTeacher(req,res))return;
+    const sid=Number(m[1]);
+    const st=usePostgres?await one('SELECT class_id FROM students WHERE id=$1',[sid]):await one('',[sid],'SELECT class_id FROM students WHERE id=?');
+    if(!st||!(await teacherOwnsClass(req,st.class_id)))return json(res,403,{error:'Bu öğrenci için yetkin yok'});
+    const rows=usePostgres?await q('SELECT id,level,result,move_count,created_at FROM computer_chess_matches WHERE student_id=$1 ORDER BY id DESC LIMIT 100',[sid]):await q('',[sid],'SELECT id,level,result,move_count,created_at FROM computer_chess_matches WHERE student_id=? ORDER BY id DESC LIMIT 100');
+    return json(res,200,rows);
+   }
   // v2.9.18: aynı sınıftaki öğrenciler arasında karşılıklı satranç
   m=url.pathname.match(/^\/api\/student\/(\d+)\/chess-peers$/);
   if(m&&req.method==='GET'){const sid=Number(m[1]),code=String(req.headers['x-student-code']||'').toUpperCase();const me=usePostgres?await one('SELECT id,class_id FROM students WHERE id=$1 AND code=$2',[sid,code]):await one('',[sid,code],'SELECT id,class_id FROM students WHERE id=? AND code=?');if(!me)return json(res,401,{error:'Geçersiz öğrenci erişimi'});const rows=usePostgres?await q('SELECT id,name,photo_data FROM students WHERE class_id=$1 AND id<>$2 ORDER BY name',[me.class_id,sid]):await q('',[me.class_id,sid],'SELECT id,name,photo_data FROM students WHERE class_id=? AND id<>? ORDER BY name');return json(res,200,rows)}
