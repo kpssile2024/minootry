@@ -166,9 +166,9 @@ async function api(req,res,url){
   if(m&&req.method==='GET'){if(!needTeacher(req,res))return;const sid=Number(m[1]);const r=usePostgres?await q(`SELECT ga.*,g.title,g.game_type,g.game_data FROM game_attempts ga JOIN assignments a ON a.id=ga.assignment_id JOIN games g ON g.id=a.game_id WHERE a.student_id=$1 ORDER BY ga.id DESC`,[sid]):await q('',[sid],`SELECT ga.*,g.title,g.game_type,g.game_data FROM game_attempts ga JOIN assignments a ON a.id=ga.assignment_id JOIN games g ON g.id=a.game_id WHERE a.student_id=? ORDER BY ga.id DESC`);return json(res,200,r)}
   m=url.pathname.match(/^\/api\/assignments\/(\d+)\/complete$/);
   if(m&&req.method==='POST'){const aid=Number(m[1]),code=String(req.headers['x-student-code']||'').toUpperCase();const a=usePostgres?await one(`SELECT a.id FROM assignments a JOIN students s ON s.id=a.student_id WHERE a.id=$1 AND s.code=$2`,[aid,code]):await one('',[aid,code],`SELECT a.id FROM assignments a JOIN students s ON s.id=a.student_id WHERE a.id=? AND s.code=?`);if(!a)return json(res,401,{error:'Yetkisiz'});await run(usePostgres?'UPDATE assignments SET completed_at=COALESCE(completed_at,NOW()) WHERE id=$1':'',[aid],"UPDATE assignments SET completed_at=COALESCE(completed_at,datetime('now')) WHERE id=?");
-  const existing=usePostgres?await one('SELECT id FROM game_attempts WHERE assignment_id=$1 LIMIT 1',[aid]):await one('',[aid],'SELECT id FROM game_attempts WHERE assignment_id=? LIMIT 1');
-  if(!existing)await run(usePostgres?'INSERT INTO game_attempts(assignment_id,first_score,total,completed) VALUES($1,1,1,TRUE)':'',[aid],'INSERT INTO game_attempts(assignment_id,first_score,total,completed) VALUES(?,1,1,1)');
-  return json(res,200,{ok:true})}
+   const previous=usePostgres?await one('SELECT id FROM game_attempts WHERE assignment_id=$1 LIMIT 1',[aid]):await one('',[aid],'SELECT id FROM game_attempts WHERE assignment_id=? LIMIT 1');
+   if(!previous)await run(usePostgres?'INSERT INTO game_attempts(assignment_id,first_score,total,completed) VALUES($1,1,1,TRUE)':'',[aid],'INSERT INTO game_attempts(assignment_id,first_score,total,completed) VALUES(?,1,1,1)');
+   return json(res,200,{ok:true})}
    // Bilgisayara karşı satranç: öğrencinin bitirdiği maçları kaydet ve görüntüle.
    m=url.pathname.match(/^\/api\/student\/(\d+)\/computer-chess-history$/);
    if(m&&req.method==='GET'){
