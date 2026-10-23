@@ -888,8 +888,16 @@ function m263PieceNext(){const s=window._m263piece;if(s.slide<2){s.slide++;m263P
 function m263Speak(t){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='tr-TR';speechSynthesis.speak(u)}catch{}}
 const M263_FRUIT=['🍎','🍓','🍌','🍊','🍐','🍒'];
 function m263PieceQuiz(){const s=window._m263piece,c=M263_PIECES[s.type],pos=c.positions[s.round%3],valid=m263Targets(s.type,pos),board={[pos]:m262Piece(c.name,false)},targets=[];let picks=[];for(let i=0;i<6;i++){let k;if(i<3&&valid.length)k=valid[(i*2+s.round)%valid.length];else{do{k=M262_FILES[(i*3+s.round)%8]+(1+((i*2+s.round+2)%8))}while(k===pos||picks.includes(k))}if(picks.includes(k))continue;picks.push(k);const reachable=valid.includes(k);targets.push({k,reachable});board[k]=s.round<4?M263_FRUIT[i%M263_FRUIT.length]:m262Piece(['Piyon','At','Fil','Vezir','Kale','Şah'][i%6],true)}s.targets=targets;s.selected=new Set();app.innerHTML=`<header class="chess-header"><button class="ghost" onclick="m262Home()">⌂</button><b>${c.title}</b><span>${s.round+1}/5</span></header><main class="m262-game"><div class="v261-instruction">${s.round<4?`${c.name} tek hamlede hangi meyveleri alabilir? Dokunup çember içine al.`:`${c.name} tek hamlede hangi rakip taşları alabilir?`}</div>${m262Board(board,'m263-quiz')}<div class="v261-actions"><button class="retry" onclick="m263PieceQuiz()">↻ Temizle</button><button onclick="m263PieceCheck()">✓ Kontrol Et</button></div></main>`;document.querySelectorAll('.m263-quiz .m262-sq').forEach(q=>{if(q.dataset.key===pos||!q.innerHTML)return;q.onclick=()=>m263Circle(q,s.selected,q.dataset.key)})}
-function m263PieceCheck(){const s=window._m263piece;let ok=true;s.targets.forEach(t=>{const q=document.querySelector(`.m263-quiz [data-key="${t.k}"]`),sel=s.selected.has(t.k);if(sel!==t.reachable){ok=false;q?.classList.add('m262-wrong')}});if(!ok)return modal(`<h2>Bir daha bakalım 🌱</h2><p>Neon kırmızı işaretlenenleri yeniden düşün.</p><div class="modal-actions"><button onclick="closeModal()">Yeniden Dene</button></div>`);if(s.round<4){s.round++;m263PieceQuiz()}else modal(`<h2>Aferin! 🎉</h2><p>${M263_PIECES[s.type].name} oyununu tamamladın.</p><div class="modal-actions"><button onclick="closeModal();m262Home()">Ana Sayfa</button></div>`)}
+function m263PieceCheck(){const s=window._m263piece;let ok=true;s.targets.forEach(t=>{const q=document.querySelector(`.m263-quiz [data-key="${t.k}"]`),sel=s.selected.has(t.k);if(sel!==t.reachable){ok=false;q?.classList.add('m262-wrong')}});if(!ok)return modal(`<h2>Bir daha bakalım 🌱</h2><p>Neon kırmızı işaretlenenleri yeniden düşün.</p><div class="modal-actions"><button onclick="closeModal()">Yeniden Dene</button></div>`);if(s.round<4){s.round++;m263PieceQuiz()}else m263PieceComplete(s)}
 
+async function m263PieceComplete(s){
+  const aid=Number(s.g?.assignment_id||0);
+  if(!teacherPreviewMode&&studentSession&&aid){
+    try{await api(`/api/assignments/${aid}/complete`,{method:'POST'});}
+    catch(e){notify('Oyun bitti ancak kayıt yapılamadı: '+e.message);return;}
+  }
+  modal(`<h2>Aferin! 🎉</h2><p>${M263_PIECES[s.type].name} oyununu tamamladın.</p><div class="modal-actions"><button onclick="closeModal();m262Home()">Ana Sayfa</button></div>`);
+}
 /* v2.6.3: kare tahta, taş hizası, çember sesi */
 const _m262FixRender263=m262FixRender;m262FixRender=function(){_m262FixRender263();const s=window._m262fix;document.querySelectorAll('.fix-board .m262-sq').forEach(b=>{if(!b.innerHTML)return;b.onclick=()=>m263Circle(b,s.selected,b.dataset.key)})};
 const _m262RookQuiz263=m262RookQuiz;m262RookQuiz=function(){_m262RookQuiz263();const s=window._m262rook,pos=['d4','b6','g3','a5','e4'][s.round];document.querySelectorAll('.rook-quiz .m262-sq').forEach(q=>{if(q.dataset.key===pos||!q.innerHTML)return;q.onclick=()=>m263Circle(q,s.selected,q.dataset.key)})};
@@ -3452,7 +3460,7 @@ function m299StartRookQuiz(){const s=window._m262rook;m297StopAll();s.phase='qui
 rookCaptureGame=function(g){m297StopAll();window._m262rook={g,phase:'move',slide:0,round:0,selected:new Set()};m299RookMove()};
 
 /* Tüm taş alma alıştırmalarında doğru/yanlış sesli geri bildirim. */
-m263PieceCheck=function(){const s=window._m263piece;let ok=true;s.targets.forEach(t=>{const q=document.querySelector(`.m263-quiz [data-key="${t.k}"]`),sel=s.selected.has(t.k);if(sel!==t.reachable){ok=false;q?.classList.add('m262-wrong')}});if(!ok){m299Play(M299_FEEDBACK.bad);return modal(`<h2>Bir daha bakalım 🌱</h2><p>Neon kırmızı işaretlenenleri yeniden düşün.</p><div class="modal-actions"><button onclick="closeModal()">Yeniden Dene</button></div>`)}m299Play(M299_FEEDBACK.ok,()=>{if(s.round<4){s.round++;m263PieceQuiz()}else modal(`<h2>Aferin! 🎉</h2><p>${M263_PIECES[s.type].name} oyununu tamamladın.</p><div class="modal-actions"><button onclick="closeModal();m262Home()">Ana Sayfa</button></div>`)})};
+m263PieceCheck=function(){const s=window._m263piece;let ok=true;s.targets.forEach(t=>{const q=document.querySelector(`.m263-quiz [data-key="${t.k}"]`),sel=s.selected.has(t.k);if(sel!==t.reachable){ok=false;q?.classList.add('m262-wrong')}});if(!ok){m299Play(M299_FEEDBACK.bad);return modal(`<h2>Bir daha bakalım 🌱</h2><p>Neon kırmızı işaretlenenleri yeniden düşün.</p><div class="modal-actions"><button onclick="closeModal()">Yeniden Dene</button></div>`)}m299Play(M299_FEEDBACK.ok,()=>{if(s.round<4){s.round++;m263PieceQuiz()}else m263PieceComplete(s)})};
 m262RookCheck=function(){const s=window._m262rook;let ok=true;s.targets.forEach(t=>{const q=document.querySelector(`.rook-quiz [data-key="${t.k}"]`),sel=s.selected.has(t.k);if(sel!==t.reachable){ok=false;q?.classList.add('m262-wrong')}});if(!ok){m299Play(M299_FEEDBACK.bad);return modal(`<h2>Bir daha bakalım 🌱</h2><p>Neon kırmızı işaretli seçimleri yeniden düşün.</p><div class="modal-actions"><button onclick="closeModal()">Yeniden Dene</button></div>`)}m299Play(M299_FEEDBACK.ok,()=>{if(s.round<4){s.round++;m262RookQuiz()}else modal(`<h2>Aferin! 🎉</h2><p>Kalenin hareketini ve tek hamlede taş almasını tamamladın.</p><div class="modal-actions"><button onclick="closeModal();m262Home()">Ana Sayfa</button></div>`)})};
 
 /* Piyon: düz hareket yolları öğreticide, çapraz alma ayrı öğreticide, alıştırma mutlaka var. */
@@ -3534,7 +3542,7 @@ m262RookCheck=function(){
  }
  m299Play('14_dogru_1.mp3',()=>{
    if(s.round<4){s.round++;m262RookQuiz()}
-   else modal(`<h2>Aferin! 🎉</h2><p>Kalenin hareketini ve tek hamlede taş almasını tamamladın.</p><div class="modal-actions"><button onclick="closeModal();m262Home()">Ana Sayfa</button></div>`)
+   else m302RookComplete(s)
  });
 };
 
@@ -3552,3 +3560,47 @@ m271Speak = function(text,lang='tr-TR') {
   if (isRealChess && isPieceSelection) return;
   return _m301ChessSpeak(text,lang);
 };
+
+/* Unified persistence fixes: rook and computer chess. */
+async function m302RookComplete(s){
+ const aid=Number(s?.g?.assignment_id||0);
+ if(!teacherPreviewMode&&studentSession&&aid){
+  try{await api(`/api/assignments/${aid}/complete`,{method:'POST'})}
+  catch(e){notify('Oyun tamamlandı fakat kaydedilemedi: '+e.message);return}
+ }
+ modal(`<h2>Aferin! 🎉</h2><p>Kalenin hareketini ve taş almasını tamamladın.</p><button onclick="closeModal();m262Home()">Ana Sayfa</button>`);
+}
+const _m302AfterMove=m280AfterMove;
+m280AfterMove=function(who){
+ const result=_m302AfterMove(who);
+ if(['mate','stalemate','draw'].includes(m280.status)&&!m280._historySaved){
+  m280._historySaved=true;
+  if(studentSession&&!teacherPreviewMode){
+   const outcome=m280.status==='mate'?(m280.turn==='b'?'win':'loss'):'draw';
+   const sid=studentSession.id;
+   api(`/api/student/${sid}/computer-chess-history`,{method:'POST',body:JSON.stringify({level:Number(m280.level),result:outcome,move_count:Number(m280.history?.length||0)})})
+    .catch(e=>{m280._historySaved=false;notify('Satranç sonucu kaydedilemedi: '+e.message)});
+  }
+ }
+ return result;
+};
+const _m302StudentHistory=studentHistory;
+studentHistory=async function(){
+ await _m302StudentHistory.apply(this,arguments);
+ if(!studentSession)return;
+ try{
+  const rows=await api(`/api/student/${studentSession.id}/computer-chess-history`);
+  const main=document.querySelector('main.m299-history');if(!main)return;
+  const section=document.createElement('section');section.className='m302-chess-history';
+  const h=document.createElement('h2');h.textContent='♟️ Bilgisayara Karşı Satranç Geçmişi';section.appendChild(h);
+  if(!rows.length){const p=document.createElement('p');p.textContent='Henüz tamamlanan satranç maçı yok.';section.appendChild(p)}
+  for(const row of rows){const p=document.createElement('p');const label=row.result==='win'?'Kazandın':row.result==='loss'?'Kaybettin':'Berabere';p.textContent=`${label} · Seviye ${row.level} · ${formatDate(row.created_at)}`;section.appendChild(p)}
+  main.appendChild(section);
+ }catch(e){notify('Satranç geçmişi yüklenemedi: '+e.message)}
+};
+const _m302Profile=profile;
+profile=async function(id){await _m302Profile.apply(this,arguments);try{
+ const rows=await api(`/api/students/${id}/computer-chess-history`);
+ const modalBody=document.querySelector('.modal-content,.modal-body,#modal .content');
+ if(modalBody){const sec=document.createElement('section');const h=document.createElement('h3');h.textContent='Bilgisayara Karşı Satranç';sec.appendChild(h);for(const r of rows){const p=document.createElement('p');p.textContent=`${r.result==='win'?'Kazandı':r.result==='loss'?'Kaybetti':'Berabere'} · Seviye ${r.level} · ${formatDate(r.created_at)}`;sec.appendChild(p)}modalBody.appendChild(sec)}
+ }catch(e){console.warn('Satranç geçmişi:',e)} };
