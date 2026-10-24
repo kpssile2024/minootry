@@ -3276,8 +3276,10 @@ let m297Audio=null, m297Token=0;
 function m297StopAll(){
   m297Token++;
   try{speechSynthesis?.cancel?.()}catch(e){}
-  for(const a of [m297Audio,window.__minooGameVoice,window.__setupVoice,m296Audio,m2923Audio]){
-    try{if(a){a.onended=null;a.pause();a.currentTime=0}}catch(e){}
+  // Tüm eski ses kanallarını kapat; önceki oyundan ses taşınmasın.
+  for(const a of [m297Audio,window.__minooGameVoice,window.__setupVoice,
+                  window.__minooCigdemAudio,m296Audio,m2923Audio]){
+    try{if(a){a.onended=null;a.onerror=null;a.pause();a.currentTime=0}}catch(e){}
   }
   m297Audio=null;
 }
@@ -3287,7 +3289,12 @@ function m297Play(file,onended){
     const a=new Audio('/audio/minoo-voice/chess/'+file+'?v=2942');
     m297Audio=a;window.__minooGameVoice=a;
     a.onended=()=>{if(token===m297Token&&onended)onended()};
-    a.play().catch(e=>console.warn('[Minoo 297 ses]',file,e)); return a;
+    a.onerror=()=>{if(token===m297Token)console.warn('[Minoo ses dosyası açılamadı]',file)};
+    const playback=a.play();
+    if(playback&&typeof playback.catch==='function')playback.catch(e=>{
+      if(token===m297Token)console.warn('[Minoo ses oynatılamadı]',file,e);
+    });
+    return a;
   }catch(e){console.warn('[Minoo 297 ses]',file,e);return null}
 }
 function m297Speak(text){
