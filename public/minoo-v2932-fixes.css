@@ -1,0 +1,5 @@
+/* Minoo 2.9.32: clear, accessible quiz feedback */
+.m263-quiz .m262-sq.m2932-wrong,.rook-quiz .m262-sq.m2932-wrong{outline:4px solid #f43f5e!important;outline-offset:-5px;box-shadow:inset 0 0 0 3px #fb7185!important}
+.m263-quiz .m262-sq.m2932-correct,.rook-quiz .m262-sq.m2932-correct{outline:4px solid #16a34a!important;outline-offset:-5px;position:relative}
+.m263-quiz .m262-sq.m2932-correct:after,.rook-quiz .m262-sq.m2932-correct:after{content:'✓';position:absolute;right:2px;top:0;color:#15803d;background:#dcfce7;border-radius:50%;font-size:22px;font-weight:900;line-height:1.1;z-index:5}
+.m263-quiz .m262-sq.m2932-missing,.rook-quiz .m262-sq.m2932-missing{outline:4px solid #eab308!important;outline-offset:-5px;box-shadow:inset 0 0 0 3px #fde047!important}
