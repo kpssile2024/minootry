@@ -3419,39 +3419,50 @@ function m299Play(file,done){return m297Play(file,done)}
 
 /* Yönler: öğretici sesi yalnız öğreticide; çizim yönergesi yalnız Şimdi Sen Çiz sonrası. */
 chessDirectionsGame=function(g){m297StopAll();window._v261=null;window._m262fix=null;window._m262dir={g,step:0,practice:false,lines:[],modeKey:''};m262DirRender()};
-/* v2.9.34: Yön öğreticisinde gecikmiş seslerin bir sonraki ekrana taşmasını önle. */
+/* v2.9.35: Her yön ekranının sesi yalnız o ekran etkin olduğunda çalar. */
 let m300DirVoiceTimer=null;
 let m300DirScreenToken=0;
 function m300DirCancelVoice(){
-  m300DirScreenToken++;
+  ++m300DirScreenToken;
   if(m300DirVoiceTimer!==null){clearTimeout(m300DirVoiceTimer);m300DirVoiceTimer=null}
   m297StopAll();
 }
+function m300DirSpeakCurrent(){
+  const s=window._m262dir;
+  if(!s)return;
+  const d=M262_DIRS[s.step],a=M298_DIR[d[2]];
+  m297Play(s.practice?a.draw:a.teach);
+}
 m262DirRender=function(){
- const s=window._m262dir;
- if(!s)return;
+ const s=window._m262dir;if(!s)return;
  m300DirCancelVoice();
  const token=m300DirScreenToken;
- const d=M262_DIRS[s.step],a=M298_DIR[d[2]],practice=Boolean(s.practice);
- const key=s.step+':'+(practice?'p':'t');
- const file=practice?a.draw:a.teach;
- app.innerHTML=`<header class="chess-header"><button class="ghost" onclick="m262Home()">⌂</button><b>♟️ Satrançta Yönleri Öğreniyorum</b><span>${s.step+1}/4</span><button class="ghost" onclick="m299Play('${file}')">🔊</button></header><main class="m262-game"><div class="v261-instruction">${practice?`Parmağınla ${d[0].toLowerCase()} bir çizgi çiz.`:`${d[0]} çizgiyi öğrenelim.`}</div><div class="m262-dirwrap">${m262Board({},'dir-board')}<svg class="m262-overlay"></svg></div><div class="v261-actions"><button class="retry" onclick="m262DirPrev()">← Geri</button>${practice?`<button class="ghost" onclick="m262DirClear()">🧹 Temizle</button><button onclick="m262DirCheck()">✓ Kontrol Et</button>`:`<button onclick="m299DirPractice()">Şimdi Sen Çiz →</button>`}</div></main>`;
+ const d=M262_DIRS[s.step],practice=!!s.practice;
+ const key=s.step+':'+(practice?'practice':'teach');
+ app.innerHTML=`<header class="chess-header"><button class="ghost" onclick="m262Home()">⌂</button><b>♟️ Satrançta Yönleri Öğreniyorum</b><span>${s.step+1}/4</span><button class="ghost" onclick="m300DirSpeakCurrent()">🔊</button></header><main class="m262-game"><div class="v261-instruction">${practice?`Şimdi sen parmağınla ${d[0].toLowerCase()} çizgiler çiz.`:`${d[0]} çizgiyi öğrenelim.`}</div><div class="m262-dirwrap">${m262Board({},'dir-board')}<svg class="m262-overlay"></svg></div><div class="v261-actions"><button class="retry" onclick="m262DirPrev()">← Geri</button>${practice?`<button class="ghost" onclick="m262DirClear()">🧹 Temizle</button><button onclick="m262DirCheck()">✓ Kontrol Et</button>`:`<button onclick="m299DirPractice()">Şimdi Sen Çiz →</button>`}</div></main>`;
  if(!practice){requestAnimationFrame(()=>{if(token===m300DirScreenToken)m262DrawGuide(d[2])})}
  else m262EnableDraw(d[2]);
- s.modeKey=key;
  m300DirVoiceTimer=setTimeout(()=>{
    m300DirVoiceTimer=null;
-   if(token!==m300DirScreenToken||window._m262dir!==s||s.step+':'+(s.practice?'p':'t')!==key)return;
-   m299Play(file);
- },230);
+   if(token!==m300DirScreenToken||window._m262dir!==s||s.step+':'+(s.practice?'practice':'teach')!==key)return;
+   m300DirSpeakCurrent();
+ },200);
 };
 function m299DirPractice(){
  const s=window._m262dir;if(!s)return;
- m300DirCancelVoice();
- s.practice=true;s.lines=[];s.modeKey='';
- m262DirRender();
+ m300DirCancelVoice();s.practice=true;s.lines=[];m262DirRender();
 }
-m262DirCheck=function(){const s=window._m262dir,type=M262_DIRS[s.step][2],a=M298_DIR[type],ok=s.lines.length&&s.lines.every(([x,z])=>type==='vertical'?x[0]===z[0]:type==='horizontal'?x[1]===z[1]:Math.abs(x[0]-z[0])===Math.abs(x[1]-z[1]));if(!ok){m299Play('yon28_yanlis.mp3');return notify('Çizginin yönüne yeniden bakalım.')}m299Play(a.ok,()=>{if(s.step<3){m300DirCancelVoice();s.step++;s.practice=false;s.lines=[];s.modeKey='';m262DirRender()}else m299Play('yon28_bitis.mp3',()=>modal(`<h2>Harika! 🎉</h2><p>Dikey, yatay ve çapraz yönleri tamamladın.</p><div class="modal-actions"><button onclick="closeModal();m262Home()">Ana Sayfa</button></div>`))})};
+m262DirCheck=function(){
+ const s=window._m262dir,type=M262_DIRS[s.step][2],a=M298_DIR[type];
+ const ok=s.lines.length&&s.lines.every(([x,z])=>type==='vertical'?x[0]===z[0]:type==='horizontal'?x[1]===z[1]:Math.abs(x[0]-z[0])===Math.abs(x[1]-z[1]));
+ if(!ok){m297Play('yon28_yanlis.mp3');return notify('Çizginin yönüne yeniden bakalım.')}
+ m300DirCancelVoice();
+ m297Play(a.ok,()=>{
+   if(window._m262dir!==s)return;
+   if(s.step<3){s.step++;s.practice=false;s.lines=[];m262DirRender()}
+   else m297Play('yon28_bitis.mp3',()=>modal(`<h2>Harika! 🎉</h2><p>Dikey, yatay ve çapraz yönleri tamamladın.</p><div class="modal-actions"><button onclick="closeModal();m262Home()">Ana Sayfa</button></div>`));
+ });
+};
 
 /* Ortak öğretici: hareket -> taş alma öğreticisi -> taş alma alıştırması. */
 function m299MoveEnds(type,pos){
