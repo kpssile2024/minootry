@@ -3443,12 +3443,12 @@ function m299CaptureTeach(type){
  const s=window._m263piece,c=M263_PIECES[type],pos=c.positions[0],caps=m263Targets(type,pos),board={[pos]:m262Piece(c.name,false)};
  const show=(type==='pawn'?caps.slice(0,2):caps.filter((_,i)=>i%Math.max(1,Math.floor(caps.length/3))===0).slice(0,3));show.forEach(k=>board[k]=m262Piece('Piyon',true));
  app.innerHTML=`<header class="chess-header"><button class="ghost" onclick="m262Home()">⌂</button><b>${c.title}</b><span>Taş Alma Öğreticisi</span><button class="ghost" onclick="m299Play('${M298_PIECE_AUDIO[type].alma}')">🔊</button></header><main class="m262-game"><div class="v261-instruction">${c.name} rakip taşı nasıl alır?</div><div class="m262-dirwrap">${m262Board(board,'m263-piece-board')}<svg class="m262-overlay"></svg></div><div class="v261-actions"><button class="retry" onclick="window._m263piece.phase='move';m299PieceMove()">← Geri</button><button onclick="m299StartPieceQuiz()">Alıştırmaya Geç →</button></div></main>`;
- setTimeout(()=>m299DrawLines(pos,show,'capture-arrow'),80);setTimeout(()=>m299Play(M298_PIECE_AUDIO[type].alma),150)
+ m299DrawLines(pos,show,'capture-arrow');requestAnimationFrame(()=>{if(window._m263piece===s&&document.querySelector('.m262-overlay')&&!document.querySelector('.m262-overlay .guide-line'))m299DrawLines(pos,show,'capture-arrow')});setTimeout(()=>m299Play(M298_PIECE_AUDIO[type].alma),150)
 }
 function m299PieceMove(){
  const s=window._m263piece,c=M263_PIECES[s.type],pos=c.positions[0],board={[pos]:m262Piece(c.name,false)},a=M298_PIECE_AUDIO[s.type];
  app.innerHTML=`<header class="chess-header"><button class="ghost" onclick="m262Home()">⌂</button><b>${c.title}</b><span>Hareket Öğreticisi</span><button class="ghost" onclick="m299Play('${a.hareket}')">🔊</button></header><main class="m262-game"><div class="v261-instruction">${c.name} nasıl hareket eder?</div><div class="m262-dirwrap">${m262Board(board,'m263-piece-board')}<svg class="m262-overlay"></svg></div><div class="v261-actions"><button onclick="window._m263piece.phase='captureTeach';m299CaptureTeach('${s.type}')">Taş Almayı Öğren →</button></div></main>`;
- setTimeout(()=>m299DrawLines(pos,m299MoveEnds(s.type,pos)),80);setTimeout(()=>m299Play(a.hareket),150)
+ m299DrawLines(pos,m299MoveEnds(s.type,pos));requestAnimationFrame(()=>{if(window._m263piece===s&&document.querySelector('.m262-overlay')&&!document.querySelector('.m262-overlay .guide-line'))m299DrawLines(pos,m299MoveEnds(s.type,pos))});setTimeout(()=>m299Play(a.hareket),150)
 }
 function m299StartPieceQuiz(){const s=window._m263piece,a=M298_PIECE_AUDIO[s.type];m297StopAll();s.phase='quiz';s.round=0;m263PieceQuiz();setTimeout(()=>m299Play(a.gorev),150)}
 pieceLearnGame=function(g,type){m297StopAll();window._m263piece={g,type,phase:'move',slide:0,round:0,selected:new Set()};m299PieceMove()};
