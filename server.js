@@ -36,6 +36,7 @@ async function initDb(){
    CREATE TABLE IF NOT EXISTS teachers(id BIGSERIAL PRIMARY KEY,name TEXT NOT NULL,username TEXT NOT NULL UNIQUE,password_hash TEXT NOT NULL,active BOOLEAN NOT NULL DEFAULT TRUE,created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());
    CREATE TABLE IF NOT EXISTS teacher_classes(teacher_id BIGINT NOT NULL REFERENCES teachers(id) ON DELETE CASCADE,class_id BIGINT NOT NULL REFERENCES classes(id) ON DELETE CASCADE,PRIMARY KEY(teacher_id,class_id));
    CREATE TABLE IF NOT EXISTS teacher_permissions(teacher_id BIGINT NOT NULL REFERENCES teachers(id) ON DELETE CASCADE,permission_key TEXT NOT NULL,PRIMARY KEY(teacher_id,permission_key));
+      CREATE TABLE IF NOT EXISTS computer_checkers_matches(id BIGSERIAL PRIMARY KEY,student_id BIGINT NOT NULL REFERENCES students(id) ON DELETE CASCADE,result TEXT NOT NULL,move_count INTEGER NOT NULL DEFAULT 0,created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());
       CREATE TABLE IF NOT EXISTS computer_chess_matches(id BIGSERIAL PRIMARY KEY,student_id BIGINT NOT NULL REFERENCES students(id) ON DELETE CASCADE,level INTEGER NOT NULL,result TEXT NOT NULL,move_count INTEGER NOT NULL DEFAULT 0,created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());
 CREATE TABLE IF NOT EXISTS chess_matches(id BIGSERIAL PRIMARY KEY,class_id BIGINT NOT NULL REFERENCES classes(id) ON DELETE CASCADE,white_student_id BIGINT NOT NULL REFERENCES students(id) ON DELETE CASCADE,black_student_id BIGINT NOT NULL REFERENCES students(id) ON DELETE CASCADE,invited_by BIGINT NOT NULL REFERENCES students(id) ON DELETE CASCADE,status TEXT NOT NULL DEFAULT 'pending',state_json TEXT,turn_student_id BIGINT REFERENCES students(id) ON DELETE SET NULL,result TEXT,end_reason TEXT,move_count INTEGER NOT NULL DEFAULT 0,created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),started_at TIMESTAMPTZ,finished_at TIMESTAMPTZ,updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW());
   `);
@@ -61,6 +62,7 @@ CREATE TABLE IF NOT EXISTS chess_matches(id BIGSERIAL PRIMARY KEY,class_id BIGIN
    CREATE TABLE IF NOT EXISTS teachers(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,username TEXT NOT NULL UNIQUE,password_hash TEXT NOT NULL,active INTEGER NOT NULL DEFAULT 1,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
    CREATE TABLE IF NOT EXISTS teacher_classes(teacher_id INTEGER NOT NULL REFERENCES teachers(id) ON DELETE CASCADE,class_id INTEGER NOT NULL REFERENCES classes(id) ON DELETE CASCADE,PRIMARY KEY(teacher_id,class_id));
    CREATE TABLE IF NOT EXISTS teacher_permissions(teacher_id INTEGER NOT NULL REFERENCES teachers(id) ON DELETE CASCADE,permission_key TEXT NOT NULL,PRIMARY KEY(teacher_id,permission_key));
+      CREATE TABLE IF NOT EXISTS computer_checkers_matches(id INTEGER PRIMARY KEY AUTOINCREMENT,student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,result TEXT NOT NULL,move_count INTEGER NOT NULL DEFAULT 0,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
       CREATE TABLE IF NOT EXISTS computer_chess_matches(id INTEGER PRIMARY KEY AUTOINCREMENT,student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,level INTEGER NOT NULL,result TEXT NOT NULL,move_count INTEGER NOT NULL DEFAULT 0,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
 CREATE TABLE IF NOT EXISTS chess_matches(id INTEGER PRIMARY KEY AUTOINCREMENT,class_id INTEGER NOT NULL REFERENCES classes(id) ON DELETE CASCADE,white_student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,black_student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,invited_by INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,status TEXT NOT NULL DEFAULT 'pending',state_json TEXT,turn_student_id INTEGER REFERENCES students(id) ON DELETE SET NULL,result TEXT,end_reason TEXT,move_count INTEGER NOT NULL DEFAULT 0,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,started_at TEXT,finished_at TEXT,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);`);
  } const missing=usePostgres?await q('SELECT id,name,code,username,password_hash FROM students WHERE username IS NULL OR password_hash IS NULL'):await q('',[],'SELECT id,name,code,username,password_hash FROM students WHERE username IS NULL OR password_hash IS NULL');
@@ -197,6 +199,25 @@ async function api(req,res,url){
     const rows=usePostgres?await q('SELECT id,level,result,move_count,created_at FROM computer_chess_matches WHERE student_id=$1 ORDER BY id DESC LIMIT 100',[sid]):await q('',[sid],'SELECT id,level,result,move_count,created_at FROM computer_chess_matches WHERE student_id=? ORDER BY id DESC LIMIT 100');
     return json(res,200,rows);
    }
+  // Dama: authenticated match history, student and authorized teacher.
+  m=url.pathname.match(/^\/api\/student\/(\d+)\/computer-checkers-history$/);
+  if(m&&(req.method==='GET'||req.method==='POST')){
+   const sid=Number(m[1]),code=String(req.headers['x-student-code']||'').toUpperCase();
+   const me=usePostgres?await one('SELECT id FROM students WHERE id=$1 AND code=$2',[sid,code]):await one('',[sid,code],'SELECT id FROM students WHERE id=? AND code=?');
+   if(!me)return json(res,401,{error:'Geçersiz öğrenci erişimi'});
+   if(req.method==='GET')return json(res,200,usePostgres?await q('SELECT id,result,move_count,created_at FROM computer_checkers_matches WHERE student_id=$1 ORDER BY id DESC LIMIT 100',[sid]):await q('',[sid],'SELECT id,result,move_count,created_at FROM computer_checkers_matches WHERE student_id=? ORDER BY id DESC LIMIT 100'));
+   const b=await body(req),result=String(b.result||''),count=Number(b.move_count);
+   if(!['win','loss','draw'].includes(result)||!Number.isInteger(count)||count<0||count>1000)return json(res,400,{error:'Geçersiz dama sonucu'});
+   await run(usePostgres?'INSERT INTO computer_checkers_matches(student_id,result,move_count) VALUES($1,$2,$3)':'',[sid,result,count],'INSERT INTO computer_checkers_matches(student_id,result,move_count) VALUES(?,?,?)');
+   return json(res,201,{ok:true});
+  }
+  m=url.pathname.match(/^\/api\/students\/(\d+)\/computer-checkers-history$/);
+  if(m&&req.method==='GET'){
+   if(!needTeacher(req,res))return;
+   const sid=Number(m[1]),st=usePostgres?await one('SELECT class_id FROM students WHERE id=$1',[sid]):await one('',[sid],'SELECT class_id FROM students WHERE id=?');
+   if(!st||!(await teacherOwnsClass(req,st.class_id)))return json(res,403,{error:'Bu öğrenci için yetkin yok'});
+   return json(res,200,usePostgres?await q('SELECT id,result,move_count,created_at FROM computer_checkers_matches WHERE student_id=$1 ORDER BY id DESC LIMIT 100',[sid]):await q('',[sid],'SELECT id,result,move_count,created_at FROM computer_checkers_matches WHERE student_id=? ORDER BY id DESC LIMIT 100'));
+  }
   // v2.9.18: aynı sınıftaki öğrenciler arasında karşılıklı satranç
   m=url.pathname.match(/^\/api\/student\/(\d+)\/chess-peers$/);
   if(m&&req.method==='GET'){const sid=Number(m[1]),code=String(req.headers['x-student-code']||'').toUpperCase();const me=usePostgres?await one('SELECT id,class_id FROM students WHERE id=$1 AND code=$2',[sid,code]):await one('',[sid,code],'SELECT id,class_id FROM students WHERE id=? AND code=?');if(!me)return json(res,401,{error:'Geçersiz öğrenci erişimi'});const rows=usePostgres?await q('SELECT id,name,photo_data FROM students WHERE class_id=$1 AND id<>$2 ORDER BY name',[me.class_id,sid]):await q('',[me.class_id,sid],'SELECT id,name,photo_data FROM students WHERE class_id=? AND id<>? ORDER BY name');return json(res,200,rows)}
