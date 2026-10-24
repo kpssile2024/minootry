@@ -3689,3 +3689,54 @@ m262DirCheck = function(){
   s.lines=accepted;
   return m29737OriginalDirectionCheck();
 };
+
+
+/* Minoo v2.9.39 — Yön çizimi: 8 çizgi, doğru aşama sesi ve güvenli geçiş. */
+(function(){
+  let checking=false;
+  const oldRender=m262DirRender;
+  m262DirRender=function(){checking=false;return oldRender.apply(this,arguments)};
+  m262DirCheck=function(){
+    const s=window._m262dir;
+    if(!s||!s.practice||checking)return;
+    const stage=s.step, type=M262_DIRS[stage][2];
+    const strokes=(s.lines||[]).filter(line=>Array.isArray(line)&&line.length>=2);
+    if(strokes.length<8){
+      notify(`Birlikte ${8-strokes.length} çizgi daha çizelim. 🌱`);
+      return;
+    }
+    const valid=strokes.filter(line=>{
+      const pts=line[3]&&line[3].length>=2?line[3]:[line[0],line[1]];
+      const first=pts[0],last=pts[pts.length-1];
+      if(!first||!last)return false;
+      const dx=last[0]-first[0],dy=last[1]-first[1];
+      const ax=Math.abs(dx),ay=Math.abs(dy);
+      // Çocukların hafif eğri ve titrek çizgilerini kabul et.
+      if(type==='vertical')return ay>=28&&ay>=ax*1.35;
+      if(type==='horizontal')return ax>=28&&ax>=ay*1.35;
+      if(ax<25||ay<25||Math.min(ax,ay)/Math.max(ax,ay)<.42)return false;
+      // İki çapraz aşamasının eğimi farklıdır.
+      return type==='diag1'?dx*dy<0:dx*dy>0;
+    });
+    if(valid.length<8){
+      m297Play('yon28_yanlis.mp3');
+      notify('Çizgilerin yönüne yeniden bakalım. 🌱');
+      return;
+    }
+    checking=true;
+    // Ses, mevcut aşamaya göre seçilir; aşama yalnız ses bittikten sonra ilerler.
+    const successFile=M298_DIR[type].ok;
+    m297Play(successFile,()=>{
+      if(window._m262dir!==s||s.step!==stage)return;
+      if(stage<3){
+        s.step=stage+1;s.practice=false;s.lines=[];
+        m262DirRender();
+      }else{
+        m297Play('yon28_bitis.mp3',()=>{
+          if(window._m262dir!==s)return;
+          modal(`<h2>Harika! 🎉</h2><p>Dikey, yatay ve çapraz çizgileri öğrendin.</p><div class="modal-actions"><button onclick="closeModal();m262Home()">Ana Sayfa</button></div>`);
+        });
+      }
+    });
+  };
+})();
