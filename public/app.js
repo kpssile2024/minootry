@@ -3238,7 +3238,7 @@ let m296Audio=null;
 function m296Play(file,onended){
  try{
   if(m296Audio){m296Audio.pause();m296Audio.currentTime=0}
-  const a=new Audio('/audio/minoo-voice/chess/'+file+'?v=297');m296Audio=a;window.__minooGameVoice=a;
+  const a=new Audio('/audio/minoo-voice/chess/'+file+'?v=2942');m296Audio=a;window.__minooGameVoice=a;
   if(onended)a.onended=onended;
   a.play().catch(e=>console.warn('[Minoo ses]',file,e));return a
  }catch(e){console.warn('[Minoo ses]',file,e);return null}
@@ -3284,7 +3284,7 @@ function m297StopAll(){
 function m297Play(file,onended){
   m297StopAll(); const token=m297Token;
   try{
-    const a=new Audio('/audio/minoo-voice/chess/'+file+'?v=297');
+    const a=new Audio('/audio/minoo-voice/chess/'+file+'?v=2942');
     m297Audio=a;window.__minooGameVoice=a;
     a.onended=()=>{if(token===m297Token&&onended)onended()};
     a.play().catch(e=>console.warn('[Minoo 297 ses]',file,e)); return a;
