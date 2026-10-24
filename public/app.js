@@ -3431,7 +3431,9 @@ function m300DirSpeakCurrent(){
   const s=window._m262dir;
   if(!s)return;
   const d=M262_DIRS[s.step],a=M298_DIR[d[2]];
-  m297Play(s.practice?a.draw:a.teach);
+  // Alıştırma ekranında yeni anlatım başlatma: öğretici zaten çizim yönergesini veriyor.
+  if(s.practice)return;
+  m297Play(a.teach);
 }
 m262DirRender=function(){
  const s=window._m262dir;if(!s)return;
@@ -3442,6 +3444,7 @@ m262DirRender=function(){
  app.innerHTML=`<header class="chess-header"><button class="ghost" onclick="m262Home()">⌂</button><b>♟️ Satrançta Yönleri Öğreniyorum</b><span>${s.step+1}/4</span><button class="ghost" onclick="m300DirSpeakCurrent()">🔊</button></header><main class="m262-game"><div class="v261-instruction">${practice?`Şimdi sen parmağınla ${d[0].toLowerCase()} çizgiler çiz.`:`${d[0]} çizgiyi öğrenelim.`}</div><div class="m262-dirwrap">${m262Board({},'dir-board')}<svg class="m262-overlay"></svg></div><div class="v261-actions"><button class="retry" onclick="m262DirPrev()">← Geri</button>${practice?`<button class="ghost" onclick="m262DirClear()">🧹 Temizle</button><button onclick="m262DirCheck()">✓ Kontrol Et</button>`:`<button onclick="m299DirPractice()">Şimdi Sen Çiz →</button>`}</div></main>`;
  if(!practice){requestAnimationFrame(()=>{if(token===m300DirScreenToken)m262DrawGuide(d[2])})}
  else m262EnableDraw(d[2]);
+ if(practice)return; // Boş çizim ekranı sessiz kalır; sonraki yönün sesi erken başlamaz.
  m300DirVoiceTimer=setTimeout(()=>{
    m300DirVoiceTimer=null;
    if(token!==m300DirScreenToken||window._m262dir!==s||s.step+':'+(s.practice?'practice':'teach')!==key)return;
