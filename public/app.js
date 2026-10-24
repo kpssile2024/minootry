@@ -3773,22 +3773,11 @@ m262DirCheck = function(){
   }).length>=8;
   if(!ok){m297Play('yon28_yanlis.mp3');notify('Çizgilerin yönüne yeniden bakalım. 🌱');return}
   busy=true;
-  // Dosya adları doğru görünse de MP3 içerikleri bir sonraki yönü söylüyor.
-  // Bu üç geri bildirimi dosyadan değil, doğru aşamaya kilitli Türkçe metinden okut.
+  // Yanlış yön adı söyleyen MP3 kayıtları ve erkek tarayıcı sesi kullanılmaz.
+  // Mevcut çocuk sesiyle genel doğru geri bildirimi verilir; yön adı ekranda doğru gösterilir.
   const correctText=type==='vertical'?'Harika, dikey çizgiyi doğru çizdin!':type==='horizontal'?'Harika, yatay çizgiyi doğru çizdin!':'Harika, çapraz çizgiyi doğru çizdin!';
-  m297StopAll();
-  const speakCorrect=(done)=>{
-    if(!('speechSynthesis' in window)){notify(correctText);setTimeout(done,1300);return}
-    try{
-      window.speechSynthesis.cancel();
-      const utter=new SpeechSynthesisUtterance(correctText);
-      utter.lang='tr-TR';utter.rate=0.88;utter.pitch=1.12;
-      let finished=false;
-      const finish=()=>{if(finished)return;finished=true;done()};
-      utter.onend=finish;utter.onerror=finish;
-      window.speechSynthesis.speak(utter);
-    }catch(e){notify(correctText);setTimeout(done,1300)}
-  };
+  notify(correctText);
+  const speakCorrect=(done)=>m297Play('yon_dogru.mp3',done);
   speakCorrect(()=>{
    if(window._m262dir!==s||s.step!==stage||!s.practice)return;
    if(stage<3){s.step=stage+1;s.practice=false;s.lines=[];m262DirRender()}
