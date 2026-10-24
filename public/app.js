@@ -3643,3 +3643,49 @@ profile=async function(id){await _m302Profile.apply(this,arguments);try{
  const modalBody=document.querySelector('.modal-content,.modal-body,#modal .content');
  if(modalBody){const sec=document.createElement('section');const h=document.createElement('h3');h.textContent='Bilgisayara Karşı Satranç';sec.appendChild(h);for(const r of rows){const p=document.createElement('p');p.textContent=`${r.result==='win'?'Kazandı':r.result==='loss'?'Kaybetti':'Berabere'} · Seviye ${r.level} · ${formatDate(r.created_at)}`;sec.appendChild(p)}modalBody.appendChild(sec)}
  }catch(e){console.warn('Satranç geçmişi:',e)} };
+
+
+/* v2.9.37 — Okul öncesi çizgi değerlendirmesi.
+   Parmakla çizilen hafif eğri çizgiler kabul edilir; sekiz çizgi gereklidir; çizgilerin kusursuz olması gerekmez.
+   Mevcut ses ve sonraki ekrana geçiş akışını korur. */
+const m29737OriginalDirectionCheck = m262DirCheck;
+m262DirCheck = function(){
+  const s=window._m262dir;
+  if(!s || !s.practice) return m29737OriginalDirectionCheck();
+  const type=M262_DIRS[s.step]?.[2];
+  if(!['vertical','horizontal','diag1','diag2'].includes(type)) return m29737OriginalDirectionCheck();
+  const strokes=s.lines||[];
+  const accepted=[];
+  for(const stroke of strokes){
+    const pts=stroke[3]&&stroke[3].length>1?stroke[3]:[stroke[0],stroke[1]];
+    if(!pts||pts.length<2)continue;
+    const first=pts[0],last=pts[pts.length-1];
+    const dx=last[0]-first[0],dy=last[1]-first[1];
+    const ax=Math.abs(dx),ay=Math.abs(dy);
+    const minLength=28; // Tahtanın yaklaşık üçte biri yeterli.
+    let valid=false,normal;
+    if(type==='vertical'){
+      valid=ay>=minLength && ay>=ax*1.6;
+      normal=[[50,5],[50,95]];
+    }else if(type==='horizontal'){
+      valid=ax>=minLength && ax>=ay*1.6;
+      normal=[[5,50],[95,50]];
+    }else{
+      valid=ax>=minLength && ay>=minLength && Math.min(ax,ay)/Math.max(ax,ay)>=.5;
+      // Çapraz yönün işareti korunur; tam 45 derece beklenmez.
+      normal=[[dx>=0?10:90,dy>=0?10:90],[dx>=0?90:10,dy>=0?90:10]];
+    }
+    if(valid)accepted.push([normal[0],normal[1],type,pts]);
+  }
+  // Çocuk birden çok çizgi çizdiyse çoğunluğunun doğru yönde olması yeterli.
+  const enough=strokes.length>=8 && accepted.length>=8;
+  if(!enough){
+    m297Play('yon28_yanlis.mp3');
+    notify(strokes.length<8 ? `Harika gidiyorsun! ${8-strokes.length} çizgi daha çizelim. 🌱` : 'Çok güzel denedin! Sekiz çizginin yönüne birlikte dikkat edelim. 🌱');
+    return;
+  }
+  // Eski kontrolün kayıt, ses ve ekran geçişlerini korumak için sadece
+  // değerlendirmeye giren uç noktalarını geçici olarak yönüne hizala.
+  s.lines=accepted;
+  return m29737OriginalDirectionCheck();
+};
